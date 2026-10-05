@@ -150,7 +150,7 @@ Bottom tabs: **Home · Schedule · Tasks · Courses · Settings**.
 - Tap block → bottom sheet: course name, time, venue, lecturer, missed X / limit, link to Course detail.
 
 ### Tasks
-- Sections **Upcoming** (count) and **Past** (count). Overdue not-done tasks at top of Upcoming in red. Past = done or past-due-and-done.
+- Sections **Upcoming** (count) and **Past** (count). Overdue not-done tasks at top of Upcoming in red. Past = done tasks (newest due first). Not-done tasks always stay in Upcoming, however late.
 - Row: title, course code, due relative ("in 2 days"), checkbox.
 - `+` button → bottom sheet form: title (required), course (picker, optional), due date + time (required), note. Same sheet for edit; delete in sheet.
 
