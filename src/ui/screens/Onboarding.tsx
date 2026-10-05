@@ -3,6 +3,7 @@ import { completeOnboarding, setSemesterEnd } from "../../domain/actions";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate } from "../format";
 import { useSync } from "../useSync";
+import { IconClock } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 
@@ -15,7 +16,7 @@ export function Onboarding() {
   if (step === 0) {
     return (
       <div class="onboard">
-        <img class="logo" src="/mascot.webp" alt="" />
+        <div class="logo"><IconClock size={30} /></div>
         <h1>Bombodule</h1>
         <p>Track attendance and tasks for your IIUM classes, so you never get barred.</p>
         <p>In i-Ma'luum, open your Course Registration Confirmation Slip and print it to PDF. Import that file and Bombodule builds your timetable.</p>
