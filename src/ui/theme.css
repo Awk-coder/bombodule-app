@@ -72,6 +72,13 @@ svg { vertical-align: -2px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
 .row small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }
 .row .grow { flex: 1; min-width: 0; }
+.swipe { position: relative; margin-bottom: 10px; border-radius: 16px; overflow: hidden; }
+.swipe .swipe-card { position: relative; margin-bottom: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.swipe-under { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-weight: 700; visibility: hidden; }
+.swipe.to-right .swipe-under { visibility: visible; background: var(--accent); color: var(--on-accent); }
+.swipe.to-left .swipe-under { visibility: visible; background: var(--missed); color: var(--text); justify-content: flex-end; }
+.swipe.to-right .swipe-under span:last-child, .swipe.to-left .swipe-under span:first-child { display: none; }
+.swipe-arrows { color: var(--text-muted); font-size: 18px; letter-spacing: 6px; }
 .btn { border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 13px; border: 1px solid var(--border); flex: none; }
 .btn.ok { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .btn.bad { color: var(--danger); border-color: var(--danger); }

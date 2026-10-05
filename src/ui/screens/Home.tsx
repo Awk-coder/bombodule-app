@@ -9,6 +9,7 @@ import { dayName, fmtDate, fmtTime, greeting, minutesLeft, relDue, shortName, ti
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
 import { IconClock, IconPin } from "../components/icons";
+import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
 import { TaskRow } from "../components/TaskRow";
@@ -77,12 +78,16 @@ export function Home() {
       {unmarked.length > 0 && (
         <>
           <h2 class="section-title">Unmarked <span class="count">{unmarked.length}</span></h2>
+          <p class="group-hint">Swipe right if you attended, left if you missed.</p>
           {unmarked.map((s) => (
-            <div class="row" key={s.id}>
+            <SwipeRow
+              key={s.id}
+              onRight={() => dispatch((st) => markSession(st, s.id, "attended"))}
+              onLeft={() => dispatch((st) => markSession(st, s.id, "missed"))}
+            >
               <div class="grow"><b>{info(s).course.code}</b><small>{fmtDate(s.date)} · {fmtTime(hhmm(s.start))}</small></div>
-              <button class="btn ok" onClick={() => dispatch((st) => markSession(st, s.id, "attended"))}>Attended</button>
-              <button class="btn bad" onClick={() => dispatch((st) => markSession(st, s.id, "missed"))}>Missed</button>
-            </div>
+              <span class="swipe-arrows">‹ ›</span>
+            </SwipeRow>
           ))}
         </>
       )}
