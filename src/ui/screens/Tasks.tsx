@@ -26,7 +26,7 @@ export function Tasks() {
     <>
       <h1 class="page-title">Tasks</h1>
       <h2 class="section-title">Upcoming <span class="count">{upcoming.length}</span></h2>
-      {upcoming.length ? upcoming.map(row) : <div class="card muted">Nothing due. Tap + to add a task.</div>}
+      {upcoming.length ? upcoming.map(row) : <button class="card muted add-card" onClick={() => edit(null)}>Nothing due. Tap to add a task.</button>}
       <h2 class="section-title muted">Past <span class="count">{past.length}</span></h2>
       {past.map(row)}
       <button class="fab" aria-label="Add task" onClick={() => edit(null)}><IconPlus size={28} /></button>
