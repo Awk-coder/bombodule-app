@@ -1,6 +1,7 @@
 import { App as CapApp } from "@capacitor/app";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
+import { Hadir } from "./native/hadir";
 import { shareFile } from "./native/share";
 import { useAppState, useLoadStatus } from "./store/store";
 import { TabBar } from "./ui/components/TabBar";
@@ -13,6 +14,7 @@ import { Onboarding } from "./ui/screens/Onboarding";
 import { Schedule } from "./ui/screens/Schedule";
 import { Settings } from "./ui/screens/Settings";
 import { Tasks } from "./ui/screens/Tasks";
+import { applyTheme } from "./ui/themes";
 
 const SCREENS: Record<Tab, () => JSX.Element> = { home: Home, schedule: Schedule, tasks: Tasks, courses: Courses, settings: Settings };
 
@@ -44,6 +46,10 @@ export function App() {
   const status = useLoadStatus();
   const state = useAppState();
   useBackButton();
+  const theme = state.settings.theme;
+  useEffect(() => {
+    void Hadir.setLightBars({ light: applyTheme(theme).light }).catch(() => {});
+  }, [theme]);
   const route = useRoute();
 
   if (!status.loaded) return <div class="screen"><div class="skeleton" /><div class="skeleton" /></div>;

@@ -16,12 +16,12 @@ import { TaskRow } from "../components/TaskRow";
 
 type Info = (s: Session) => { course: Course; slot: Slot };
 
-function NowCard({ current, next, info, now }: { current?: Session; next?: Session; info: Info; now: Date }) {
-  const main = current ?? next;
+function NowCard({ current, upcoming, info, now }: { current?: Session; upcoming: Session[]; info: Info; now: Date }) {
+  const main = current ?? upcoming[0];
   if (!main) return <div class="card muted">No more classes this semester</div>;
   const { course, slot } = info(main);
   const pct = current ? Math.min(100, ((now.getTime() - main.start.getTime()) / (main.end.getTime() - main.start.getTime())) * 100) : 0;
-  const after = current ? next : undefined;
+  const after = current ? upcoming[0] : upcoming[1];
   const n = after && info(after);
   return (
     <div class="hero">
@@ -57,7 +57,7 @@ export function Home() {
   const info: Info = (s) => ({ course: courses.get(s.courseId)!, slot: slots.get(s.slotId)! });
 
   const current = sessions.find((s) => s.start <= now && now < s.end);
-  const next = sessions.find((s) => s.start > now);
+  const upcoming = sessions.filter((s) => s.start > now).slice(0, 2);
   const unmarked = sessions.filter((s) => s.status === "unmarked").reverse();
   const warnings = state.courses
     .filter((c) => c.active)
@@ -73,7 +73,7 @@ export function Home() {
         <h1>{state.account?.name ? shortName(state.account.name) : "Student"}</h1>
       </header>
 
-      {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} next={next} info={info} now={now} />}
+      {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} upcoming={upcoming} info={info} now={now} />}
 
       {unmarked.length > 0 && (
         <>

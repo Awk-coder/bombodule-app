@@ -13,12 +13,15 @@ import { PermissionRows } from "../components/PermissionRows";
 import { Sheet } from "../components/Sheet";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
+import { THEMES, themeById } from "../themes";
 
 export function Settings() {
   const state = useAppState();
   const sync = useSync();
   const [pendingImport, setPendingImport] = useState<AppState | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const theme = themeById(state.settings.theme);
   const today = ymd(new Date());
   const acc = state.account;
 
@@ -52,6 +55,12 @@ export function Settings() {
           <small>{acc ? `${acc.matric ?? "Matric unknown"} · imported ${fmtDate(acc.lastSync)}` : "Import your confirmation slip to load your timetable"}</small>
         </div>
       </div>
+
+      <p class="group-title">Appearance</p>
+      <button class="row" onClick={() => setThemeOpen(true)}>
+        <div class="grow"><b>Theme</b><small>{theme.name}</small></div>
+        <span class="theme-dot">{theme.swatch.map((c) => <span key={c} style={`background:${c}`} />)}</span>
+      </button>
 
       <p class="group-title">Timetable</p>
       <p class="group-hint">In i-Ma'luum, open the Course Registration Confirmation Slip and print it to PDF. Import it again whenever your classes change.</p>
@@ -130,6 +139,26 @@ export function Settings() {
         </p>
         <button class="btn primary" onClick={confirmImport}>Replace</button>
         <button class="btn ghost" onClick={() => setPendingImport(null)}>Cancel</button>
+      </Sheet>
+      <Sheet open={themeOpen} onClose={() => setThemeOpen(false)}>
+        <h2>Theme</h2>
+        <div class="themes" role="radiogroup">
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              role="radio"
+              aria-checked={t.id === theme.id}
+              class={t.id === theme.id ? "theme-opt on" : "theme-opt"}
+              onClick={() => {
+                dispatch((s) => updateSettings(s, { theme: t.id }));
+                setThemeOpen(false);
+              }}
+            >
+              <div class="swatch">{t.swatch.map((c) => <span key={c} style={`background:${c}`} />)}</div>
+              <b>{t.name}</b>
+            </button>
+          ))}
+        </div>
       </Sheet>
       <SyncPreviewSheet sync={sync} />
     </>

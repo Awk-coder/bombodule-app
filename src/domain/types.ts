@@ -43,6 +43,7 @@ export interface Settings {
   promptDelayMin: number;
   taskReminderTime: string; // "HH:MM", day before due
   warningsEnabled: boolean;
+  theme: string; // ThemeId from ui/themes
 }
 
 export interface Account {
@@ -90,6 +91,7 @@ export const DEFAULT_SETTINGS: Settings = {
   promptDelayMin: 0,
   taskReminderTime: "20:00",
   warningsEnabled: true,
+  theme: "dark",
 };
 
 export function emptyState(): AppState {

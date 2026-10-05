@@ -6,4 +6,5 @@ export class HadirWeb extends WebPlugin implements HadirPlugin {
     return { value: true };
   }
   async openBatterySettings() {}
+  async setLightBars() {}
 }
