@@ -75,6 +75,7 @@ export function Home() {
 
       {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} upcoming={upcoming} info={info} now={now} />}
 
+      <div class="home-scroll">
       {unmarked.length > 0 && (
         <>
           <h2 class="section-title">Unmarked <span class="count">{unmarked.length}</span></h2>
@@ -112,6 +113,7 @@ export function Home() {
           ))}
         </>
       )}
+      </div>
     </>
   );
 }
