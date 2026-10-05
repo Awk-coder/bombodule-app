@@ -45,8 +45,8 @@ Grades/GPA, exams, sharing, multiple users, cloud sync, iOS, Play Store distribu
 │   ├─ notify/             schedules local notifications           │
 │   └─ iium/               sync flow: plugin → HTTP → parser       │
 │                                                                  │
-│  Native (Kotlin)                                                 │
-│   └─ CasLoginPlugin      WebView activity → returns cookie string│
+│  Native (Java — matches Capacitor template, no Kotlin setup)     │
+│   └─ HadirPlugin (Java)  CAS WebView → cookie; battery settings  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -67,8 +67,9 @@ type Course = {
   code: string;          // "BICS 4350"
   name: string;          // "Privacy Engineering"
   section: string;
-  color: string;         // assigned from palette at sync
+  color: number;         // palette index, assigned at sync
   absenceLimit: number;  // default 6
+  active: boolean;       // false when dropped from i-Ma'luum on re-sync
 };
 
 type Slot = {            // weekly recurring class
@@ -111,15 +112,15 @@ type Settings = {
 Rules:
 
 - `semester.start` = sync date; `semester.end` = start + 14 weeks. End editable in Settings.
-- Sessions are generated lazily for the semester range from slots, skipping dates while paused (pause stores the pause intervals so past paused days stay excluded).
+- Sessions are generated lazily for the semester range from slots, skipping dates inside pause intervals (`pauses: {from, to|null}[]`) — except sessions already marked, which are always kept.
 - Session status: `upcoming` before end time; becomes `unmarked` after end time until answered.
-- Missed count = sessions with `missed`. Remaining = `absenceLimit − missed`.
+- Missed count = sessions with `missed`. `absenceLimit` (6) is the absence count that bars you, so **can still miss** = `max(0, absenceLimit − 1 − missed)` and barred = `missed ≥ absenceLimit`. Risk: amber at `limit − 2` (4), red at `limit − 1` (5), "Barred" at `limit`.
 - Re-sync replaces courses/slots; keeps existing sessions/tasks whose `courseId` still exists. Courses that disappear are kept in data but hidden (history not lost).
 
 ## 4. IIUM sync flow
 
 1. Settings → "Link IIUM account" / "Re-sync".
-2. `CasLoginPlugin.login()` opens native WebView at
+2. `Hadir.casLogin()` opens native WebView dialog at
    `https://cas.iium.edu.my:8448/cas/login?service=https%3A%2F%2Fimaluum.iium.edu.my%2Fhome`.
 3. User logs in on IIUM's page. Plugin watches navigation; when URL host is `imaluum.iium.edu.my` and page loaded, reads `CookieManager.getCookie("https://imaluum.iium.edu.my")`, closes, returns cookie string. User cancel → rejected promise.
 4. App fetches `https://imaluum.iium.edu.my/MyAcademic/schedule` via `CapacitorHttp` (native, no CORS) with that cookie. Reads session dropdown, picks the latest session, fetches it.
@@ -177,8 +178,8 @@ Bottom tabs: **Home · Schedule · Tasks · Courses · Settings**.
 
 ### Schedule
 - Header: semester label.
-- Day tabs (only days that have classes), default today.
-- Time grid with colored course blocks (code, name, start/end), dashed "now" line.
+- Day header pills, one column per day that has classes (as in Aurum's screenshot); today's pill filled green.
+- Time grid with colored course blocks (code, name, start/end), dashed "now" line with time label.
 - Tap block → bottom sheet: course name, time, venue, lecturer, missed X / limit, link to Course detail.
 
 ### Tasks
@@ -212,10 +213,10 @@ Library: `@capacitor/local-notifications`.
 | Kind | When | Content | Actions |
 |---|---|---|---|
 | Attendance prompt | slot end + promptDelayMin, each non-paused session | "Did you attend BICS 4350?" / course name, venue | **Attended**, **Missed** |
-| Task reminder | day before `due` at `taskReminderTime` (or immediately if that's past but due is future) | "Due tomorrow: <title>" | tap → Tasks |
+| Task reminder | day before `due` at `taskReminderTime`; skipped if that moment already passed | "Due tomorrow: <title>" | tap → Tasks |
 | Absence warning | when a course reaches limit − 1 missed | "BICS 4350: 5 / 6 missed — one more and you're barred" | tap → Course detail |
 
-- Action buttons update session status without opening the UI (listener `localNotificationActionPerformed`). Tapping the body opens Home.
+- Action buttons update session status via listener `localNotificationActionPerformed`. On Android the Capacitor plugin brings the app to the foreground when an action is tapped (app opens on Home, already marked). Tapping the body opens Home.
 - Scheduling window: keep notifications scheduled for the next 14 days; re-schedule on app open, after sync, after settings/pause changes, after task edits. (Avoids Android's pending-alarm limits.)
 - Stable notification IDs derived from session/task id hash so re-scheduling replaces, not duplicates.
 
