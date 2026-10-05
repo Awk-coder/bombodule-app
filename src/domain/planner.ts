@@ -1,11 +1,12 @@
 import type { AppState, Course } from "./types";
+import { courseStats } from "./attendance";
 import { generateSessions } from "./sessions";
 import { addDays, atTime, hhmm, ymd } from "./time";
 
 export interface Planned {
   id: number;
   at: Date;
-  kind: "attendance" | "task";
+  kind: "attendance" | "task" | "warning";
   title: string;
   body: string;
   route: string;
@@ -28,8 +29,10 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
   const courses = new Map(state.courses.map((c) => [c.id, c]));
   const slots = new Map(state.slots.map((s) => [s.id, s]));
   const out: Planned[] = [];
+  const sessions = generateSessions(state, now);
+  const autoMissFrom = state.semester?.autoMissFrom;
 
-  for (const s of generateSessions(state, now)) {
+  for (const s of sessions) {
     if (state.marks[s.id]) continue;
     const at = new Date(s.end.getTime() + state.settings.promptDelayMin * 60_000);
     if (at.getTime() <= nowMs || at.getTime() > horizon) continue;
@@ -41,9 +44,31 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
       kind: "attendance",
       sessionId: s.id,
       title: `Did you attend ${c.code}?`,
-      body: [c.name, slot.venue].filter(Boolean).join(" · "),
+      body: [c.name, slot.venue, autoMissFrom && s.date >= autoMissFrom && "no answer by midnight = missed"].filter(Boolean).join(" · "),
       route: "#/home",
     });
+  }
+
+  // An unanswered class becomes a miss at midnight; warn then if that miss is the one that matters.
+  if (autoMissFrom && state.settings.warningsEnabled) {
+    const today = ymd(now);
+    for (const c of state.courses) {
+      if (!c.active) continue;
+      const next = sessions.find((s) => s.courseId === c.id && s.date >= today && s.date >= autoMissFrom && (s.status === "upcoming" || s.status === "unmarked"));
+      if (!next) continue;
+      const missed = courseStats(c, sessions).missed + 1;
+      const tail = missed >= c.absenceLimit ? "you've reached the bar limit" : missed === c.absenceLimit - 1 ? "one more and you're barred" : null;
+      const at = atTime(addDays(next.date, 1), "00:00");
+      if (!tail || at.getTime() <= nowMs || at.getTime() > horizon) continue;
+      out.push({
+        id: notifId(`w:${next.id}`),
+        at,
+        kind: "warning",
+        title: "Absence warning",
+        body: `${c.code}: not answered, counted as missed — ${missed} / ${c.absenceLimit}, ${tail}`,
+        route: `#/course/${encodeURIComponent(c.id)}`,
+      });
+    }
   }
 
   for (const t of state.tasks) {

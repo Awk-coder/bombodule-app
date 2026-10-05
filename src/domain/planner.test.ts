@@ -55,6 +55,30 @@ describe("planNotifications: attendance", () => {
   });
 });
 
+describe("planNotifications: unanswered-class warning", () => {
+  const tracked = (marks: Record<string, "missed" | "attended">) =>
+    makeState({ semester: { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2026-10-18", autoMissFrom: "2026-10-05" }, marks });
+  const limit4 = (st: ReturnType<typeof tracked>) => ({ ...st, courses: st.courses.map((c) => (c.code === "BICS 4350" ? { ...c, absenceLimit: 4 } : c)) });
+  const twoMissed = { [BICS_MON_1]: "missed" as const, "BICS 4350-1-3-11:30@2026-10-07": "missed" as const };
+
+  it("warns at midnight when leaving the next class unanswered would put the course one below the limit", () => {
+    const w = planNotifications(limit4(tracked(twoMissed)), at(12, 7)).filter((x) => x.kind === "warning");
+    expect(w).toEqual([
+      expect.objectContaining({ at: at(13, 0), title: "Absence warning", body: "BICS 4350: not answered, counted as missed — 3 / 4, one more and you're barred", route: "#/course/BICS%204350-1" }),
+    ]);
+  });
+
+  it("plans no warning while the course is far from the limit or tracking is off", () => {
+    expect(planNotifications(tracked({}), at(5, 7)).filter((x) => x.kind === "warning")).toEqual([]);
+    expect(planNotifications(limit4(makeState({ marks: twoMissed })), at(12, 7)).filter((x) => x.kind === "warning")).toEqual([]);
+  });
+
+  it("tells you in the prompt that no answer counts as missed", () => {
+    const p = planNotifications(tracked({}), at(5, 7)).find((x) => x.kind === "attendance");
+    expect(p?.body).toBe("PRIVACY ENGINEERING · ICT LR 14 · no answer by midnight = missed");
+  });
+});
+
 describe("planNotifications: tasks", () => {
   const task = (due: Date, done = false): Task => ({ id: "t1", courseId: "BICS 4350-1", title: "Lab report", due: due.toISOString(), note: "", done });
 

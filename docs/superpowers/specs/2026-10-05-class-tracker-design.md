@@ -111,6 +111,7 @@ type Settings = {
 
 Rules:
 
+- A class not answered by the end of its day counts as **missed** (shown as "Missed (not answered)"; a later mark overrides it). This applies from the first import date (`semester.autoMissFrom`); earlier classes stay unmarked until answered. If leaving the next class unanswered would bring a course to limit−1 or the limit, a warning notification is scheduled for midnight after it.
 - Semester dates come from IIUM's official academic calendar bundled in the app (`domain/calendar.ts`, 2026/2027 Sem 1–3): `start` = first lecture day, `end` = last lecture day, mid-semester break added as a pause interval. Semester not in the table → `start` = import date, `end` = start + 14 weeks. End editable in Settings.
 - Sessions are generated lazily for the semester range from slots, skipping dates inside pause intervals (`pauses: {from, to|null}[]`) — except sessions already marked, which are always kept.
 - Session status: `upcoming` before end time; becomes `unmarked` after end time until answered.

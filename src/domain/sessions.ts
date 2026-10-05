@@ -1,5 +1,5 @@
 import type { AppState, PauseInterval, Session } from "./types";
-import { addDays, atTime, parseYmd } from "./time";
+import { addDays, atTime, parseYmd, ymd } from "./time";
 
 export function isPausedOn(pauses: PauseInterval[], date: string): boolean {
   return pauses.some((p) => date >= p.from && (p.to === null || date <= p.to));
@@ -11,6 +11,7 @@ export function generateSessions(state: AppState, now: Date): Session[] {
   const active = new Set(state.courses.filter((c) => c.active).map((c) => c.id));
   const slots = state.slots.filter((s) => active.has(s.courseId));
   const out: Session[] = [];
+  const today = ymd(now);
   for (let date = sem.start; date <= sem.end; date = addDays(date, 1)) {
     const dow = parseYmd(date).getDay();
     const paused = isPausedOn(state.pauses, date);
@@ -21,6 +22,10 @@ export function generateSessions(state: AppState, now: Date): Session[] {
       if (paused && !mark) continue;
       const start = atTime(date, slot.start);
       const end = atTime(date, slot.end);
+      if (!mark && sem.autoMissFrom && date >= sem.autoMissFrom && date < today) {
+        out.push({ id, slotId: slot.id, courseId: slot.courseId, date, start, end, status: "missed", assumed: true });
+        continue;
+      }
       out.push({ id, slotId: slot.id, courseId: slot.courseId, date, start, end, status: mark ?? (now < end ? "upcoming" : "unmarked") });
     }
   }

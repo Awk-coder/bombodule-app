@@ -25,6 +25,23 @@ describe("generateSessions", () => {
     expect(s[1].status).toBe("upcoming"); // Tue 08:30-09:50 still running
   });
 
+  it("counts a class not answered by the end of its day as missed", () => {
+    const st = makeState({ semester: { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2026-10-18", autoMissFrom: "2026-10-05" } });
+    const s = generateSessions(st, at(6, 13));
+    expect(s[0]).toMatchObject({ id: BICS_MON_1, status: "missed", assumed: true }); // yesterday, never answered
+    expect(s[1]).toMatchObject({ status: "unmarked" }); // ended today, still time to answer
+    expect(s[1].assumed).toBeUndefined();
+  });
+
+  it("leaves classes from before tracking began unmarked, and a mark always wins", () => {
+    const st = makeState({
+      semester: { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2026-10-18", autoMissFrom: "2026-10-07" },
+      marks: { "BIIT 2301-1-2-08:30@2026-10-06": "attended" },
+    });
+    const s = generateSessions(st, at(9, 9));
+    expect(s.slice(0, 3).map((x) => x.status)).toEqual(["unmarked", "attended", "missed"]);
+  });
+
   it("uses the saved mark", () => {
     const s = generateSessions(makeState({ marks: { [BICS_MON_1]: "missed" } }), at(6, 9));
     expect(s[0].status).toBe("missed");

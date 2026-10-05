@@ -55,6 +55,7 @@ export interface Semester {
   label: string;
   start: string;
   end: string;
+  autoMissFrom?: string; // classes from this date not answered by the end of their day count as missed
 }
 
 export interface AppState {
@@ -78,6 +79,7 @@ export interface Session {
   start: Date;
   end: Date;
   status: SessionStatus;
+  assumed?: true; // missed because it was never answered, not because the user said so
 }
 
 export const DEFAULT_LIMIT = 6;

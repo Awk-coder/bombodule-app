@@ -49,7 +49,7 @@ export function CourseDetail({ id }: { id: string }) {
       {history.length === 0 && <div class="card muted">No classes yet.</div>}
       {history.map((s) => (
         <div class="row" key={s.id}>
-          <div class="grow"><b>{fmtDate(s.date)}</b><small>{fmtTime(hhmm(s.start))}</small></div>
+          <div class="grow"><b>{fmtDate(s.date)}</b><small>{fmtTime(hhmm(s.start))}{s.assumed ? " · not answered" : ""}</small></div>
           <div class="seg">
             <button class={s.status === "attended" ? "on ok" : ""} onClick={() => dispatch((x) => markSession(x, s.id, "attended"))}>Attended</button>
             <button class={s.status === "missed" ? "on bad" : ""} onClick={() => dispatch((x) => markSession(x, s.id, "missed"))}>Missed</button>

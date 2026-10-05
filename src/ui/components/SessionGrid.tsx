@@ -4,6 +4,7 @@ import type { Session, SessionStatus } from "../../domain/types";
 import { fmtDate, fmtTime } from "../format";
 
 const LABEL: Record<SessionStatus, string> = { upcoming: "Upcoming", unmarked: "Not answered", attended: "Attended", missed: "Missed" };
+const label = (s: Session) => (s.assumed ? "Missed (not answered)" : LABEL[s.status]);
 
 export function SessionGrid({ sessions }: { sessions: Session[] }) {
   const [selected, setSelected] = useState<Session | null>(null);
@@ -11,12 +12,12 @@ export function SessionGrid({ sessions }: { sessions: Session[] }) {
     <div class="grid-card">
       <div class="sgrid">
         {sessions.map((s) => (
-          <button key={s.id} class={`sq sq-${s.status}`} aria-label={`${fmtDate(s.date)} ${LABEL[s.status]}`} onClick={() => setSelected(s)} />
+          <button key={s.id} class={`sq sq-${s.status}`} aria-label={`${fmtDate(s.date)} ${label(s)}`} onClick={() => setSelected(s)} />
         ))}
       </div>
       <p class="grid-caption">
         {selected
-          ? `${fmtDate(selected.date)} · ${fmtTime(hhmm(selected.start))} · ${LABEL[selected.status]}`
+          ? `${fmtDate(selected.date)} · ${fmtTime(hhmm(selected.start))} · ${label(selected)}`
           : `${sessions.length} classes this semester`}
       </p>
     </div>

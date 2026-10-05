@@ -100,11 +100,14 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
   };
 }
 
-/** Official dates and mid-semester break when IIUM's calendar has this semester; otherwise start today. */
+/**
+ * Official dates and mid-semester break when IIUM's calendar has this semester; otherwise start today.
+ * Unanswered classes count as missed only from the import date: earlier ones happened before the app was tracking.
+ */
 function newSemester(state: AppState, label: string, today: string): Pick<AppState, "semester" | "pauses"> {
   const cal = IIUM_CALENDAR[label];
-  if (!cal) return { semester: { label, start: today, end: addDays(today, SEMESTER_DAYS) }, pauses: state.pauses };
-  return { semester: { label, start: cal.start, end: cal.end }, pauses: [...state.pauses, ...cal.breaks] };
+  if (!cal) return { semester: { label, start: today, end: addDays(today, SEMESTER_DAYS), autoMissFrom: today }, pauses: state.pauses };
+  return { semester: { label, start: cal.start, end: cal.end, autoMissFrom: today }, pauses: [...state.pauses, ...cal.breaks] };
 }
 
 export function serialize(state: AppState): string {
