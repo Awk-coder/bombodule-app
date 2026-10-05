@@ -49,6 +49,7 @@ export function Schedule() {
           {days.map((d) => <span key={d} class={`day-pill ${d === now.getDay() ? "active" : ""}`}>{dayName(d)}</span>)}
           <span />
         </div>
+        <div class="sched-scroll">
         <div class="sched-body" style={`height:${y(endMin) + 12}px`}>
           {lines.map((m) => <div key={m} class="hour-line" style={`top:${y(m)}px`}><span>{label(m)}</span></div>)}
           {days.map((d, i) =>
@@ -73,6 +74,7 @@ export function Schedule() {
           {nowMin >= startMin && nowMin <= endMin && (
             <div class="now-line" style={`top:${y(nowMin)}px`}><span>{hhmm(now)}</span></div>
           )}
+        </div>
         </div>
       </div>
 

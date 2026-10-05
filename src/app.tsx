@@ -53,7 +53,7 @@ export function App() {
   const Screen = SCREENS[route.tab];
   return (
     <>
-      <main class="screen">{route.courseId ? <CourseDetail id={route.courseId} /> : <Screen />}</main>
+      <main class={route.tab === "schedule" && !route.courseId ? "screen fill" : "screen"}>{route.courseId ? <CourseDetail id={route.courseId} /> : <Screen />}</main>
       <TabBar current={route.tab} />
     </>
   );
