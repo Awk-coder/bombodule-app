@@ -132,7 +132,39 @@ Fallback (only if cookie capture proves impossible during the first build task):
 
 ## 5. Screens
 
-Dark theme, green accent (#4ADE80-ish), serif display font for headings, rounded cards — modeled on `references/*.jpeg`, not copied.
+Visual style emulates Aurum (`references/*.jpeg`); colors sampled from the screenshots. Own app icon/logo (no Aurum branding). Dark only.
+
+**Color tokens**
+
+| Token | Value | Use |
+|---|---|---|
+| `bg` | `#0B0C0E` | page background, tab bar |
+| `surface` | `#131416` | cards, list rows, sheets |
+| `border` | `#1E1F21` | 1px card/row borders |
+| `accent` | `#48DE7C` | headings, active tab, progress, attended squares, primary buttons |
+| `accent-dim` | `#15331F` | grid squares (upcoming/unmarked), chip bg, inactive day-tab border |
+| `hero` | `#0C1B14` | now/next card bg (green-tinted, subtle green border + glow) |
+| `text` | `#F2F2F2` | primary text |
+| `text-muted` | `#7C7D7F` | secondary text, inactive tab icons |
+| `danger` | `#E9777C` on `#3A1416` | overdue, red meter, warning chips (Aurum's "UPCOMING" pill) |
+| `missed` | `#6B2E30` | dull red grid squares |
+| `warn` | `#F5B53D` | amber meter, glowing outline on warning cards (Aurum's "Upgrade" card style) |
+
+Course block palette (dark fill / bright text), assigned in order at sync:
+orange `#421A00`/`#FFA65C`, purple `#3A0763`/`#D9A8FF`, olive `#192E03`/`#C6F25A`, indigo `#1D1B4A`/`#A9B1FF`, teal `#083343`/`#67E0F5`, brown `#3D2600`/`#FFD84D`, rose `#3F0A1E`/`#FF8FB5`, slate `#1A2733`/`#9CC3E6`.
+
+**Typography** (bundled locally, works offline)
+- Display/headings: **Libre Baskerville** bold — page titles ("Activities"-style, green, centered), greeting name, section headings ("Quick Links"-style, green, left).
+- UI/body: **Manrope** — card titles 600, body 400, small caps-ish chips 700.
+
+**Shape & layout**
+- Radius: cards 16px, chips/pills 999px, grid squares 6px, day tabs 10px, course blocks 14px.
+- Cards: `surface` fill + 1px `border`, 16–20px padding, 12px gaps, 20px screen gutter.
+- List rows (Settings/Courses): Aurum's "Quick Links" row — icon left, title + muted subtitle, chevron/arrow right.
+- Bottom tab bar: outline icons + label, active = `accent` filled icon + label.
+- Schedule: Aurum's grid — day tabs as pills (active filled `accent` with dark text), time labels right-aligned in muted, dashed hour lines, blocks show start time top-left, code large, name small, end time bottom-right; dashed "now" line with time label.
+- Skeleton shimmer placeholders while loading (Aurum's Activities style).
+- Motion: subtle only — sheet slide-up, progress bar, press scale 0.98.
 
 Bottom tabs: **Home · Schedule · Tasks · Courses · Settings**.
 
