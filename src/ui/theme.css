@@ -49,6 +49,10 @@ svg { vertical-align: -2px; }
 .card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; }
 .card.muted { color: var(--text-muted); text-align: center; }
 .card.add-card { width: 100%; }
+.caught-up { display: flex; gap: 14px; align-items: center; margin-top: 16px; }
+.caught-up b { display: block; color: var(--accent); }
+.caught-up small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+.caught-up-icon { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--accent-dim); color: var(--accent); display: grid; place-items: center; }
 .card.glow-warn { border-color: var(--warn); box-shadow: 0 0 14px color-mix(in srgb, var(--warn) 25%, transparent); }
 .card.glow-danger { border-color: var(--danger); box-shadow: 0 0 14px color-mix(in srgb, var(--danger) 25%, transparent); }
 .course-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }

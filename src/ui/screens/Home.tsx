@@ -1,14 +1,14 @@
 import { useMemo } from "preact/hooks";
 import { markSession } from "../../domain/actions";
-import { courseStats } from "../../domain/attendance";
+import { courseStats, daySummary } from "../../domain/attendance";
 import { generateSessions } from "../../domain/sessions";
-import { hhmm } from "../../domain/time";
+import { hhmm, ymd } from "../../domain/time";
 import type { Course, Session, Slot } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { dayName, fmtDate, fmtTime, greeting, minutesLeft, relDue, shortName, titleCase } from "../format";
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
-import { IconClock, IconPin } from "../components/icons";
+import { IconCheck, IconClock, IconPin } from "../components/icons";
 import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
@@ -48,6 +48,25 @@ function NowCard({ current, upcoming, info, now }: { current?: Session; upcoming
   );
 }
 
+function CaughtUp({ sessions, today }: { sessions: Session[]; today: string }) {
+  const d = daySummary(sessions, today);
+  const attended = sessions.filter((s) => s.status === "attended").length;
+  const missed = sessions.filter((s) => s.status === "missed").length;
+  const todayLine = d.total
+    ? [`Today: ${d.attended}/${d.total} attended`, d.missed && `${d.missed} missed`, d.left && `${d.left} to go`].filter(Boolean).join(" · ")
+    : "No classes today";
+  return (
+    <div class="card caught-up">
+      <span class="caught-up-icon"><IconCheck size={20} /></span>
+      <div>
+        <b>All classes marked</b>
+        <small>{todayLine}</small>
+        <small>This semester: {attended} attended · {missed} missed</small>
+      </div>
+    </div>
+  );
+}
+
 export function Home() {
   const state = useAppState();
   const now = useNow();
@@ -76,6 +95,8 @@ export function Home() {
       {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} upcoming={upcoming} info={info} now={now} />}
 
       <div class="home-scroll">
+      {unmarked.length === 0 && state.courses.length > 0 && <CaughtUp sessions={sessions} today={ymd(now)} />}
+
       {unmarked.length > 0 && (
         <>
           <h2 class="section-title">Unmarked <span class="count">{unmarked.length}</span></h2>

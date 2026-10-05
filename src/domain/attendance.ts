@@ -52,3 +52,16 @@ export function courseStats(course: Course, sessions: Session[]): CourseStats {
     bestStreak: best,
   };
 }
+
+export interface DaySummary {
+  total: number;
+  attended: number;
+  missed: number;
+  left: number; // not started yet
+}
+
+export function daySummary(sessions: Session[], date: string): DaySummary {
+  const day = sessions.filter((s) => s.date === date);
+  const count = (st: Session["status"]) => day.filter((s) => s.status === st).length;
+  return { total: day.length, attended: count("attended"), missed: count("missed"), left: count("upcoming") };
+}

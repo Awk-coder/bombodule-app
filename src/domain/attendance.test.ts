@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { courseStats, riskOf } from "./attendance";
+import { courseStats, daySummary, riskOf } from "./attendance";
 import { course } from "./testState";
 import type { Session, SessionStatus } from "./types";
 
@@ -48,5 +48,20 @@ describe("courseStats", () => {
 
   it("only counts its own course", () => {
     expect(courseStats(C, seq(["missed", "missed"], "OTHER-1")).missed).toBe(0);
+  });
+});
+
+describe("daySummary", () => {
+  it("counts one day's classes by status", () => {
+    const day = (date: string, status: SessionStatus): Session => ({ ...seq([status])[0], date });
+    const sessions = [
+      day("2026-10-05", "attended"),
+      day("2026-10-05", "missed"),
+      day("2026-10-05", "attended"),
+      day("2026-10-05", "upcoming"),
+      day("2026-10-06", "attended"),
+    ];
+    expect(daySummary(sessions, "2026-10-05")).toEqual({ total: 4, attended: 2, missed: 1, left: 1 });
+    expect(daySummary(sessions, "2026-10-07")).toEqual({ total: 0, attended: 0, missed: 0, left: 0 });
   });
 });
