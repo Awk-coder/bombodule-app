@@ -53,14 +53,16 @@ export function onStateChange(hook: ChangeHook): void {
 
 function useSubscribe<T>(read: () => T): T {
   const [, force] = useState(0);
+  const seen = read();
   useEffect(() => {
     const l = () => force((n) => n + 1);
     listeners.add(l);
+    if (read() !== seen) l(); // changed between render and subscribe
     return () => {
       listeners.delete(l);
     };
   }, []);
-  return read();
+  return seen;
 }
 
 export const useAppState = () => useSubscribe(() => state);
