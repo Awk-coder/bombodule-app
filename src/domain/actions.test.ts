@@ -53,21 +53,22 @@ describe("setPaused", () => {
 
 describe("applySync", () => {
   it("first sync creates courses, deduped slots, semester and account", () => {
-    const s = applySync(emptyState(), parsed(), "2026-10-05");
+    const s = applySync(emptyState(), parsed({ sessionName: "Sem 1, 2030/2031" }), "2026-10-05");
     expect(s.courses.map((c) => [c.id, c.color, c.absenceLimit, c.active])).toEqual([
       ["BICS 4350-1", 0, 6, true],
       ["BIIT 2301-1", 1, 6, true],
     ]);
     expect(s.slots.map((x) => x.id)).toEqual(["BICS 4350-1-1-11:30", "BIIT 2301-1-2-08:30"]);
-    expect(s.semester).toEqual({ label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2027-01-11" });
+    expect(s.semester).toEqual({ label: "Sem 1, 2030/2031", start: "2026-10-05", end: "2027-01-11" });
     expect(s.account).toEqual({ name: "ABDUL WAHID", matric: "2212345", lastSync: "2026-10-05" });
   });
 
   it("re-sync in the same semester keeps start date, marks, colors and hides dropped courses", () => {
-    const first = markSession(applySync(emptyState(), parsed(), "2026-10-05"), BICS_MON_1, "missed");
+    const unlisted = "Sem 1, 2030/2031"; // not in the calendar, so the start date comes from the first import
+    const first = markSession(applySync(emptyState(), parsed({ sessionName: unlisted }), "2026-10-05"), BICS_MON_1, "missed");
     const again = applySync(
       first,
-      parsed({ courses: [parsed().courses[0]], slots: [parsed().slots[0]], studentName: null }),
+      parsed({ sessionName: unlisted, courses: [parsed().courses[0]], slots: [parsed().slots[0]], studentName: null }),
       "2026-10-20",
     );
     expect(again.semester?.start).toBe("2026-10-05");
@@ -104,7 +105,7 @@ describe("applySync", () => {
     const kept = applySync(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2026-10-20");
     expect(kept.semester).toEqual(first.semester);
     const started = applySync(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2026-10-20", true);
-    expect(started.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2026-10-20" });
+    expect(started.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2027-02-22" });
   });
 
   it("semesterLabelDiffers flags a new label only while the semester runs", () => {
@@ -121,7 +122,21 @@ describe("applySync", () => {
 
   it("a new semester label starts a new semester", () => {
     const s = applySync(applySync(emptyState(), parsed(), "2026-10-05"), parsed({ sessionName: "Sem 2, 2026/2027" }), "2027-03-01");
-    expect(s.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2027-03-01" });
+    expect(s.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2027-02-22" });
+  });
+
+  it("a semester in IIUM's calendar takes its lecture dates and pauses the mid-semester break", () => {
+    const s = applySync(emptyState(), parsed(), "2026-10-05");
+    expect(s.semester).toEqual({ label: "Sem 1, 2026/2027", start: "2026-09-28", end: "2027-01-08" });
+    expect(s.pauses).toEqual([{ from: "2026-11-14", to: "2026-11-22" }]);
+    const days = new Set(generateSessions(s, new Date(2026, 9, 5, 7)).map((x) => x.date));
+    expect(days.has("2026-09-28")).toBe(true);
+    expect([...days].some((d) => d >= "2026-11-14" && d <= "2026-11-22")).toBe(false);
+  });
+
+  it("re-importing the same semester doesn't add the break twice", () => {
+    const first = applySync(emptyState(), parsed(), "2026-10-05");
+    expect(applySync(first, parsed(), "2026-10-20").pauses).toEqual(first.pauses);
   });
 });
 

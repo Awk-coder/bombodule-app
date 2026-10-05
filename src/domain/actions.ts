@@ -1,5 +1,6 @@
 import { DEFAULT_LIMIT, DEFAULT_SETTINGS, PALETTE_SIZE, SEMESTER_DAYS, emptyState } from "./types";
 import type { AppState, Course, Mark, Settings, Slot, Task } from "./types";
+import { IIUM_CALENDAR } from "./calendar";
 import { addDays } from "./time";
 import type { ParsedSchedule } from "../iium/parser";
 
@@ -90,13 +91,20 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
     ...state,
     courses: [...synced, ...dropped],
     slots: [...slots.values(), ...retired],
-    semester: sameSemester ? sem : { label: parsed.sessionName ?? "Current semester", start: today, end: addDays(today, SEMESTER_DAYS) },
+    ...(sameSemester ? { semester: sem } : newSemester(state, parsed.sessionName ?? "Current semester", today)),
     account: {
       name: parsed.studentName ?? state.account?.name ?? null,
       matric: parsed.matric ?? state.account?.matric ?? null,
       lastSync: today,
     },
   };
+}
+
+/** Official dates and mid-semester break when IIUM's calendar has this semester; otherwise start today. */
+function newSemester(state: AppState, label: string, today: string): Pick<AppState, "semester" | "pauses"> {
+  const cal = IIUM_CALENDAR[label];
+  if (!cal) return { semester: { label, start: today, end: addDays(today, SEMESTER_DAYS) }, pauses: state.pauses };
+  return { semester: { label, start: cal.start, end: cal.end }, pauses: [...state.pauses, ...cal.breaks] };
 }
 
 export function serialize(state: AppState): string {

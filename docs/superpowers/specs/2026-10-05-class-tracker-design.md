@@ -111,7 +111,7 @@ type Settings = {
 
 Rules:
 
-- `semester.start` = sync date; `semester.end` = start + 14 weeks. End editable in Settings.
+- Semester dates come from IIUM's official academic calendar bundled in the app (`domain/calendar.ts`, 2026/2027 Sem 1–3): `start` = first lecture day, `end` = last lecture day, mid-semester break added as a pause interval. Semester not in the table → `start` = import date, `end` = start + 14 weeks. End editable in Settings.
 - Sessions are generated lazily for the semester range from slots, skipping dates inside pause intervals (`pauses: {from, to|null}[]`) — except sessions already marked, which are always kept.
 - Session status: `upcoming` before end time; becomes `unmarked` after end time until answered.
 - Missed count = sessions with `missed`. `absenceLimit` (6) is the absence count that bars you, so **can still miss** = `max(0, absenceLimit − 1 − missed)` and barred = `missed ≥ absenceLimit`. Risk: amber at `limit − 2` (4), red at `limit − 1` (5), "Barred" at `limit`.
