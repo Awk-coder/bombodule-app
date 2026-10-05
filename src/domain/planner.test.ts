@@ -1,10 +1,38 @@
 import { describe, expect, it } from "vitest";
 import { notifId, planNotifications, warningFor } from "./planner";
-import { BICS_MON_1, course, makeState } from "./testState";
+import { BICS_MON_1, course, makeState, slot } from "./testState";
 import { DEFAULT_SETTINGS } from "./types";
 import type { Task } from "./types";
 
 const at = (d: number, h: number, m = 0) => new Date(2026, 9, d, h, m);
+
+describe("planNotifications: end-of-day nudge", () => {
+  const twoOnMonday = () => makeState({ slots: [...makeState().slots, slot("BIIT 2301-1", 1, "14:00", "15:20")] });
+  const BIIT_MON = "BIIT 2301-1-1-14:00@2026-10-05";
+
+  it("reminds 2 hours after the day's last class about every class still unmarked", () => {
+    const n = planNotifications(twoOnMonday(), at(5, 7)).filter((x) => x.kind === "nudge");
+    expect(n[0]).toMatchObject({
+      at: at(5, 17, 20),
+      title: "Mark today's classes",
+      body: "2 unmarked: BICS 4350, BIIT 2301",
+      route: "#/home",
+      pending: [{ sessionId: BICS_MON_1, code: "BICS 4350" }, { sessionId: BIIT_MON, code: "BIIT 2301" }],
+    });
+    expect(n.map((x) => x.at.getDate())).toEqual([5, 6, 7, 12, 13, 14]);
+  });
+
+  it("lists only the unmarked classes, and skips a fully marked day", () => {
+    const st = makeState({ slots: twoOnMonday().slots, marks: { [BICS_MON_1]: "attended" } });
+    expect(planNotifications(st, at(5, 7)).find((x) => x.kind === "nudge")).toMatchObject({ body: "1 unmarked: BIIT 2301", pending: [{ sessionId: BIIT_MON, code: "BIIT 2301" }] });
+    const done = makeState({ slots: twoOnMonday().slots, marks: { [BICS_MON_1]: "attended", [BIIT_MON]: "missed" } });
+    expect(planNotifications(done, at(5, 7)).find((x) => x.kind === "nudge")?.at.getDate()).toBe(6);
+  });
+
+  it("skips a nudge whose time has passed", () => {
+    expect(planNotifications(twoOnMonday(), at(5, 17, 30)).find((x) => x.kind === "nudge")?.at.getDate()).toBe(6);
+  });
+});
 
 describe("planNotifications: attendance", () => {
   it("plans a prompt at the end of every future unmarked class", () => {

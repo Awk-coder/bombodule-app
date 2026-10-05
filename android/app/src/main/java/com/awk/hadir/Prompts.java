@@ -61,15 +61,22 @@ final class Prompts {
         JSONArray keep = new JSONArray();
         for (int i = 0; i < done.length(); i++) {
             String sid = done.optString(i);
-            for (int j = 0; j < items.length(); j++) {
-                if (sid.equals(items.optJSONObject(j).optString("sessionId"))) {
-                    keep.put(sid);
-                    break;
-                }
-            }
+            if (listed(items, sid)) keep.put(sid);
         }
         prefs(ctx).edit().putString("items", items.toString()).putString("done", keep.toString()).apply();
         arm(ctx, items);
+    }
+
+    private static boolean listed(JSONArray items, String sid) {
+        for (int j = 0; j < items.length(); j++) {
+            JSONObject it = items.optJSONObject(j);
+            if (sid.equals(it.optString("sessionId"))) return true;
+            JSONArray pending = it.optJSONArray("pending");
+            for (int k = 0; pending != null && k < pending.length(); k++) {
+                if (sid.equals(pending.optJSONObject(k).optString("sessionId"))) return true;
+            }
+        }
+        return false;
     }
 
     /** Set alarms for the stored prompts still in the future (after boot or an app update). */
@@ -134,8 +141,13 @@ final class Prompts {
     static void fire(Context ctx, int id) {
         JSONObject it = find(ctx, id);
         if (it == null || isDone(ctx, it.optString("sessionId"))) return;
+        String kind = it.optString("kind");
+        if ("nudge".equals(kind)) {
+            it = withoutAnswered(ctx, it);
+            if (it == null) return;
+        }
         ensureChannel(ctx);
-        Notification n = "attendance".equals(it.optString("kind")) ? card(ctx, it) : warning(ctx, it);
+        Notification n = "attendance".equals(kind) ? card(ctx, it) : warning(ctx, it);
         ctx.getSystemService(NotificationManager.class).notify(id, n);
     }
 
@@ -143,6 +155,25 @@ final class Prompts {
         JSONArray items = array(ctx, "items");
         for (int i = 0; i < items.length(); i++) if (items.optJSONObject(i).optInt("id") == id) return items.optJSONObject(i);
         return null;
+    }
+
+    /** The nudge with its body re-counted from classes not answered on a card since; null if none are left. */
+    private static JSONObject withoutAnswered(Context ctx, JSONObject it) {
+        JSONArray pending = it.optJSONArray("pending");
+        StringBuilder codes = new StringBuilder();
+        int left = 0;
+        for (int i = 0; pending != null && i < pending.length(); i++) {
+            JSONObject p = pending.optJSONObject(i);
+            if (isDone(ctx, p.optString("sessionId"))) continue;
+            if (left++ > 0) codes.append(", ");
+            codes.append(p.optString("code"));
+        }
+        if (left == 0) return null;
+        try {
+            return new JSONObject(it.toString()).put("body", left + " unmarked: " + codes);
+        } catch (JSONException e) {
+            return it;
+        }
     }
 
     private static boolean isDone(Context ctx, String sessionId) {
@@ -153,7 +184,7 @@ final class Prompts {
 
     static void ensureChannel(Context ctx) {
         NotificationChannel ch = new NotificationChannel(CHANNEL, "Class check-ins", NotificationManager.IMPORTANCE_HIGH);
-        ch.setDescription("Did you attend? prompts after each class, and absence warnings");
+        ch.setDescription("Did you attend? prompts after each class, end-of-day reminders, and absence warnings");
         ctx.getSystemService(NotificationManager.class).createNotificationChannel(ch);
     }
 
@@ -216,7 +247,7 @@ final class Prompts {
         String body = it.optString("body");
         return new NotificationCompat.Builder(ctx, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_hadir)
-            .setColor(Color.parseColor("#FF6B6B"))
+            .setColor(Color.parseColor("nudge".equals(it.optString("kind")) ? "#48DE7C" : "#FF6B6B"))
             .setContentTitle(it.optString("title"))
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))

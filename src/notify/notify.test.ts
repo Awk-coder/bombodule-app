@@ -73,6 +73,16 @@ describe("reschedule", () => {
       missed: 0, limit: 6, color: 0, autoMiss: false,
     });
   });
+
+  it("sends the end-of-day nudge with its unmarked classes so the card can drop ones answered since", async () => {
+    releasePending = () => {};
+    await reschedule(() => makeState(), new Date(2026, 9, 5, 7));
+    expect(prompts.find((p) => p.kind === "nudge")).toEqual({
+      id: expect.any(Number), at: new Date(2026, 9, 5, 14, 50).getTime(), kind: "nudge",
+      title: "Mark today's classes", body: "1 unmarked: BICS 4350", route: "#/home",
+      pending: [{ sessionId: BICS_MON_1, code: "BICS 4350" }],
+    });
+  });
 });
 
 describe("drainAnswers", () => {

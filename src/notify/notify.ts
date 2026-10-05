@@ -41,7 +41,7 @@ async function run(read: () => AppState, now: Date): Promise<void> {
     await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
   }
   const planned = planNotifications(read(), now);
-  // Class prompts and their warnings get the custom card, drawn and answered natively (Hadir plugin).
+  // Class prompts, their warnings and the end-of-day nudge get the custom card, drawn and answered natively (Hadir plugin).
   await Hadir.schedulePrompts({ items: planned.filter((p) => p.kind !== "task").map(toPrompt) });
   const tasks = planned.filter((p) => p.kind === "task");
   if (!tasks.length) return;
@@ -57,7 +57,9 @@ async function run(read: () => AppState, now: Date): Promise<void> {
 }
 
 function toPrompt(p: Planned): PromptItem {
-  const base = { id: p.id, at: p.at.getTime(), kind: p.kind as PromptItem["kind"], sessionId: p.sessionId!, title: p.title, body: p.body, route: p.route };
+  const base: PromptItem = { id: p.id, at: p.at.getTime(), kind: p.kind as PromptItem["kind"], title: p.title, body: p.body, route: p.route };
+  if (p.sessionId) base.sessionId = p.sessionId;
+  if (p.pending) base.pending = p.pending;
   const c = p.card;
   if (!c) return base;
   return {

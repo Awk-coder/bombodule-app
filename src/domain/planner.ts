@@ -19,13 +19,16 @@ export interface PromptCard {
 export interface Planned {
   id: number;
   at: Date;
-  kind: "attendance" | "task" | "warning";
+  kind: "attendance" | "task" | "warning" | "nudge";
   title: string;
   body: string;
   route: string;
   sessionId?: string; // attendance: the class asked about; warning: the class whose silence it warns about
   card?: PromptCard;
+  pending?: { sessionId: string; code: string }[]; // nudge: the day's classes still unmarked when planned
 }
+
+const NUDGE_AFTER_MIN = 120; // after the day's last class
 
 /** FNV-1a → positive 31-bit int, stable across runs so re-scheduling replaces instead of duplicating. */
 export function notifId(key: string): number {
@@ -65,6 +68,25 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
         code: c.code, name: c.name, venue: slot.venue, start: slot.start, end: slot.end,
         missed: courseStats(c, sessions).missed, limit: c.absenceLimit, color: c.color, autoMiss,
       },
+    });
+  }
+
+  // A day's leftover classes: one reminder after its last class, listing those still unmarked.
+  const byDay = new Map<string, typeof sessions>();
+  for (const s of sessions) byDay.set(s.date, [...(byDay.get(s.date) ?? []), s]);
+  for (const [date, day] of byDay) {
+    const at = new Date(Math.max(...day.map((s) => s.end.getTime())) + NUDGE_AFTER_MIN * 60_000);
+    const open = day.filter((s) => !state.marks[s.id]).sort((a, b) => a.start.getTime() - b.start.getTime());
+    if (!open.length || at.getTime() <= nowMs || at.getTime() > horizon) continue;
+    const pending = open.map((s) => ({ sessionId: s.id, code: courses.get(s.courseId)!.code }));
+    out.push({
+      id: notifId(`n:${date}`),
+      at,
+      kind: "nudge",
+      title: "Mark today's classes",
+      body: `${pending.length} unmarked: ${pending.map((p) => p.code).join(", ")}`,
+      route: "#/home",
+      pending,
     });
   }
 

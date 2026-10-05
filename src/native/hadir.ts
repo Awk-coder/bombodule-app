@@ -1,11 +1,12 @@
 import { registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 
-/** A class prompt or absence warning, shown as the custom card notification. */
+/** A class prompt, absence warning or end-of-day nudge, shown and answered natively. */
 export interface PromptItem {
   id: number;
   at: number; // epoch ms
-  kind: "attendance" | "warning";
-  sessionId: string;
+  kind: "attendance" | "warning" | "nudge";
+  sessionId?: string; // attendance and warning
+  pending?: { sessionId: string; code: string }[]; // nudge: classes to list, minus any answered by then
   title: string;
   body: string;
   route: string;
