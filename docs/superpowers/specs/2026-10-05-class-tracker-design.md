@@ -1,7 +1,7 @@
 # Class Tracker — Design Spec
 
 Date: 2026-10-05
-Status: Draft, awaiting user review
+Status: Approved. Revised 2026-10-05: timetable now comes from the confirmation slip PDF, not an in-app i-Ma'luum login (§4).
 
 ## 1. Purpose
 
@@ -17,8 +17,8 @@ Success = after each class the user gets a prompt, answers with one tap, and can
 | Topic | Decision |
 |---|---|
 | Platform | Native Android app (Capacitor), sideloaded APK. Target device: Nothing Phone 2, Android 16. |
-| Course data | Pulled from i-Ma'luum by scraping the schedule page after login. |
-| Login | Aurum-style: IIUM's real CAS page in a WebView; app captures i-Ma'luum session cookie, never sees password. |
+| Course data | Imported from i-Ma'luum's Course Registration Confirmation Slip, printed to PDF by the user (once per semester or when classes change). |
+| Login | None. The app never talks to IIUM servers. |
 | Bar rule | Max absences per course, default **6** (one limit per course, not split by session type). |
 | Attendance input | Notification after each class with **Attended / Missed** actions. Ignored = stays unmarked (never auto-counted). |
 | Assignments | Title, course, due date/time, optional note, done flag, reminder before due. |
@@ -39,14 +39,14 @@ Grades/GPA, exams, sharing, multiple users, cloud sync, iOS, Play Store distribu
 │   ├─ domain/             pure logic (no Capacitor imports)       │
 │   │   ├─ sessions.ts     generate sessions from slots + semester │
 │   │   ├─ attendance.ts   counts, remaining, streaks              │
-│   │   └─ parser.ts       i-Ma'luum schedule HTML → courses/slots │
+│   │   └─ parser.ts       confirmation slip text → courses/slots  │
 │   ├─ store/              persistence (Capacitor Preferences,     │
 │   │                      single JSON document, versioned)        │
 │   ├─ notify/             schedules local notifications           │
-│   └─ iium/               sync flow: plugin → HTTP → parser       │
+│   └─ iium/               import flow: PDF (pdf.js) → parser      │
 │                                                                  │
 │  Native (Java — matches Capacitor template, no Kotlin setup)     │
-│   └─ HadirPlugin (Java)  CAS WebView → cookie; battery settings  │
+│   └─ HadirPlugin (Java)  battery settings                        │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -117,19 +117,19 @@ Rules:
 - Missed count = sessions with `missed`. `absenceLimit` (6) is the absence count that bars you, so **can still miss** = `max(0, absenceLimit − 1 − missed)` and barred = `missed ≥ absenceLimit`. Risk: amber at `limit − 2` (4), red at `limit − 1` (5), "Barred" at `limit`.
 - Re-sync replaces courses/slots; keeps existing sessions/tasks whose `courseId` still exists. Courses that disappear are kept in data but hidden (history not lost).
 
-## 4. IIUM sync flow
+## 4. Timetable import (confirmation slip PDF)
 
-1. Settings → "Link IIUM account" / "Re-sync".
-2. `Hadir.casLogin()` opens native WebView dialog at
-   `https://cas.iium.edu.my:8448/cas/login?service=https%3A%2F%2Fimaluum.iium.edu.my%2Fhome`.
-3. User logs in on IIUM's page. Plugin watches navigation; when URL host is `imaluum.iium.edu.my` and page loaded, reads `CookieManager.getCookie("https://imaluum.iium.edu.my")`, closes, returns cookie string. User cancel → rejected promise.
-4. App fetches `https://imaluum.iium.edu.my/MyAcademic/schedule` via `CapacitorHttp` (native, no CORS) with that cookie. Reads session dropdown, picks the latest session, fetches it.
-5. `parser.ts` parses table rows (9-column primary rows and 4-column continuation rows; day codes `M/T/W/TH/F` and `MON…SAT`; times `Hmm-Hmm`). Also extracts student name if present.
-6. Show preview ("Found 6 courses") → confirm → save. Cookie discarded; WebView cookies cleared.
+Revised after the device test: the in-app CAS login worked, but i-Ma'luum's schedule page loads its data through JavaScript and rejects non-browser requests (HTTP 403). The confirmation slip is a fixed, server-printed table with explicit AM/PM, so the user imports that instead.
 
-Errors: login cancelled → no change. HTTP/parse failure → message "Couldn't read your timetable from i-Ma'luum" + keep existing data. Zero courses parsed → treated as failure.
+1. User opens i-Ma'luum → Course Registration Confirmation Slip → Print → Save as PDF.
+2. Onboarding / Settings → "Import confirmation slip" opens the system file picker (`application/pdf`).
+3. pdf.js extracts positioned text; `groupRows` rebuilds lines by y-position; `parseSlip` reads:
+   - header: `Session : 2026/2027` + `Semester : 1` → label "Sem 1, 2026/2027"; matric; name.
+   - course rows: code, section, title, credit hours, day (`M-W`, `T-TH`, `MON`…), time `h.mm - h.mm AM|PM`, venue. Rows without a time keep the course with no slots; a time row without a course code adds a slot to the course above.
+   - time rule: AM/PM belongs to the end time; 12 is always noon (the slip prints "11.30 - 12.50 AM" for a noon class); the start moves to PM only if it stays before the end.
+4. Show preview ("Found 7 courses") → confirm → save. Re-importing works like a re-sync (§3): moved slots are kept as history so past marks still count.
 
-Fallback (only if cookie capture proves impossible during the first build task): in-app form posting credentials directly to CAS (method in `nrmnqdds/imaluum-backend`), password held in memory only.
+Errors: unreadable file → "Couldn't open that file…"; zero courses → "No courses found…" with how to get the slip. Existing data untouched in both cases.
 
 ## 5. Screens
 
@@ -199,7 +199,7 @@ Bottom tabs: **Home · Schedule · Tasks · Courses · Settings**.
 - **Tasks** for this course + add button (opens task sheet preset to course).
 
 ### Settings
-- IIUM account: name, matric, last sync, **Re-sync timetable**, **Unlink**.
+- Timetable: name, matric, last import date, **Import confirmation slip** / **Import new slip**.
 - Semester end date.
 - **Pause prompts** toggle.
 - Notifications: prompt delay after class (0/5/10/15 min), task reminder time, absence warnings on/off.
@@ -229,22 +229,22 @@ Library: `@capacitor/local-notifications`.
 
 ## 7. Onboarding (first launch)
 
-1. Welcome → "Link IIUM account" (sync flow §4).
+1. Welcome → "Import confirmation slip" (§4).
 2. Confirm semester end date (default start + 14 weeks).
 3. Grant notification permission → prompt for exact alarms + battery exemption (skippable).
 4. Land on Home.
 
 ## 8. Error handling
 
-- No data yet → empty states with "Link IIUM account" CTA on Home/Schedule/Courses.
+- No data yet → empty states with an "Import your confirmation slip" CTA on Home/Schedule/Courses.
 - Sync failures → inline error, existing data untouched.
 - Import with bad file → error, no overwrite.
 - Persisted data with unknown `version` → refuse load, offer export of raw data (no silent loss).
 
 ## 9. Testing
 
-- **Unit (Vitest)**: `parser.ts` against saved i-Ma'luum HTML fixture(s) (multi-day rows, continuation rows, `TH`, odd spacing); `sessions.ts` (generation across weeks, pause intervals, semester bounds, timezone Asia/Kuala_Lumpur); `attendance.ts` (missed, remaining, current/best streak with unmarked gaps); notification schedule planner (pure function: state → list of notifications).
-- **Manual on device**: install APK, link IIUM, verify courses; set prompt delay so a prompt fires; tap Missed from notification shade → meter/grid update; add task due tomorrow → reminder fires; export → import round-trip.
+- **Unit (Vitest)**: `parser.ts` against synthetic slip rows (multi-day rows, continuation rows, rows without time, AM/PM at noon) plus the user's real slip PDF when present locally (gitignored); `sessions.ts` (generation across weeks, pause intervals, semester bounds, timezone Asia/Kuala_Lumpur); `attendance.ts` (missed, remaining, current/best streak with unmarked gaps); notification schedule planner (pure function: state → list of notifications).
+- **Manual on device**: install APK, import the slip PDF, verify courses; set prompt delay so a prompt fires; tap Missed from notification shade → meter/grid update; add task due tomorrow → reminder fires; export → import round-trip.
 
 ## 10. Build & install
 
@@ -254,7 +254,7 @@ Library: `@capacitor/local-notifications`.
 
 ## 11. Risks
 
-1. **Cookie capture vs. real CAS** — unverified; first implementation task proves it. Fallback in §4.
-2. **Scraper fragility** — IIUM page changes break sync; stored data unaffected; parser fails loudly.
+1. **Cookie capture vs. real CAS** — resolved: replaced by PDF import (§4).
+2. **Slip format changes** — a new layout breaks import; stored data unaffected; parser fails loudly with "No courses found".
 3. **Alarm delivery on Nothing OS** — mitigated by exact-alarm + battery settings links.
 4. **No cloud backup** — mitigated by export/import.

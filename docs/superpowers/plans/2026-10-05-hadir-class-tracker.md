@@ -10,6 +10,9 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-05-class-tracker-design.md`
 
+
+> **Revision 2026-10-05 (after device test, user-approved):** the in-app CAS login worked, but i-Ma'luum's schedule page loads its data by JavaScript and returns HTTP 403 to non-browser requests. The timetable now comes from the Course Registration Confirmation Slip PDF (spec §4). Tasks 2 and 5 (CAS spike, HTML parser) are superseded: `HadirPlugin.casLogin/clearCookies`, the HTML parser and `tests/fixtures/schedule.html` were removed; `src/iium/parser.ts` now holds `groupRows`/`parseSlip`/`parseTimeRange`, `src/iium/pdf.ts` reads the PDF with pdf.js, and `readSlip(file)` in `src/iium/sync.ts` replaces `fetchTimetable()`. The "Unlink account" row is gone. Task 16's "link IIUM" check becomes "import the slip PDF".
+
 ## Global Constraints
 
 - Run every command from the project root `/home/awk/Projects/Courses`, prefixed with `mise x --` (mise pins Node 24 and Temurin JDK 21; the system Node is 22 and too old for Capacitor 8).
