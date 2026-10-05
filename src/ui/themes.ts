@@ -1,4 +1,4 @@
-export type ThemeId = "dark" | "sand" | "mint" | "peach" | "crimson" | "pop" | "slate";
+export type ThemeId = "dark" | "royal" | "violet" | "ocean" | "sand" | "peach" | "crimson";
 
 interface Theme {
   id: ThemeId;
@@ -11,19 +11,35 @@ interface Theme {
 export const THEMES: Theme[] = [
   { id: "dark", name: "Dark", swatch: ["#0b0c0e", "#15331f", "#48de7c", "#f2f2f2"], light: false, vars: {} },
   {
+    id: "royal", name: "Royal", swatch: ["#0d0b1a", "#1e1838", "#e3b85c", "#f1edf9"], light: false,
+    vars: {
+      "--bg": "#0d0b1a", "--surface": "#16132a", "--border": "#262143", "--accent": "#e3b85c", "--accent-dim": "#2e2614",
+      "--hero": "#1e1838", "--hero-outer": "#120f22", "--hero-line": "#3a2f63", "--track": "#2a2445",
+      "--text": "#f1edf9", "--text-muted": "#8a84a3", "--on-accent": "#1a1306", "--missed": "#5b2b4a",
+    },
+  },
+  {
+    id: "violet", name: "Violet", swatch: ["#0c0c10", "#1a1630", "#a78bfa", "#f0f0f5"], light: false,
+    vars: {
+      "--bg": "#0c0c10", "--surface": "#15151b", "--border": "#24242d", "--accent": "#a78bfa", "--accent-dim": "#2a2342",
+      "--hero": "#1a1630", "--hero-outer": "#111116", "--hero-line": "#352c5c", "--track": "#22202d",
+      "--text": "#f0f0f5", "--text-muted": "#7f7f8c", "--on-accent": "#170f33", "--missed": "#4a2d4f",
+    },
+  },
+  {
+    id: "ocean", name: "Ocean", swatch: ["#071114", "#0b252b", "#38d6e0", "#eef7f8"], light: false,
+    vars: {
+      "--bg": "#071114", "--surface": "#0d1a1e", "--border": "#1a2a2f", "--accent": "#38d6e0", "--accent-dim": "#0f3238",
+      "--hero": "#0b252b", "--hero-outer": "#0b161a", "--hero-line": "#17444c", "--track": "#15282d",
+      "--text": "#eef7f8", "--text-muted": "#7a9195", "--on-accent": "#032226", "--missed": "#4f2a33",
+    },
+  },
+  {
     id: "sand", name: "Sand", swatch: ["#f9f5ef", "#f6be55", "#a1453c", "#ababab"], light: true,
     vars: {
       "--bg": "#f9f5ef", "--surface": "#fffdf9", "--border": "#e9e0d2", "--accent": "#a1453c", "--accent-dim": "#fbe7c0",
       "--hero": "#fdf0d4", "--hero-outer": "#fffdf9", "--hero-line": "#f0d39a", "--track": "#efe4d2",
       "--text": "#2c2622", "--text-muted": "#8c8681", "--on-accent": "#ffffff", "--missed": "#d9a19b", "--warn": "#d18a0f",
-    },
-  },
-  {
-    id: "mint", name: "Mint", swatch: ["#f7fbfa", "#c8fcd5", "#78d2c3", "#6993d6"], light: true,
-    vars: {
-      "--bg": "#f7fbfa", "--surface": "#ffffff", "--border": "#dcebe6", "--accent": "#4a78c4", "--accent-dim": "#d4f9de",
-      "--hero": "#e3faea", "--hero-outer": "#ffffff", "--hero-line": "#a9e3d8", "--track": "#d9eee8",
-      "--text": "#1f2d3a", "--text-muted": "#7d8a94", "--on-accent": "#ffffff", "--missed": "#e6a8ab", "--warn": "#d18a0f",
     },
   },
   {
@@ -42,23 +58,6 @@ export const THEMES: Theme[] = [
       "--hero": "#f3e6dc", "--hero-outer": "#f6f2e8", "--hero-line": "#c99a8f", "--track": "#e2d6c9",
       "--text": "#1b1919", "--text-muted": "#7a746a", "--on-accent": "#ffffff", "--missed": "#1b1919", "--warn": "#b86e00",
       "--danger": "#6a0000", "--danger-bg": "#f0d6d0",
-    },
-  },
-  {
-    id: "pop", name: "Pop", swatch: ["#f31160", "#f6f2a7", "#f6c224", "#208e7b"], light: true,
-    vars: {
-      "--bg": "#fbf9d8", "--surface": "#fffef0", "--border": "#ede8a8", "--accent": "#208e7b", "--accent-dim": "#d3eee6",
-      "--hero": "#f6f2a7", "--hero-outer": "#fffef0", "--hero-line": "#f6c224", "--track": "#ece58a",
-      "--text": "#14332d", "--text-muted": "#7c7a55", "--on-accent": "#ffffff", "--missed": "#f31160", "--warn": "#c98f00",
-      "--danger": "#f31160", "--danger-bg": "#fde0ea",
-    },
-  },
-  {
-    id: "slate", name: "Slate", swatch: ["#ededed", "#eb911b", "#3a4651", "#2f3640"], light: true,
-    vars: {
-      "--bg": "#ededed", "--surface": "#f8f8f8", "--border": "#d8d9db", "--accent": "#c46f00", "--accent-dim": "#f9e2c2",
-      "--hero": "#fbf0e1", "--hero-outer": "#f8f8f8", "--hero-line": "#e9c48f", "--track": "#e0e2e5",
-      "--text": "#2f3640", "--text-muted": "#7b828b", "--on-accent": "#ffffff", "--missed": "#3a4651", "--warn": "#c46f00",
     },
   },
 ];
