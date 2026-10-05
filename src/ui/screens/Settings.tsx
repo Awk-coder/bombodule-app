@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { isPaused, parseImport, serialize, setPaused, setSemesterEnd, unlink, updateSettings } from "../../domain/actions";
+import { isPaused, parseImport, serialize, setPaused, setSemesterEnd, updateSettings } from "../../domain/actions";
 import { ymd } from "../../domain/time";
 import { DEFAULT_LIMIT } from "../../domain/types";
 import type { AppState } from "../../domain/types";
@@ -10,7 +10,7 @@ import { useSync } from "../useSync";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { Sheet } from "../components/Sheet";
-import { SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
+import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
 
 export function Settings() {
@@ -47,23 +47,17 @@ export function Settings() {
       <div class="profile">
         <div class="avatar">{initials(acc?.name)}</div>
         <div>
-          <b>{acc?.name ? shortName(acc.name) : "Not linked"}</b>
-          <small>{acc ? `${acc.matric ?? "Matric unknown"} · synced ${fmtDate(acc.lastSync)}` : "Link your IIUM account to load your timetable"}</small>
+          <b>{acc?.name ? shortName(acc.name) : "No timetable yet"}</b>
+          <small>{acc ? `${acc.matric ?? "Matric unknown"} · imported ${fmtDate(acc.lastSync)}` : "Import your confirmation slip to load your timetable"}</small>
         </div>
       </div>
 
-      <p class="group-title">IIUM account</p>
-      <p class="group-hint">You log in on IIUM's own page. Hadir never sees your password.</p>
-      <button class="row" disabled={sync.busy} onClick={() => void sync.start()}>
-        <div class="grow"><b>{acc ? "Re-sync timetable" : "Link IIUM account"}</b><small>{sync.busy ? "Working…" : "Pulls your courses from i-Ma'luum"}</small></div>
+      <p class="group-title">Timetable</p>
+      <p class="group-hint">In i-Ma'luum, open the Course Registration Confirmation Slip and print it to PDF. Import it again whenever your classes change.</p>
+      <SlipPicker sync={sync} class="row">
+        <div class="grow"><b>{acc ? "Import new slip" : "Import confirmation slip"}</b><small>{sync.busy ? "Reading…" : "PDF from i-Ma'luum"}</small></div>
         <IconChevron />
-      </button>
-      {acc && (
-        <button class="row" onClick={() => dispatch(unlink)}>
-          <div class="grow"><b>Unlink account</b><small>Courses, attendance and tasks stay on this phone</small></div>
-          <IconChevron />
-        </button>
-      )}
+      </SlipPicker>
       <SyncErrorCard sync={sync} />
 
       {state.semester && (

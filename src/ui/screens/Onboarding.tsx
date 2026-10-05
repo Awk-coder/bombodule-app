@@ -5,7 +5,7 @@ import { fmtDate } from "../format";
 import { useSync } from "../useSync";
 import { IconCheck } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
-import { SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
+import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 
 export function Onboarding() {
   const state = useAppState();
@@ -19,7 +19,7 @@ export function Onboarding() {
         <div class="logo"><IconCheck size={30} /></div>
         <h1>Hadir</h1>
         <p>Track attendance and tasks for your IIUM classes, so you never get barred.</p>
-        <p>Link your IIUM account to pull your timetable from i-Ma'luum. You log in on IIUM's own page — Hadir never sees your password.</p>
+        <p>In i-Ma'luum, open your Course Registration Confirmation Slip and print it to PDF. Import that file and Hadir builds your timetable.</p>
         {linked ? (
           <>
             <div class="card">Timetable saved: {state.courses.filter((c) => c.active).length} courses</div>
@@ -27,7 +27,7 @@ export function Onboarding() {
           </>
         ) : (
           <>
-            <button class="btn primary" disabled={sync.busy} onClick={() => void sync.start()}>{sync.busy ? "Linking…" : "Link IIUM account"}</button>
+            <SlipPicker sync={sync} class="btn primary">{sync.busy ? "Reading…" : "Import confirmation slip"}</SlipPicker>
             <button class="btn ghost" onClick={() => setStep(1)}>Skip for now</button>
           </>
         )}

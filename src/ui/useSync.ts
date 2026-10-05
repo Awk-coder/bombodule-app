@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import { applySync } from "../domain/actions";
 import { ymd } from "../domain/time";
 import type { ParsedSchedule } from "../iium/parser";
-import { CANCELLED, fetchTimetable } from "../iium/sync";
+import { readSlip } from "../iium/sync";
 import { dispatch } from "../store/store";
 
 export function useSync() {
@@ -10,13 +10,13 @@ export function useSync() {
   const [error, setError] = useState<Error | null>(null);
   const [preview, setPreview] = useState<ParsedSchedule | null>(null);
 
-  async function start() {
+  async function start(file: Blob) {
     setBusy(true);
     setError(null);
     try {
-      setPreview(await fetchTimetable());
+      setPreview(await readSlip(file));
     } catch (e) {
-      if ((e as Error).message !== CANCELLED) setError(e as Error);
+      setError(e as Error);
     } finally {
       setBusy(false);
     }

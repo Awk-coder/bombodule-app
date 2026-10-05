@@ -1,8 +1,6 @@
 import { registerPlugin } from "@capacitor/core";
 
 export interface HadirPlugin {
-  casLogin(): Promise<{ cookie: string }>;
-  clearCookies(): Promise<void>;
   isIgnoringBatteryOptimizations(): Promise<{ value: boolean }>;
   openBatterySettings(): Promise<void>;
 }

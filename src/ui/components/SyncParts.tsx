@@ -1,7 +1,6 @@
+import type { ComponentChildren } from "preact";
 import { semesterLabelDiffers } from "../../domain/actions";
 import { ymd } from "../../domain/time";
-import { SyncError } from "../../iium/sync";
-import { shareFile } from "../../native/share";
 import { useAppState } from "../../store/store";
 import { titleCase } from "../format";
 import type { SyncState } from "../useSync";
@@ -25,7 +24,7 @@ export function SyncPreviewSheet({ sync }: { sync: SyncState }) {
           ))}
           {differs && (
             <p class="error">
-              i-Ma'luum shows {p.sessionName}, but you're still in {state.semester?.label}. Saving keeps your current attendance. Start a new semester only if the old one is over.
+              This slip is for {p.sessionName}, but you're still in {state.semester?.label}. Saving keeps your current attendance. Start a new semester only if the old one is over.
             </p>
           )}
           <button class="btn primary" onClick={() => sync.confirm()}>Save timetable</button>
@@ -38,13 +37,31 @@ export function SyncPreviewSheet({ sync }: { sync: SyncState }) {
 }
 
 export function SyncErrorCard({ sync }: { sync: SyncState }) {
-  const err = sync.error;
-  if (!err) return null;
-  const html = err instanceof SyncError ? err.html : undefined;
+  if (!sync.error) return null;
   return (
     <div class="card">
-      <p class="error">{err.message}</p>
-      {html && <button class="btn" onClick={() => void shareFile("imaluum-schedule.html", html, "text/html")}>Share page for debugging</button>}
+      <p class="error">{sync.error.message}</p>
     </div>
+  );
+}
+
+/** A label styled by the caller that opens the system file picker for the slip PDF. */
+export function SlipPicker({ sync, class: cls, children }: { sync: SyncState; class: string; children: ComponentChildren }) {
+  return (
+    <label class={cls} aria-disabled={sync.busy}>
+      {children}
+      <input
+        type="file"
+        accept="application/pdf"
+        hidden
+        disabled={sync.busy}
+        onChange={(e) => {
+          const input = e.currentTarget;
+          const file = input.files?.[0];
+          input.value = ""; // let the same file be picked again
+          if (file) void sync.start(file);
+        }}
+      />
+    </label>
   );
 }

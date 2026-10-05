@@ -21,10 +21,10 @@ export async function textItems(doc: PdfDoc): Promise<TextItem[]> {
 export async function readPdf(data: ArrayBuffer): Promise<TextItem[]> {
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(data) }).promise;
+  const task = pdfjs.getDocument({ data: new Uint8Array(data) });
   try {
-    return await textItems(doc);
+    return await textItems(await task.promise);
   } finally {
-    void doc.destroy();
+    void task.destroy();
   }
 }

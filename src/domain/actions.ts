@@ -43,9 +43,6 @@ export function setSemesterEnd(state: AppState, end: string): AppState {
 
 export const completeOnboarding = (state: AppState): AppState => ({ ...state, onboarded: true });
 
-/** Forget the account but keep all courses, attendance and tasks. */
-export const unlink = (state: AppState): AppState => ({ ...state, account: null });
-
 /** True when a sync would carry a different semester label while the current semester is still running. */
 export function semesterLabelDiffers(state: AppState, parsed: ParsedSchedule, today: string): boolean {
   const sem = state.semester;
