@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, deleteTask, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, deleteTask, semesterLabelDiffers, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
 import { BICS_MON_1, makeState } from "./testState";
@@ -91,6 +91,32 @@ describe("applySync", () => {
     const bics = sessions.filter((x) => x.courseId === "BICS 4350-1");
     expect(bics.filter((x) => x.date >= "2026-10-20").every((x) => x.slotId === "BICS 4350-1-3-14:00")).toBe(true);
     expect(bics.filter((x) => x.date < "2026-10-20").every((x) => x.slotId === "BICS 4350-1-1-11:30")).toBe(true);
+  });
+
+  it("a missing label keeps the current semester and its counts", () => {
+    const first = applySync(emptyState(), parsed(), "2026-10-05");
+    const s = applySync(first, parsed({ sessionName: null }), "2026-10-20");
+    expect(s.semester).toEqual(first.semester);
+  });
+
+  it("a different label before the semester ends keeps it unless a new one is requested", () => {
+    const first = applySync(emptyState(), parsed(), "2026-10-05");
+    const kept = applySync(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2026-10-20");
+    expect(kept.semester).toEqual(first.semester);
+    const started = applySync(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2026-10-20", true);
+    expect(started.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2026-10-20" });
+  });
+
+  it("semesterLabelDiffers flags a new label only while the semester runs", () => {
+    const first = applySync(emptyState(), parsed(), "2026-10-05");
+    expect(semesterLabelDiffers(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2026-10-20")).toBe(true);
+    expect(semesterLabelDiffers(first, parsed(), "2026-10-20")).toBe(false);
+    expect(semesterLabelDiffers(first, parsed({ sessionName: null }), "2026-10-20")).toBe(false);
+    expect(semesterLabelDiffers(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2027-03-01")).toBe(false);
+  });
+
+  it("first sync without a label still creates a semester", () => {
+    expect(applySync(emptyState(), parsed({ sessionName: null }), "2026-10-05").semester?.label).toBe("Current semester");
   });
 
   it("a new semester label starts a new semester", () => {

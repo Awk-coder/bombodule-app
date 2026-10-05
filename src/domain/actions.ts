@@ -46,7 +46,14 @@ export const completeOnboarding = (state: AppState): AppState => ({ ...state, on
 /** Forget the account but keep all courses, attendance and tasks. */
 export const unlink = (state: AppState): AppState => ({ ...state, account: null });
 
-export function applySync(state: AppState, parsed: ParsedSchedule, today: string): AppState {
+/** True when a sync would carry a different semester label while the current semester is still running. */
+export function semesterLabelDiffers(state: AppState, parsed: ParsedSchedule, today: string): boolean {
+  const sem = state.semester;
+  return !!sem && !!parsed.sessionName && parsed.sessionName !== sem.label && today <= sem.end;
+}
+
+/** A new semester starts only on first sync, when the old one has ended under a new label, or when asked. */
+export function applySync(state: AppState, parsed: ParsedSchedule, today: string, startNewSemester = false): AppState {
   const previous = new Map(state.courses.map((c) => [c.id, c]));
   let nextColor = state.courses.length;
   const synced: Course[] = parsed.courses.map((p) => {
@@ -65,7 +72,8 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
   const syncedIds = new Set(synced.map((c) => c.id));
   const dropped = state.courses.filter((c) => !syncedIds.has(c.id)).map((c) => ({ ...c, active: false }));
 
-  const sameSemester = state.semester?.label === parsed.sessionName;
+  const sem = state.semester;
+  const sameSemester = !!sem && !startNewSemester && (!parsed.sessionName || parsed.sessionName === sem.label || today <= sem.end);
   const old = new Map(sameSemester ? state.slots.map((s) => [s.id, s]) : []);
   const slots = new Map<string, Slot>();
   for (const s of parsed.slots) {
@@ -85,7 +93,7 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
     ...state,
     courses: [...synced, ...dropped],
     slots: [...slots.values(), ...retired],
-    semester: sameSemester ? state.semester : { label: parsed.sessionName, start: today, end: addDays(today, SEMESTER_DAYS) },
+    semester: sameSemester ? sem : { label: parsed.sessionName ?? "Current semester", start: today, end: addDays(today, SEMESTER_DAYS) },
     account: {
       name: parsed.studentName ?? state.account?.name ?? null,
       matric: parsed.matric ?? state.account?.matric ?? null,

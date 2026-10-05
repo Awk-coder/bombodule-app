@@ -17,7 +17,7 @@ export interface ParsedSlot {
 }
 
 export interface ParsedSchedule {
-  sessionName: string;
+  sessionName: string | null; // null when the page has no semester label
   studentName: string | null;
   matric: string | null;
   courses: ParsedCourse[];
@@ -93,8 +93,7 @@ export function parseSchedule(html: string): ParsedSchedule {
   }
 
   const sessionName =
-    clean(doc.querySelector(".box-header.with-border .dropdown-toggle") ?? doc.querySelector(".box-header.with-border .box-title")) ||
-    "Current semester";
+    clean(doc.querySelector(".box-header.with-border .dropdown-toggle") ?? doc.querySelector(".box-header.with-border .box-title")) || null;
   const profile = clean(doc.querySelector(".user-panel .info") ?? doc.querySelector(".user-header"));
   const studentName = clean(doc.querySelector(".user-panel .info p") ?? doc.querySelector(".user-header p")).replace(/(?<!\d)\d{7}(?!\d)/, "").trim() || null;
   const matric = profile.match(/(?<!\d)\d{7}(?!\d)/)?.[0] ?? null;

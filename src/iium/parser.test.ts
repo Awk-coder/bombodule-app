@@ -49,6 +49,10 @@ describe("parseSchedule (fixture)", () => {
     ]);
   });
 
+  it("returns a null semester label when the page has none", () => {
+    expect(parseSchedule("<html><body></body></html>").sessionName).toBeNull();
+  });
+
   it("returns no courses for a page without the table (e.g. the login page)", () => {
     expect(parseSchedule("<html><body><form id='fm1'></form></body></html>").courses).toEqual([]);
   });

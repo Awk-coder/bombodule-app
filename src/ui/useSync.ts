@@ -22,10 +22,10 @@ export function useSync() {
     }
   }
 
-  function confirm() {
+  function confirm(startNewSemester = false) {
     if (!preview) return;
     const parsed = preview;
-    dispatch((s) => applySync(s, parsed, ymd(new Date())));
+    dispatch((s) => applySync(s, parsed, ymd(new Date()), startNewSemester));
     setPreview(null);
   }
 

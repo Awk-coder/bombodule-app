@@ -1,11 +1,16 @@
+import { semesterLabelDiffers } from "../../domain/actions";
+import { ymd } from "../../domain/time";
 import { SyncError } from "../../iium/sync";
 import { shareFile } from "../../native/share";
+import { useAppState } from "../../store/store";
 import { titleCase } from "../format";
 import type { SyncState } from "../useSync";
 import { Sheet } from "./Sheet";
 
 export function SyncPreviewSheet({ sync }: { sync: SyncState }) {
   const p = sync.preview;
+  const state = useAppState();
+  const differs = !!p && semesterLabelDiffers(state, p, ymd(new Date()));
   return (
     <Sheet open={!!p} onClose={sync.cancel}>
       {p && (
@@ -18,7 +23,13 @@ export function SyncPreviewSheet({ sync }: { sync: SyncState }) {
               <small>{p.slots.filter((s) => s.code === c.code && s.section === c.section).length}× / week</small>
             </div>
           ))}
-          <button class="btn primary" onClick={sync.confirm}>Save timetable</button>
+          {differs && (
+            <p class="error">
+              i-Ma'luum shows {p.sessionName}, but you're still in {state.semester?.label}. Saving keeps your current attendance. Start a new semester only if the old one is over.
+            </p>
+          )}
+          <button class="btn primary" onClick={() => sync.confirm()}>Save timetable</button>
+          {differs && <button class="btn" onClick={() => sync.confirm(true)}>Start new semester</button>}
           <button class="btn ghost" onClick={sync.cancel}>Cancel</button>
         </>
       )}
