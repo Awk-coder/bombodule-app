@@ -3,3 +3,4 @@ dist/
 tests/fixtures/real-*
 *.log
 .superpowers/
+references/
