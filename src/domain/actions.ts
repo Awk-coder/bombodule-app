@@ -65,18 +65,26 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
   const syncedIds = new Set(synced.map((c) => c.id));
   const dropped = state.courses.filter((c) => !syncedIds.has(c.id)).map((c) => ({ ...c, active: false }));
 
+  const sameSemester = state.semester?.label === parsed.sessionName;
+  const old = new Map(sameSemester ? state.slots.map((s) => [s.id, s]) : []);
   const slots = new Map<string, Slot>();
   for (const s of parsed.slots) {
     const courseId = courseKey(s.code, s.section);
     const id = `${courseId}-${s.day}-${s.start}`;
-    slots.set(id, { id, courseId, day: s.day, start: s.start, end: s.end, venue: s.venue, lecturer: s.lecturer });
+    const prev = old.get(id);
+    const from = prev ? prev.from : sameSemester ? today : undefined;
+    slots.set(id, { id, courseId, day: s.day, start: s.start, end: s.end, venue: s.venue, lecturer: s.lecturer, ...(from && { from }) });
   }
+  // Slots that moved or vanished mid-semester stay as history so past marks keep counting.
+  const yesterday = addDays(today, -1);
+  const retired = [...old.values()]
+    .filter((s) => !slots.has(s.id))
+    .map((s) => ({ ...s, until: s.until && s.until < yesterday ? s.until : yesterday }));
 
-  const sameSemester = state.semester?.label === parsed.sessionName;
   return {
     ...state,
     courses: [...synced, ...dropped],
-    slots: [...slots.values()],
+    slots: [...slots.values(), ...retired],
     semester: sameSemester ? state.semester : { label: parsed.sessionName, start: today, end: addDays(today, SEMESTER_DAYS) },
     account: {
       name: parsed.studentName ?? state.account?.name ?? null,

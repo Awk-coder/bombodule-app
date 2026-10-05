@@ -15,7 +15,7 @@ export function generateSessions(state: AppState, now: Date): Session[] {
     const dow = parseYmd(date).getDay();
     const paused = isPausedOn(state.pauses, date);
     for (const slot of slots) {
-      if (slot.day !== dow) continue;
+      if (slot.day !== dow || (slot.from && date < slot.from) || (slot.until && date > slot.until)) continue;
       const id = `${slot.id}@${date}`;
       const mark = state.marks[id];
       if (paused && !mark) continue;

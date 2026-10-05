@@ -20,6 +20,8 @@ export interface Slot {
   end: string;
   venue: string;
   lecturer: string;
+  from?: string; // YYYY-MM-DD, first date this slot applies (added by a mid-semester re-sync)
+  until?: string; // YYYY-MM-DD, last date — set when a re-sync moved or removed the slot
 }
 
 export interface Task {

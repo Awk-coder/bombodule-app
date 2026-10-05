@@ -77,6 +77,22 @@ describe("applySync", () => {
     expect(again.account).toEqual({ name: "ABDUL WAHID", matric: "2212345", lastSync: "2026-10-20" });
   });
 
+  it("re-sync with a moved slot keeps past marks counted", () => {
+    const first = markSession(applySync(emptyState(), parsed(), "2026-10-05"), BICS_MON_1, "missed");
+    const moved = parsed({
+      slots: [
+        { code: "BICS 4350", section: "1", day: 3, start: "14:00", end: "15:20", venue: "ICT LR 14", lecturer: "DR. X" },
+        parsed().slots[2],
+      ],
+    });
+    const again = applySync(first, moved, "2026-10-20");
+    const sessions = generateSessions(again, new Date(2026, 9, 20, 7));
+    expect(sessions.find((x) => x.id === BICS_MON_1)?.status).toBe("missed");
+    const bics = sessions.filter((x) => x.courseId === "BICS 4350-1");
+    expect(bics.filter((x) => x.date >= "2026-10-20").every((x) => x.slotId === "BICS 4350-1-3-14:00")).toBe(true);
+    expect(bics.filter((x) => x.date < "2026-10-20").every((x) => x.slotId === "BICS 4350-1-1-11:30")).toBe(true);
+  });
+
   it("a new semester label starts a new semester", () => {
     const s = applySync(applySync(emptyState(), parsed(), "2026-10-05"), parsed({ sessionName: "Sem 2, 2026/2027" }), "2027-03-01");
     expect(s.semester).toMatchObject({ label: "Sem 2, 2026/2027", start: "2027-03-01" });

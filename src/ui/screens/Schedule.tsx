@@ -25,7 +25,7 @@ export function Schedule() {
   const [open, setOpen] = useState<Slot | null>(null);
 
   const courses = new Map(state.courses.filter((c) => c.active).map((c) => [c.id, c]));
-  const slots = state.slots.filter((s) => courses.has(s.courseId));
+  const slots = state.slots.filter((s) => courses.has(s.courseId) && !s.until);
   const title = <h1 class="page-title">{state.semester?.label ?? "Schedule"}</h1>;
   if (!slots.length) return <>{title}<LinkCard /></>;
 
