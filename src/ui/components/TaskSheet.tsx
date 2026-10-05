@@ -3,6 +3,7 @@ import { deleteTask, upsertTask } from "../../domain/actions";
 import { addDays, atTime, hhmm, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
+import { Chips } from "./Chips";
 import { Sheet } from "./Sheet";
 
 interface Props {
@@ -52,13 +53,14 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
     <Sheet open={open} onClose={onClose}>
       <h2>{task ? "Edit task" : "New task"}</h2>
       <label class="field"><span>Title</span><input value={title} onInput={(e) => setTitle(e.currentTarget.value)} placeholder="Lab report 2" /></label>
-      <label class="field">
+      <div class="field">
         <span>Course</span>
-        <select value={courseId ?? ""} onChange={(e) => setCourseId(e.currentTarget.value || null)}>
-          <option value="">No course</option>
-          {state.courses.filter((c) => c.active).map((c) => <option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}
-        </select>
-      </label>
+        <Chips
+          options={[{ value: null, label: "No course" }, ...state.courses.filter((c) => c.active).map((c) => ({ value: c.id as string | null, label: c.code }))]}
+          value={courseId}
+          onChange={setCourseId}
+        />
+      </div>
       <div class="field-row">
         <label class="field"><span>Due date</span><input type="date" value={date} onInput={(e) => setDate(e.currentTarget.value)} /></label>
         <label class="field"><span>Time</span><input type="time" value={time} onInput={(e) => setTime(e.currentTarget.value)} /></label>

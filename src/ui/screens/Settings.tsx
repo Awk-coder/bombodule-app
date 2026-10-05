@@ -7,6 +7,7 @@ import { shareFile } from "../../native/share";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate, initials, shortName } from "../format";
 import { useSync } from "../useSync";
+import { Chips } from "../components/Chips";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { Sheet } from "../components/Sheet";
@@ -83,12 +84,14 @@ export function Settings() {
         <div class="grow"><b>Pause prompts</b><small>For mid-sem break and holidays</small></div>
         <Toggle on={isPaused(state)} onChange={(v) => dispatch((s) => setPaused(s, v, today))} />
       </div>
-      <label class="field">
+      <div class="field">
         <span>Ask "Did you attend?"</span>
-        <select value={String(state.settings.promptDelayMin)} onChange={(e) => dispatch((s) => updateSettings(s, { promptDelayMin: Number(e.currentTarget.value) }))}>
-          {[0, 5, 10, 15].map((m) => <option key={m} value={String(m)}>{m === 0 ? "When class ends" : `${m} min after class`}</option>)}
-        </select>
-      </label>
+        <Chips
+          options={[0, 5, 10, 15].map((m) => ({ value: m, label: m === 0 ? "At end" : `${m} min` }))}
+          value={state.settings.promptDelayMin}
+          onChange={(m) => dispatch((s) => updateSettings(s, { promptDelayMin: m }))}
+        />
+      </div>
       <label class="field">
         <span>Task reminder time (day before due)</span>
         <input

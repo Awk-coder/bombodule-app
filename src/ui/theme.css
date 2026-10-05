@@ -21,6 +21,8 @@
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
+/* Opaque strip behind the transparent status bar so scrolled content doesn't show through it. */
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 15; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 button:active { transform: scale(0.98); }
 button:disabled { opacity: 0.4; }
@@ -98,6 +100,9 @@ svg { vertical-align: -2px; }
 .field { display: block; margin-bottom: 14px; }
 .field span { display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 6px; }
 .field-row { display: flex; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 14px; font-weight: 600; }
+.chips button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .field-row .field { flex: 1; }
 @keyframes up { from { transform: translateY(100%); } }
 @keyframes fade { from { opacity: 0; } }
