@@ -22,7 +22,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
+html, body { overscroll-behavior: none; margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
 /* Opaque strip behind the transparent status bar so scrolled content doesn't show through it. */
 body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 15; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
