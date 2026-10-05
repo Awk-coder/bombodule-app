@@ -29,7 +29,7 @@ export async function boot(): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const rescheduleSoon = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => void reschedule(getState()), 500);
+    timer = setTimeout(() => void reschedule(getState), 500);
   };
 
   onStateChange((prev, next) => {

@@ -24,14 +24,25 @@ export async function initNotifications(onAction: (a: NotificationAction) => voi
   });
 }
 
-/** Cancel everything pending and schedule the next 14 days from scratch. */
-export async function reschedule(state: AppState, now = new Date()): Promise<void> {
+let queue: Promise<void> = Promise.resolve();
+
+/**
+ * Cancel everything pending and schedule the next 14 days from scratch.
+ * Runs one at a time and reads state just before planning, so a slow run can't
+ * re-schedule a prompt for a class marked while it was in flight.
+ */
+export function reschedule(read: () => AppState, now?: Date): Promise<void> {
+  queue = queue.then(() => run(read, now ?? new Date())).catch((e) => console.error("reschedule failed", e));
+  return queue;
+}
+
+async function run(read: () => AppState, now: Date): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   const pending = await LocalNotifications.getPending();
   if (pending.notifications.length) {
     await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
   }
-  const planned = planNotifications(state, now);
+  const planned = planNotifications(read(), now);
   if (!planned.length) return;
   await LocalNotifications.schedule({
     notifications: planned.map((p) => ({
