@@ -34,6 +34,15 @@ describe("planNotifications: attendance", () => {
     expect(p[0].at).toEqual(at(7, 13, 0));
   });
 
+  it("gives each prompt the data its card shows", () => {
+    const st = makeState({ marks: { "BICS 4350-1-1-11:30@2026-10-05": "missed" } });
+    const p = planNotifications(st, at(5, 13)).find((x) => x.sessionId === "BICS 4350-1-3-11:30@2026-10-07");
+    expect(p?.card).toEqual({
+      code: "BICS 4350", name: "PRIVACY ENGINEERING", venue: "ICT LR 14", start: "11:30", end: "12:50",
+      missed: 1, limit: 6, color: 0, autoMiss: false,
+    });
+  });
+
   it("stops at the horizon", () => {
     expect(planNotifications(makeState(), at(5, 7), 3).filter((x) => x.kind === "attendance")).toHaveLength(3);
   });
@@ -64,7 +73,7 @@ describe("planNotifications: unanswered-class warning", () => {
   it("warns at midnight when leaving the next class unanswered would put the course one below the limit", () => {
     const w = planNotifications(limit4(tracked(twoMissed)), at(12, 7)).filter((x) => x.kind === "warning");
     expect(w).toEqual([
-      expect.objectContaining({ at: at(13, 0), title: "Absence warning", body: "BICS 4350: not answered, counted as missed — 3 / 4, one more and you're barred", route: "#/course/BICS%204350-1" }),
+      expect.objectContaining({ sessionId: "BICS 4350-1-1-11:30@2026-10-12", at: at(13, 0), title: "Absence warning", body: "BICS 4350: not answered, counted as missed — 3 / 4, one more and you're barred", route: "#/course/BICS%204350-1" }),
     ]);
   });
 

@@ -3,6 +3,19 @@ import { courseStats } from "./attendance";
 import { generateSessions } from "./sessions";
 import { addDays, atTime, hhmm, ymd } from "./time";
 
+/** What a class prompt's custom notification card shows. */
+export interface PromptCard {
+  code: string;
+  name: string;
+  venue: string;
+  start: string; // "HH:MM"
+  end: string;
+  missed: number;
+  limit: number;
+  color: number; // course palette index
+  autoMiss: boolean; // no answer by midnight counts as missed
+}
+
 export interface Planned {
   id: number;
   at: Date;
@@ -10,7 +23,8 @@ export interface Planned {
   title: string;
   body: string;
   route: string;
-  sessionId?: string;
+  sessionId?: string; // attendance: the class asked about; warning: the class whose silence it warns about
+  card?: PromptCard;
 }
 
 /** FNV-1a → positive 31-bit int, stable across runs so re-scheduling replaces instead of duplicating. */
@@ -38,14 +52,19 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
     if (at.getTime() <= nowMs || at.getTime() > horizon) continue;
     const c = courses.get(s.courseId)!;
     const slot = slots.get(s.slotId)!;
+    const autoMiss = !!autoMissFrom && s.date >= autoMissFrom;
     out.push({
       id: notifId(`a:${s.id}`),
       at,
       kind: "attendance",
       sessionId: s.id,
       title: `Did you attend ${c.code}?`,
-      body: [c.name, slot.venue, autoMissFrom && s.date >= autoMissFrom && "no answer by midnight = missed"].filter(Boolean).join(" · "),
+      body: [c.name, slot.venue, autoMiss && "no answer by midnight = missed"].filter(Boolean).join(" · "),
       route: "#/home",
+      card: {
+        code: c.code, name: c.name, venue: slot.venue, start: slot.start, end: slot.end,
+        missed: courseStats(c, sessions).missed, limit: c.absenceLimit, color: c.color, autoMiss,
+      },
     });
   }
 
@@ -64,6 +83,7 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
         id: notifId(`w:${next.id}`),
         at,
         kind: "warning",
+        sessionId: next.id,
         title: "Absence warning",
         body: `${c.code}: not answered, counted as missed — ${missed} / ${c.absenceLimit}, ${tail}`,
         route: `#/course/${encodeURIComponent(c.id)}`,

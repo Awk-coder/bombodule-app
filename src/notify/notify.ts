@@ -1,9 +1,10 @@
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import type { AppState, Mark } from "../domain/types";
-import { planNotifications } from "../domain/planner";
-
-const ATTEND = "ATTEND";
+import { planNotifications, type Planned } from "../domain/planner";
+import { generateSessions } from "../domain/sessions";
+import { Hadir, type PromptItem } from "../native/hadir";
+import { fmtTime, titleCase } from "../ui/format";
 
 export interface NotificationAction {
   actionId: string;
@@ -15,9 +16,6 @@ export const isMark = (id: string): id is Mark => id === "attended" || id === "m
 
 export async function initNotifications(onAction: (a: NotificationAction) => void): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
-  await LocalNotifications.registerActionTypes({
-    types: [{ id: ATTEND, actions: [{ id: "attended", title: "Attended" }, { id: "missed", title: "Missed", destructive: true }] }],
-  });
   await LocalNotifications.addListener("localNotificationActionPerformed", (e) => {
     const extra = (e.notification.extra ?? {}) as { sessionId?: string; route?: string };
     onAction({ actionId: e.actionId, sessionId: extra.sessionId, route: extra.route });
@@ -43,17 +41,43 @@ async function run(read: () => AppState, now: Date): Promise<void> {
     await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
   }
   const planned = planNotifications(read(), now);
-  if (!planned.length) return;
+  // Class prompts and their warnings get the custom card, drawn and answered natively (Hadir plugin).
+  await Hadir.schedulePrompts({ items: planned.filter((p) => p.kind !== "task").map(toPrompt) });
+  const tasks = planned.filter((p) => p.kind === "task");
+  if (!tasks.length) return;
   await LocalNotifications.schedule({
-    notifications: planned.map((p) => ({
+    notifications: tasks.map((p) => ({
       id: p.id,
       title: p.title,
       body: p.body,
       schedule: { at: p.at, allowWhileIdle: true },
-      actionTypeId: p.kind === "attendance" ? ATTEND : undefined,
-      extra: { sessionId: p.sessionId, route: p.route },
+      extra: { route: p.route },
     })),
   });
+}
+
+function toPrompt(p: Planned): PromptItem {
+  const base = { id: p.id, at: p.at.getTime(), kind: p.kind as PromptItem["kind"], sessionId: p.sessionId!, title: p.title, body: p.body, route: p.route };
+  const c = p.card;
+  if (!c) return base;
+  return {
+    ...base, code: c.code, name: titleCase(c.name), venue: c.venue, time: `${fmtTime(c.start)} - ${fmtTime(c.end)}`,
+    missed: c.missed, limit: c.limit, color: c.color, autoMiss: c.autoMiss,
+  };
+}
+
+/**
+ * Apply answers given on the notification card while the app wasn't listening, and return the
+ * route of a notification the user tapped. Ids that aren't a class of this timetable are dropped.
+ */
+export async function drainAnswers(read: () => AppState, apply: (sessionId: string, mark: Mark) => void, now = new Date()): Promise<string | undefined> {
+  if (!Capacitor.isNativePlatform()) return;
+  const { answers, route } = await Hadir.takeAnswers();
+  if (answers.length) {
+    const known = new Set(generateSessions(read(), now).map((s) => s.id));
+    for (const a of answers) if (known.has(a.sessionId) && isMark(a.mark)) apply(a.sessionId, a.mark);
+  }
+  return route;
 }
 
 export async function notifyNow(title: string, body: string, route: string): Promise<void> {

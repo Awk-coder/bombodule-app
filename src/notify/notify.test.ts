@@ -6,6 +6,8 @@ import type { AppState } from "../domain/types";
 const log: string[] = [];
 let releasePending: (() => void) | null = null;
 let scheduled: { extra: { sessionId?: string } }[] = [];
+let prompts: Record<string, unknown>[] = [];
+let stored: { answers: { sessionId: string; mark: string }[]; route?: string } = { answers: [] };
 
 vi.mock("@capacitor/core", () => ({ Capacitor: { isNativePlatform: () => true } }));
 vi.mock("@capacitor/local-notifications", () => ({
@@ -22,13 +24,27 @@ vi.mock("@capacitor/local-notifications", () => ({
     },
   },
 }));
+vi.mock("../native/hadir", () => ({
+  Hadir: {
+    schedulePrompts: async (o: { items: Record<string, unknown>[] }) => {
+      log.push("schedulePrompts");
+      prompts = o.items;
+    },
+    takeAnswers: async () => {
+      const out = stored;
+      stored = { answers: [] };
+      return out;
+    },
+  },
+}));
 
-const { reschedule } = await import("./notify");
+const { drainAnswers, reschedule } = await import("./notify");
 
 beforeEach(() => {
   log.length = 0;
   releasePending = null;
   scheduled = [];
+  prompts = [];
 });
 
 describe("reschedule", () => {
@@ -41,7 +57,30 @@ describe("reschedule", () => {
     await vi.waitFor(() => expect(releasePending).not.toBeNull());
     releasePending!();
     await Promise.all([first, second]);
-    expect(log).toEqual(["getPending", "schedule", "getPending", "schedule"]);
-    expect(scheduled.some((n) => n.extra.sessionId === BICS_MON_1)).toBe(false);
+    expect(log).toEqual(["getPending", "schedulePrompts", "getPending", "schedulePrompts"]);
+    expect(prompts.some((n) => n.sessionId === BICS_MON_1)).toBe(false);
+  });
+
+  it("sends class prompts to the native card scheduler and keeps tasks on LocalNotifications", async () => {
+    releasePending = () => {};
+    const state = makeState({ tasks: [{ id: "t1", title: "Lab", courseId: null, due: new Date(2026, 9, 8, 23, 59).toISOString(), note: "", done: false }] });
+    await reschedule(() => state, new Date(2026, 9, 5, 7));
+    expect(scheduled).toHaveLength(1);
+    expect(prompts[0]).toEqual({
+      id: expect.any(Number), at: new Date(2026, 9, 5, 12, 50).getTime(), kind: "attendance", sessionId: BICS_MON_1,
+      title: "Did you attend BICS 4350?", body: expect.any(String), route: "#/home",
+      code: "BICS 4350", name: "Privacy Engineering", venue: "ICT LR 14", time: "11:30 AM - 12:50 PM",
+      missed: 0, limit: 6, color: 0, autoMiss: false,
+    });
+  });
+});
+
+describe("drainAnswers", () => {
+  it("applies answers for real classes, ignores unknown ids, and returns the tapped route", async () => {
+    stored = { answers: [{ sessionId: BICS_MON_1, mark: "attended" }, { sessionId: "TEST@2026-10-05", mark: "missed" }], route: "#/course/X" };
+    const applied: string[] = [];
+    const route = await drainAnswers(() => makeState(), (id, mark) => applied.push(`${id}=${mark}`), new Date(2026, 9, 5, 14));
+    expect(applied).toEqual([`${BICS_MON_1}=attended`]);
+    expect(route).toBe("#/course/X");
   });
 });

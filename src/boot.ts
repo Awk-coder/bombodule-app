@@ -4,7 +4,8 @@ import { courseStats } from "./domain/attendance";
 import { warningFor } from "./domain/planner";
 import { generateSessions } from "./domain/sessions";
 import type { AppState } from "./domain/types";
-import { initNotifications, isMark, notifyNow, reschedule } from "./notify/notify";
+import { Hadir } from "./native/hadir";
+import { drainAnswers, initNotifications, isMark, notifyNow, reschedule } from "./notify/notify";
 import { dispatch, getState, loadState, onStateChange } from "./store/store";
 import { courseHref } from "./ui/router";
 
@@ -42,6 +43,17 @@ export async function boot(): Promise<void> {
     location.hash = route ?? "#/home";
   });
 
+  // Answers from the prompt cards wait natively until the app picks them up.
+  const drain = async () => {
+    const route = await drainAnswers(getState, (id, mark) => dispatch((s) => markSession(s, id, mark)));
+    if (route) location.hash = route;
+  };
+  await drain();
+  void Hadir.addListener("answer", () => void drain());
+
   rescheduleSoon();
-  void CapApp.addListener("resume", rescheduleSoon);
+  void CapApp.addListener("resume", () => {
+    void drain();
+    rescheduleSoon();
+  });
 }

@@ -7,4 +7,8 @@ export class HadirWeb extends WebPlugin implements HadirPlugin {
   }
   async openBatterySettings() {}
   async setLightBars() {}
+  async schedulePrompts() {}
+  async takeAnswers() {
+    return { answers: [] };
+  }
 }
