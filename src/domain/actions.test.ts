@@ -127,7 +127,7 @@ describe("applySync", () => {
 
   it("a semester in IIUM's calendar takes its lecture dates and pauses the mid-semester break", () => {
     const s = applySync(emptyState(), parsed(), "2026-10-05");
-    expect(s.semester).toEqual({ label: "Sem 1, 2026/2027", start: "2026-09-28", end: "2027-01-08", autoMissFrom: "2026-10-05" });
+    expect(s.semester).toEqual({ label: "Sem 1, 2026/2027", start: "2026-09-28", end: "2027-01-08", autoMissFrom: "2026-09-28" });
     expect(s.pauses).toEqual([{ from: "2026-11-14", to: "2026-11-22" }]);
     const days = new Set(generateSessions(s, new Date(2026, 9, 5, 7)).map((x) => x.date));
     expect(days.has("2026-09-28")).toBe(true);
