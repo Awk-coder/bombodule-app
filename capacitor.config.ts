@@ -2,9 +2,9 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.awk.hadir",
-  appName: "Hadir",
+  appName: "Bombodule",
   webDir: "dist",
-  backgroundColor: "#0B0C0E",
+  backgroundColor: "#101115",
   plugins: {
     LocalNotifications: { smallIcon: "ic_stat_hadir", iconColor: "#48DE7C" },
   },

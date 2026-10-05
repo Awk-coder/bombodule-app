@@ -3,7 +3,6 @@ import { completeOnboarding, setSemesterEnd } from "../../domain/actions";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate } from "../format";
 import { useSync } from "../useSync";
-import { IconLogo } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 
@@ -16,10 +15,10 @@ export function Onboarding() {
   if (step === 0) {
     return (
       <div class="onboard">
-        <div class="logo"><IconLogo size={56} /></div>
-        <h1>Hadir</h1>
+        <img class="logo" src="/mascot.webp" alt="" />
+        <h1>Bombodule</h1>
         <p>Track attendance and tasks for your IIUM classes, so you never get barred.</p>
-        <p>In i-Ma'luum, open your Course Registration Confirmation Slip and print it to PDF. Import that file and Hadir builds your timetable.</p>
+        <p>In i-Ma'luum, open your Course Registration Confirmation Slip and print it to PDF. Import that file and Bombodule builds your timetable.</p>
         {linked ? (
           <>
             <div class="card">Timetable saved: {state.courses.filter((c) => c.active).length} courses</div>
@@ -62,7 +61,7 @@ export function Onboarding() {
   return (
     <div class="onboard">
       <h1>Notifications</h1>
-      <p>Hadir asks "Did you attend?" after each class. Turn these on so the prompts arrive on time.</p>
+      <p>Bombodule asks "Did you attend?" after each class. Turn these on so the prompts arrive on time.</p>
       <PermissionRows />
       <button class="btn primary" onClick={() => dispatch(completeOnboarding)}>Finish</button>
     </div>
