@@ -19,3 +19,10 @@ export const IconBack = (p: P) => <Svg {...p}><path d="m15 6-6 6 6 6" /></Svg>;
 export const IconClock = (p: P) => <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Svg>;
 export const IconPin = (p: P) => <Svg {...p}><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></Svg>;
 export const IconCheck = (p: P) => <Svg {...p}><path d="m5 12.5 4.5 4.5L19 7.5" /></Svg>;
+// The app mark, same paths as assets/logo.svg.
+export const IconLogo = ({ size = 24 }: P) => (
+  <svg width={size} height={size} viewBox="0 0 2000 2000" fill="none" stroke="currentColor" stroke-width="220" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M543 717V1514M543 1230C543 1090 640 997 765 997C890 997 986 1090 986 1230V1514" />
+    <path d="M953 637L1130 812L1457 487" />
+  </svg>
+);

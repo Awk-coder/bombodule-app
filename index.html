@@ -5,9 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0C0E" />
     <title>Hadir</title>
+    <style>
+      #intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #0b0c0e; animation: intro-out 0.25s ease-in 0.75s forwards; }
+      #intro svg { width: 132px; height: 132px; animation: intro-pop 0.25s ease-out 0.55s; }
+      #intro path { stroke-dasharray: 1 2; stroke-dashoffset: 1; }
+      #intro .h { animation: intro-draw 0.4s cubic-bezier(0.6, 0, 0.3, 1) forwards; }
+      #intro .tick { animation: intro-draw 0.25s cubic-bezier(0.3, 0, 0.2, 1) 0.3s forwards; }
+      @keyframes intro-draw { to { stroke-dashoffset: 0; } }
+      @keyframes intro-pop { 50% { transform: scale(1.08); } }
+      @keyframes intro-out { to { opacity: 0; transform: scale(1.04); visibility: hidden; } }
+      @media (prefers-reduced-motion: reduce) { #intro { display: none; } }
+    </style>
   </head>
   <body style="background:#0B0C0E">
     <div id="app"></div>
+    <!-- Cold-start intro; main.tsx removes it once it has played. -->
+    <div id="intro" aria-hidden="true">
+      <svg viewBox="0 0 2000 2000" fill="none" stroke="#48DE7C" stroke-width="220" stroke-linecap="round" stroke-linejoin="round">
+        <path class="h" pathLength="1" d="M543 717V1514M543 1230C543 1090 640 997 765 997C890 997 986 1090 986 1230V1514" />
+        <path class="tick" pathLength="1" d="M953 637L1130 812L1457 487" />
+      </svg>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

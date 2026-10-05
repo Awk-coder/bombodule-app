@@ -9,3 +9,7 @@ import { boot } from "./boot";
 
 render(<App />, document.getElementById("app")!);
 void boot();
+
+// The intro in index.html plays once per cold start (a resumed app keeps its page, so it never replays).
+// It ends hidden, so this is only cleanup.
+setTimeout(() => document.getElementById("intro")?.remove(), 1200);
