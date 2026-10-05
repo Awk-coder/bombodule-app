@@ -21,7 +21,7 @@
   --tabbar-h: 68px;
   color-scheme: dark;
 }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text) 12%, transparent) transparent; }
 html, body { overscroll-behavior: none; margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
 /* Opaque strip behind the transparent status bar so scrolled content doesn't show through it. */
 body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 15; }
