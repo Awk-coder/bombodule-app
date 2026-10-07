@@ -93,6 +93,16 @@ describe("achievements", () => {
     expect(earned(...no())).not.toContain(id);
   });
 
+  it("sorts achievements into tiers", () => {
+    const ids = (tier?: string) => ACHIEVEMENTS.filter((a) => a.tier === tier).map((a) => a.id).sort();
+    expect(ids("legendary")).toEqual(["balanced-diet", "fasting-scholar", "flawless", "from-the-ashes", "next-generation", "perfect-record", "speedrun"]);
+    expect(ids("rare")).toEqual([
+      "back-from-the-brink", "copy-paste", "full-house", "gordons-protege", "how-did-we-get-here", "lock-in", "master-baker", "bare-minimum",
+      "monsters-hunted", "not-today", "overpowered", "redemption-arc", "serious-dedication", "top-of-the-class", "voluntary-exile",
+    ].sort());
+    expect(ids(undefined)).toHaveLength(28);
+  });
+
   it("records new unlocks once and keeps the first time", () => {
     const a = recordAchievements(base(), NOW);
     expect(a.achievements["taking-inventory"]).toBe(NOW.toISOString());

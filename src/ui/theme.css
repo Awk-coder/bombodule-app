@@ -257,6 +257,28 @@ svg { vertical-align: -2px; }
 .adv-toast.secret { border-color: color-mix(in srgb, #b07ce8 55%, var(--border)); }
 .adv-toast.secret b { color: #b07ce8; }
 @keyframes toast-in { from { transform: translate(-50%, -120%); opacity: 0; } }
+.adv .adv-art { float: right; margin: 0 0 4px 8px; }
+.adv.rare.on { border-color: color-mix(in srgb, #f2b43a 55%, var(--border)); }
+.adv.rare.on b { color: #f2b43a; }
+.adv.legendary.on { border-color: color-mix(in srgb, #b07ce8 70%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, #b07ce8 16%, var(--surface)), var(--surface) 70%); box-shadow: 0 0 14px rgb(176 124 232 / 0.25); }
+.adv.legendary.on b { color: #c79cff; }
+.adv-sheet-art { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
+.adv-sheet-art small { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #f2b43a; }
+.adv-sheet-art.legendary small { color: #c79cff; }
+.adv-toast { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.adv-toast.rare { border-color: color-mix(in srgb, #f2b43a 60%, var(--border)); }
+.adv-toast.rare b { color: #f2b43a; }
+.adv-toast.rare::after, .adv-toast.legendary::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgb(255 240 200 / 0.35) 50%, transparent 65%); background-size: 250% 100%; animation: toast-shine 1.1s ease-out 0.3s both; }
+.adv-toast.legendary { min-width: 300px; padding: 16px 20px; border: 2px solid #b07ce8; background: linear-gradient(135deg, color-mix(in srgb, #b07ce8 22%, var(--surface)), var(--surface) 75%); animation: legendary-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1), legendary-glow 1.4s ease-in-out 0.6s infinite alternate; }
+.adv-toast.legendary::after { animation-duration: 1.6s; animation-iteration-count: 2; }
+.adv-toast.legendary small { color: #c79cff; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.adv-toast.legendary b { display: block; color: #fff; font-size: 18px; margin-top: 2px; }
+.adv-toast.legendary .adv-art { animation: art-pop 0.7s 0.2s both; }
+@keyframes toast-shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@keyframes legendary-in { from { transform: translate(-50%, -140%) scale(0.8); opacity: 0; } }
+@keyframes legendary-glow { from { box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); } to { box-shadow: 0 8px 24px rgb(0 0 0 / 0.4), 0 0 28px 4px rgb(176 124 232 / 0.55); } }
+@keyframes art-pop { from { transform: scale(0) rotate(-20deg); } 70% { transform: scale(1.2) rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .adv-toast, .adv-toast::after, .adv-toast .adv-art { animation: none !important; } }
 .exams-card { display: block; width: 100%; text-align: left; border-color: var(--warn); }
 .exams-card b { color: var(--warn); }
 .exams-card small { display: block; color: var(--text-muted); }

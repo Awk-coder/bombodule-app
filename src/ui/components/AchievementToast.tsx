@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { useAppState } from "../../store/store";
+import { AchievementArt } from "./AchievementArt";
+
+const SHOW_MS = 4000;
+const LEGENDARY_MS = 7000;
 
 /** Minecraft-style "Advancement Made!" for unlocks that happen while the app is open. */
 export function AchievementToast() {
@@ -19,18 +23,23 @@ export function AchievementToast() {
     if (fresh.length) setQueue((q) => [...q, ...fresh]);
   }, [achievements]);
 
+  const a = ACHIEVEMENTS.find((x) => x.id === queue[0]);
+
   useEffect(() => {
     if (!queue.length) return;
-    const t = setTimeout(() => setQueue((q) => q.slice(1)), 4000);
+    const t = setTimeout(() => setQueue((q) => q.slice(1)), a?.tier === "legendary" ? LEGENDARY_MS : SHOW_MS);
     return () => clearTimeout(t);
   }, [queue]);
 
-  const a = ACHIEVEMENTS.find((x) => x.id === queue[0]);
   if (!a) return null;
+  const label = a.tier === "legendary" ? "Legendary achievement" : a.tier === "rare" ? "Rare achievement" : a.secret ? "Secret achievement" : "Achievement unlocked";
   return (
-    <div class={`adv-toast ${a.secret ? "secret" : ""}`} role="status" onClick={() => setQueue([])}>
-      <small>{a.secret ? "Secret achievement" : "Achievement unlocked"}</small>
-      <b>{a.name}</b>
+    <div key={a.id} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""}`} role="status" onClick={() => setQueue([])}>
+      <AchievementArt a={a} size={a.tier === "legendary" ? 64 : 20} />
+      <div>
+        <small>{label}</small>
+        <b>{a.name}</b>
+      </div>
     </div>
   );
 }

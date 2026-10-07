@@ -3,9 +3,12 @@ import { ACHIEVEMENTS, progressOf } from "../../domain/achievements";
 import type { Achievement } from "../../domain/achievements";
 import { useAppState } from "../../store/store";
 import { useNow } from "../useNow";
+import { AchievementArt } from "./AchievementArt";
 import { Sheet } from "./Sheet";
 
 const SHOWN = 8;
+
+const TIER_NAME = { rare: "Rare", legendary: "Legendary" };
 
 const longDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
@@ -25,7 +28,8 @@ export function AchievementGrid() {
       <h2 class="section-title">Achievements <span class="count">{got} / {ACHIEVEMENTS.length}</span></h2>
       <div class="adv-grid">
         {sorted.slice(0, all ? undefined : SHOWN).map((a) => (
-          <button key={a.id} class={`adv ${achievements[a.id] ? "on" : ""} ${a.secret ? "secret" : ""}`} onClick={() => setOpen(a)}>
+          <button key={a.id} class={`adv ${achievements[a.id] ? `on ${a.tier ?? ""}` : ""} ${a.secret ? "secret" : ""}`} onClick={() => setOpen(a)}>
+            {achievements[a.id] && <AchievementArt a={a} size={a.tier === "legendary" ? 36 : 14} />}
             <b>{hidden(a) ? "???" : a.name}</b>
             <small>{hidden(a) ? a.hint : a.desc}</small>
           </button>
@@ -35,6 +39,12 @@ export function AchievementGrid() {
       <Sheet open={!!open} onClose={() => setOpen(null)}>
         {open && (
           <>
+            {achievements[open.id] && open.tier && (
+              <div class={`adv-sheet-art ${open.tier}`}>
+                <AchievementArt a={open} size={open.tier === "legendary" ? 96 : 32} />
+                <small>{TIER_NAME[open.tier]}</small>
+              </div>
+            )}
             <h2>{hidden(open) ? "Secret achievement" : open.name}</h2>
             <p>{hidden(open) ? `Hint: ${open.hint}` : open.desc}</p>
             {achievements[open.id] && <p class="group-hint">Unlocked {longDate(achievements[open.id])}</p>}

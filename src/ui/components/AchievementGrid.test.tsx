@@ -3,7 +3,9 @@ import { render } from "preact";
 import { act } from "preact/test-utils";
 import { expect, it } from "vitest";
 import { dispatch } from "../../store/store";
+import { ACHIEVEMENTS } from "../../domain/achievements";
 import { AchievementGrid } from "./AchievementGrid";
+import { LEGENDARY_ART } from "./achievementArt";
 
 const showAll = (root: HTMLElement) => act(() => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent?.startsWith("Show all"))!.click());
 
@@ -55,4 +57,22 @@ it("opens details with unlock date or progress", () => {
   act(() => tile(root, "Ten Down").click());
   expect(root.querySelector(".sheet")!.textContent).toContain("0 / 10");
   root.remove();
+});
+
+it("marks unlocked rare and legendary achievements with their art, and keeps locked ones plain", () => {
+  act(() => dispatch((s) => ({ ...s, achievements: { "full-house": "2026-10-02T00:00:00.000Z", flawless: "2026-10-01T00:00:00.000Z" } })));
+  const root = document.createElement("div");
+  act(() => render(<AchievementGrid />, root));
+  showAll(root);
+  expect(tile(root, "Full House").classList).toContain("rare");
+  expect(tile(root, "Full House").querySelector("svg")).not.toBeNull();
+  expect(tile(root, "Flawless").classList).toContain("legendary");
+  expect(tile(root, "Flawless").querySelector("svg")).not.toBeNull();
+  const locked = tile(root, "Perfect Record");
+  expect(locked.classList).not.toContain("legendary");
+  expect(locked.querySelector("svg")).toBeNull();
+});
+
+it("has its own art for every legendary achievement", () => {
+  expect(Object.keys(LEGENDARY_ART).sort()).toEqual(ACHIEVEMENTS.filter((a) => a.tier === "legendary").map((a) => a.id).sort());
 });
