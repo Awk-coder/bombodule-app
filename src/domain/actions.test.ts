@@ -163,6 +163,15 @@ describe("tasks", () => {
     expect(b.tasks).toEqual([{ ...t, title: "Lab 1 v2" }]);
   });
 
+  it("toggle records and clears the completion time", () => {
+    const at = new Date("2026-10-06T09:00:00Z");
+    const a = toggleTask(upsertTask(makeState(), t), "t1", at);
+    expect(a.tasks[0].completedAt).toBe(at.toISOString());
+    const b = toggleTask(a, "t1", at);
+    expect(b.tasks[0].done).toBe(false);
+    expect(b.tasks[0].completedAt).toBeUndefined();
+  });
+
   it("toggle and delete", () => {
     const a = toggleTask(upsertTask(makeState(), t), "t1");
     expect(a.tasks[0].done).toBe(true);

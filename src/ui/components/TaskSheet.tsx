@@ -5,6 +5,7 @@ import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { Chips } from "./Chips";
 import { Sheet } from "./Sheet";
+import { Toggle } from "./Toggle";
 
 interface Props {
   open: boolean;
@@ -20,6 +21,7 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
   const [date, setDate] = useState("");
   const [time, setTime] = useState("23:59");
   const [note, setNote] = useState("");
+  const [final, setFinal] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -29,6 +31,7 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
     setDate(due ? ymd(due) : addDays(ymd(new Date()), 1));
     setTime(due ? hhmm(due) : "23:59");
     setNote(task?.note ?? "");
+    setFinal(task?.final ?? false);
   }, [open, task, presetCourseId]);
 
   function save() {
@@ -39,6 +42,8 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
       due: atTime(date, time).toISOString(),
       note: note.trim(),
       done: task?.done ?? false,
+      ...(task?.completedAt && { completedAt: task.completedAt }),
+      ...(final && { final: true }),
     };
     dispatch((s) => upsertTask(s, next));
     onClose();
@@ -64,6 +69,10 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
       <div class="field-row">
         <label class="field"><span>Due date</span><input type="date" value={date} onInput={(e) => setDate(e.currentTarget.value)} /></label>
         <label class="field"><span>Time</span><input type="time" value={time} onInput={(e) => setTime(e.currentTarget.value)} /></label>
+      </div>
+      <div class="row final-row">
+        <div class="grow"><b>Final assignment</b><small>Worth more on your Ranked season</small></div>
+        <Toggle on={final} onChange={setFinal} />
       </div>
       <label class="field"><span>Note</span><textarea rows={3} value={note} onInput={(e) => setNote(e.currentTarget.value)} /></label>
       <button class="btn primary" disabled={!title.trim() || !date || !time} onClick={save}>Save</button>

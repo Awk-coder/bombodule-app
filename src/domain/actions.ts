@@ -43,8 +43,15 @@ export function deleteTask(state: AppState, id: string): AppState {
   return { ...state, tasks: state.tasks.filter((t) => t.id !== id) };
 }
 
-export function toggleTask(state: AppState, id: string): AppState {
-  return { ...state, tasks: state.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) };
+export function toggleTask(state: AppState, id: string, now = new Date()): AppState {
+  return {
+    ...state,
+    tasks: state.tasks.map((t) => {
+      if (t.id !== id) return t;
+      const { completedAt: _, ...rest } = t;
+      return t.done ? { ...rest, done: false } : { ...rest, done: true, completedAt: now.toISOString() };
+    }),
+  };
 }
 
 export function updateSettings(state: AppState, patch: Partial<Settings>): AppState {

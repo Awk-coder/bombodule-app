@@ -9,7 +9,7 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
   const due = new Date(task.due);
   const overdue = !task.done && due < now;
   return (
-    <div class={`row ${task.done ? "task-done" : ""} ${overdue ? "overdue" : ""}`} onClick={onOpen}>
+    <div class={`row ${task.done ? "task-done" : ""} ${overdue ? "overdue" : ""} ${task.final ? "task-final" : ""}`} onClick={onOpen}>
       <button
         class={`check ${task.done ? "on" : ""}`}
         aria-label={task.done ? "Mark not done" : "Mark done"}
@@ -21,7 +21,7 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
         {task.done && <IconCheck size={14} />}
       </button>
       <div class="grow">
-        <b>{task.title}</b>
+        <b>{task.final && <span class="final-tag pixel">FINAL</span>}{task.title}</b>
         <small>{[course?.code, task.done ? fmtDate(ymd(due)) : relDue(due, now)].filter(Boolean).join(" · ")}</small>
       </div>
     </div>
