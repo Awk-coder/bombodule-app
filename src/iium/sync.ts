@@ -1,6 +1,8 @@
 import { groupRows, parseSlip } from "./parser";
 import type { ParsedSchedule } from "./parser";
 import { readPdf } from "./pdf";
+import { parseResults } from "./results";
+import type { ParsedResult } from "./results";
 
 export class SyncError extends Error {}
 
@@ -16,5 +18,18 @@ export async function readSlip(file: Blob): Promise<ParsedSchedule> {
   if (parsed.courses.length === 0) {
     throw new SyncError("No courses found. In i-Ma'luum open the Course Registration Confirmation Slip, print it to PDF, then import that file.");
   }
+  return parsed;
+}
+
+/** Read the i-Ma'luum Examination Result slip PDF the user picked. */
+export async function readResultSlip(file: Blob): Promise<ParsedResult> {
+  let items;
+  try {
+    items = await readPdf(await file.arrayBuffer());
+  } catch {
+    throw new SyncError("Couldn't open that file. Pick the PDF of your Examination Result slip.");
+  }
+  const parsed = parseResults(groupRows(items));
+  if (!parsed) throw new SyncError("That isn't a result slip. In i-Ma'luum open Examination Result for the semester, print it to PDF, then import that file.");
   return parsed;
 }
