@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ACHIEVEMENTS, earned, recordAchievements } from "./achievements";
+import { ACHIEVEMENTS, earned, progressOf, recordAchievements } from "./achievements";
 import { generateSessions } from "./sessions";
 import { course, makeState, result, slot } from "./testState";
 import { emptyState } from "./types";
@@ -103,4 +103,20 @@ it("skips the Hijri calendar while the semester is running", () => {
   earned(markAll(base(), NOW, "attended"), NOW);
   expect(spy.mock.calls.filter((c) => String(c[0]).includes("islamic"))).toHaveLength(0);
   spy.mockRestore();
+});
+
+describe("achievement progress", () => {
+  it("counts toward goals like Ten Down", () => {
+    const s = base();
+    const tasks = [1, 2, 3].map(() => task({ done: true, completedAt: iso("2026-10-09T12:00+08:00") }));
+    expect(progressOf({ ...s, tasks }, NOW, "ten-down")).toEqual([3, 10]);
+  });
+
+  it("has no progress for one-off achievements", () => {
+    expect(progressOf(base(), NOW, "roll-call")).toBeNull();
+  });
+
+  it("every secret achievement has a hint", () => {
+    for (const a of ACHIEVEMENTS.filter((x) => x.secret)) expect(a.hint, a.id).toBeTruthy();
+  });
 });

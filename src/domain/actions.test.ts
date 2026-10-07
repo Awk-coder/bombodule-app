@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, deleteTask, finishExams, importResult, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, clearGraduated, deleteTask, finishExams, importResult, removeResult, unfinishExams, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
 import { BICS_MON_1, makeState, result } from "./testState";
@@ -241,5 +241,21 @@ describe("result slips", () => {
     const a = finishExams(finishExams(makeState(), "Sem 1, 2026/2027"), "Sem 1, 2026/2027");
     expect(a.examsDone).toEqual(["Sem 1, 2026/2027"]);
     expect(setGraduated(a, now).graduated).toBe(now.toISOString());
+  });
+});
+
+describe("undo", () => {
+  it("removes an imported result by label", () => {
+    const s = makeState({ results: [result("Sem 1, 2025/2026", [["X 1", "A"]]), result("Sem 2, 2025/2026", [["X 2", "B"]])] });
+    expect(removeResult(s, "Sem 1, 2025/2026").results.map((r) => r.label)).toEqual(["Sem 2, 2025/2026"]);
+  });
+
+  it("takes back finishing the last paper", () => {
+    const s = finishExams(makeState(), "Sem 1, 2026/2027");
+    expect(unfinishExams(s, "Sem 1, 2026/2027").examsDone).toEqual([]);
+  });
+
+  it("takes back graduating", () => {
+    expect(clearGraduated(setGraduated(makeState(), new Date())).graduated).toBeUndefined();
   });
 });

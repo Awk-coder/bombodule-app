@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cgpa, degree, eloFromGpa, gpa, labelKey, rankOf, semesterMismatch, sortResults, tierOf } from "./grades";
+import { cgpa, degree, missingSemesters, eloFromGpa, gpa, labelKey, rankOf, semesterMismatch, sortResults, tierOf } from "./grades";
 import { result } from "./testState";
 
 const REAL = result("Sem 2, 2025/2026", [["BICS 2304", "F"], ["BICS 4336", "A-"], ["BICS 4340", "C+"], ["BICS 4350", "B-"], ["BIIT 2301", "D"], ["EECE 1313", "E"], ["UNGS 1301", "C+"]]);
@@ -49,11 +49,32 @@ describe("degree", () => {
   it("stays locked when semesters are missing", () => {
     const d = degree([{ ...REAL, printed: { ...REAL.printed, cgpa: 2.54, cumCredits: 68.5 } }])!;
     expect(d.ok).toBe(false);
-    expect(d.reason).toContain("earlier result slips");
+    expect(d.reason).toContain("Import the slips before");
   });
   it("is null with no slips", () => expect(degree([])).toBeNull());
   it("flags a GPA the app can't reproduce", () => {
     expect(semesterMismatch(REAL)).toBeNull();
     expect(semesterMismatch({ ...REAL, printed: { ...REAL.printed, gpa: 2.1 } })).toContain("2.10");
+  });
+});
+
+describe("missingSemesters", () => {
+  it("names regular semesters skipped between imported slips", () => {
+    const rs = [result("Sem 1, 2024/2025", [["X 1", "A"]]), result("Sem 1, 2025/2026", [["X 2", "A"]])];
+    expect(missingSemesters(rs)).toEqual(["Sem 2, 2024/2025"]);
+  });
+
+  it("is empty when the slips run back to back", () => {
+    expect(missingSemesters([result("Sem 2, 2024/2025", [["X 1", "A"]]), result("Sem 1, 2025/2026", [["X 2", "A"]])])).toEqual([]);
+  });
+
+  it("degree says which semesters are missing", () => {
+    const last = result("Sem 1, 2025/2026", [["X 2", "A"]], { printed: { gpa: 4, cgpa: 4, credits: 3, cumCredits: 9, cumPoints: 36 } });
+    expect(degree([result("Sem 1, 2024/2025", [["X 1", "A"]]), last])!.reason).toContain("Sem 2, 2024/2025");
+  });
+
+  it("degree asks for slips before the first one when nothing is skipped", () => {
+    const only = result("Sem 1, 2025/2026", [["X 2", "A"]], { printed: { gpa: 4, cgpa: 4, credits: 3, cumCredits: 9, cumPoints: 36 } });
+    expect(degree([only])!.reason).toContain("before Sem 1, 2025/2026");
   });
 });

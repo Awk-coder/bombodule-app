@@ -88,9 +88,31 @@ export function degree(results: SemesterResult[]): Degree | null {
   const unknown = unknownGrades(results);
   let reason: string | null = null;
   if (unknown.length) reason = `Unknown grade codes: ${unknown.join(", ")}`;
-  else if (c.credits !== latest.printed.cumCredits) reason = `Found ${c.credits} of ${latest.printed.cumCredits} credit hours. Import your earlier result slips.`;
+  else if (c.credits !== latest.printed.cumCredits) {
+    const missing = missingSemesters(results);
+    const first = sortResults(results)[0].label;
+    reason = missing.length
+      ? `Missing ${missing.join(", ")}. Import ${missing.length > 1 ? "those slips" : "that slip"} to get ranked.`
+      : `Found ${c.credits} of ${latest.printed.cumCredits} credit hours. Import the slips before ${first}.`;
+  }
   else if (c.cgpa !== latest.printed.cgpa) reason = `Calculated CGPA ${c.cgpa.toFixed(2)}, slip says ${latest.printed.cgpa.toFixed(2)}.`;
   return { cgpa: c.cgpa, credits: c.credits, ok: !reason, reason };
+}
+
+/** Regular semesters (Sem 1 and 2) between the first and last imported slip that have no slip. */
+export function missingSemesters(results: SemesterResult[]): string[] {
+  const have = new Set(results.map((r) => r.label));
+  const regular = sortResults(results).map((r) => r.label.match(/^Sem ([12]), (\d{4})\/\d{4}$/)).filter((m) => m !== null);
+  if (regular.length < 2) return [];
+  const label = (sem: number, y: number) => `Sem ${sem}, ${y}/${y + 1}`;
+  const out: string[] = [];
+  let [sem, y] = [Number(regular[0][1]), Number(regular[0][2])];
+  const end = label(Number(regular.at(-1)![1]), Number(regular.at(-1)![2]));
+  while (label(sem, y) !== end) {
+    [sem, y] = sem === 1 ? [2, y] : [1, y + 1];
+    if (!have.has(label(sem, y))) out.push(label(sem, y));
+  }
+  return out;
 }
 
 export function semesterMismatch(r: SemesterResult): string | null {

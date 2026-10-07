@@ -20,7 +20,7 @@ it("locks the degree and explains why when slips are missing", () => {
   act(() => dispatch((s) => ({ ...s, results: [r] })));
   const root = document.createElement("div");
   act(() => render(<Ranked />, root));
-  expect(root.querySelector(".degree")!.textContent).toContain("earlier result slips");
+  expect(root.querySelector(".degree")!.textContent).toContain("Import the slips before");
   expect(root.querySelectorAll(".history .badge")).toHaveLength(1);
   expect(root.querySelector(".history-item")!.textContent).toContain("2.67");
 });

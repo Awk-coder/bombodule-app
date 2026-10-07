@@ -151,8 +151,20 @@ export function finishExams(state: AppState, label: string): AppState {
   return state.examsDone.includes(label) ? state : { ...state, examsDone: [...state.examsDone, label] };
 }
 
+export function unfinishExams(state: AppState, label: string): AppState {
+  return { ...state, examsDone: state.examsDone.filter((l) => l !== label) };
+}
+
 export function setGraduated(state: AppState, now: Date): AppState {
   return { ...state, graduated: now.toISOString() };
+}
+
+export function clearGraduated({ graduated: _, ...state }: AppState): AppState {
+  return state;
+}
+
+export function removeResult(state: AppState, label: string): AppState {
+  return { ...state, results: state.results.filter((r) => r.label !== label) };
 }
 
 export function serialize(state: AppState): string {
