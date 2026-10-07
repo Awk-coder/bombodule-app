@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, deleteTask, setCourseStart, semesterLabelDiffers, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, deleteTask, finishExams, importResult, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
-import { BICS_MON_1, makeState } from "./testState";
+import { BICS_MON_1, makeState, result } from "./testState";
 import { emptyState } from "./types";
 import type { AppState, Task } from "./types";
 import type { ParsedSchedule } from "../iium/parser";
@@ -195,5 +195,32 @@ describe("serialize / parseImport", () => {
     const old: Partial<AppState> = { ...makeState() };
     delete old.settings;
     expect(parseImport(JSON.stringify(old)).settings).toEqual(emptyState().settings);
+  });
+});
+
+describe("result slips", () => {
+  const now = new Date("2026-10-07T10:00:00Z");
+  const r = result("Sem 2, 2025/2026", [["BICS 4350", "B-"], ["BIIT 2301", "D"]]);
+  const parsed = { label: r.label, courses: r.courses, printed: r.printed, status: r.status, remarks: r.remarks };
+
+  it("adds, then replaces the same semester", () => {
+    const a = importResult(makeState(), parsed, now);
+    expect(a.results).toHaveLength(1);
+    expect(a.results[0].importedAt).toBe(now.toISOString());
+    const b = importResult(a, parsed, now);
+    expect(b.results).toHaveLength(1);
+    expect(b.results[0].regraded).toBeUndefined();
+  });
+
+  it("marks a re-import with a changed grade", () => {
+    const a = importResult(makeState(), parsed, now);
+    const changed = { ...parsed, courses: parsed.courses.map((c) => (c.code === "BIIT 2301" ? { ...c, grade: "C", point: 2 } : c)) };
+    expect(importResult(a, changed, now).results[0].regraded).toBe(true);
+  });
+
+  it("records exams done once per semester, and graduation", () => {
+    const a = finishExams(finishExams(makeState(), "Sem 1, 2026/2027"), "Sem 1, 2026/2027");
+    expect(a.examsDone).toEqual(["Sem 1, 2026/2027"]);
+    expect(setGraduated(a, now).graduated).toBe(now.toISOString());
   });
 });

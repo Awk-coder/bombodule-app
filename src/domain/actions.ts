@@ -3,6 +3,7 @@ import type { AppState, Course, Mark, Settings, Slot, Task } from "./types";
 import { IIUM_CALENDAR } from "./calendar";
 import { addDays } from "./time";
 import type { ParsedSchedule } from "../iium/parser";
+import type { ParsedResult } from "../iium/results";
 
 export const courseKey = (code: string, section: string) => `${code}-${section}`;
 
@@ -121,6 +122,23 @@ function newSemester(state: AppState, label: string, today: string): Pick<AppSta
   const cal = IIUM_CALENDAR[label];
   if (!cal) return { semester: { label, start: today, end: addDays(today, SEMESTER_DAYS), autoMissFrom: today }, pauses: state.pauses };
   return { semester: { label, start: cal.start, end: cal.end, autoMissFrom: cal.start }, pauses: [...state.pauses, ...cal.breaks] };
+}
+
+/** Save a semester's result slip; re-importing replaces it and notes whether any grade changed. */
+export function importResult(state: AppState, parsed: ParsedResult, now: Date): AppState {
+  const prev = state.results.find((r) => r.label === parsed.label);
+  const grade = (code: string) => prev?.courses.find((c) => c.code === code)?.grade;
+  const regraded = !!prev && (prev.regraded || parsed.courses.some((c) => grade(c.code) !== undefined && grade(c.code) !== c.grade));
+  const next = { ...parsed, importedAt: now.toISOString(), ...(regraded && { regraded: true as const }) };
+  return { ...state, results: [...state.results.filter((r) => r.label !== parsed.label), next] };
+}
+
+export function finishExams(state: AppState, label: string): AppState {
+  return state.examsDone.includes(label) ? state : { ...state, examsDone: [...state.examsDone, label] };
+}
+
+export function setGraduated(state: AppState, now: Date): AppState {
+  return { ...state, graduated: now.toISOString() };
 }
 
 export function serialize(state: AppState): string {
