@@ -1,9 +1,11 @@
 import { App as CapApp } from "@capacitor/app";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
+import { recordAchievements } from "./domain/achievements";
 import { Hadir } from "./native/hadir";
 import { shareFile } from "./native/share";
-import { useAppState, useLoadStatus } from "./store/store";
+import { dispatch, useAppState, useLoadStatus } from "./store/store";
+import { AchievementToast } from "./ui/components/AchievementToast";
 import { TabBar } from "./ui/components/TabBar";
 import { go, parseHash, useRoute } from "./ui/router";
 import type { Tab } from "./ui/router";
@@ -16,6 +18,7 @@ import { Schedule } from "./ui/screens/Schedule";
 import { Settings } from "./ui/screens/Settings";
 import { Tasks } from "./ui/screens/Tasks";
 import { applyTheme } from "./ui/themes";
+import { useNow } from "./ui/useNow";
 
 const SCREENS: Record<Tab, () => JSX.Element> = { home: Home, schedule: Schedule, tasks: Tasks, courses: Courses, ranked: Ranked, settings: Settings };
 
@@ -52,6 +55,10 @@ export function App() {
     void Hadir.setLightBars({ light: applyTheme(theme).light }).catch(() => {});
   }, [theme]);
   const route = useRoute();
+  const now = useNow();
+  useEffect(() => {
+    if (status.loaded && !status.error && state.onboarded) dispatch((s) => recordAchievements(s, new Date()));
+  }, [state, now, status.loaded, status.error]);
 
   if (!status.loaded) return <div class="screen"><div class="skeleton" /><div class="skeleton" /></div>;
   if (status.error) return <LoadError message={status.error} raw={status.raw ?? ""} />;
@@ -62,6 +69,7 @@ export function App() {
     <>
       <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>{route.courseId ? <CourseDetail id={route.courseId} /> : <Screen />}</main>
       <TabBar current={route.tab} />
+      <AchievementToast />
     </>
   );
 }

@@ -8,6 +8,7 @@ import { useAppState } from "../../store/store";
 import { titleCase } from "../format";
 import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
+import { AchievementGrid } from "../components/AchievementGrid";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
 
@@ -139,6 +140,7 @@ export function Ranked() {
 
       <ResultPicker imp={imp} />
       {imp.error && <p class="error">{imp.error.message}</p>}
+      <AchievementGrid />
       {imp.preview && (
         <ResultSheet r={imp.preview} onClose={imp.cancel}>
           <button class="btn primary" onClick={imp.confirm}>Save result</button>

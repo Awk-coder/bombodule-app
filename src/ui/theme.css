@@ -227,3 +227,16 @@ svg { vertical-align: -2px; }
 .elo-change .down { color: #ff5555; min-width: 36px; }
 .season.promoted .badge { animation: promote 1.2s steps(6) 1; }
 @keyframes promote { 0% { transform: scale(0.4); filter: brightness(3); } 60% { transform: scale(1.15); } 100% { transform: scale(1); filter: none; } }
+
+.adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 32px; }
+.adv { background: #1b1b1f; border: 2px solid #000; box-shadow: inset 0 0 0 2px #2c2c33; padding: 10px; opacity: 0.45; }
+.adv.on { opacity: 1; box-shadow: inset 0 0 0 2px #ffaa00; }
+.adv.secret.on { box-shadow: inset 0 0 0 2px #c45cff; }
+.adv b { display: block; font-size: 14px; color: #ffff55; }
+.adv.secret.on b { color: #ff55ff; }
+.adv small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 20; min-width: 240px; background: #212121; border: 2px solid #000; box-shadow: inset 0 0 0 2px #555; padding: 10px 14px; animation: toast-in 0.3s steps(4); }
+.adv-toast b { display: block; color: #ffff55; font-size: 14px; }
+.adv-toast.secret b { color: #ff55ff; }
+.adv-toast span { color: #fff; }
+@keyframes toast-in { from { transform: translate(-50%, -120%); } }
