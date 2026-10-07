@@ -15,6 +15,7 @@ import { Courses } from "./ui/screens/Courses";
 import { Home } from "./ui/screens/Home";
 import { Onboarding } from "./ui/screens/Onboarding";
 import { Ranked } from "./ui/screens/Ranked";
+import { LeaderboardPage } from "./ui/components/Leaderboard";
 import { Schedule } from "./ui/screens/Schedule";
 import { Settings } from "./ui/screens/Settings";
 import { Tasks } from "./ui/screens/Tasks";
@@ -37,7 +38,7 @@ function useBackButton() {
   useEffect(() => {
     const handle = CapApp.addListener("backButton", () => {
       const r = parseHash(location.hash);
-      if (r.courseId) history.back();
+      if (r.courseId || r.board) history.back();
       else if (r.tab !== "home") go("#/home");
       else void CapApp.exitApp();
     });
@@ -68,7 +69,7 @@ export function App() {
   const Screen = SCREENS[route.tab];
   return (
     <>
-      <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>{route.courseId ? <CourseDetail id={route.courseId} /> : <Screen />}</main>
+      <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>{route.courseId ? <CourseDetail id={route.courseId} /> : route.board ? <LeaderboardPage /> : <Screen />}</main>
       <TabBar current={route.tab} />
       <AchievementToast />
     </>

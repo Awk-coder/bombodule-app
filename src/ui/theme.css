@@ -298,6 +298,8 @@ svg { vertical-align: -2px; }
 .lb-name { flex: 1; min-width: 0; }
 .lb-name b, .lb-name small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-name small { color: var(--text-muted); font-style: italic; font-size: 12px; }
+.lb-more { display: block; margin: 10px 0 0; }
+.lb-search { display: block; width: 100%; margin-bottom: 12px; }
 .lb-elo { font-weight: 700; font-variant-numeric: tabular-nums; }
 .player { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .player h2 { margin: 10px 0 0; }

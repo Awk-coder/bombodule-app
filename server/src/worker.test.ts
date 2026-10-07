@@ -106,6 +106,19 @@ describe("boards", () => {
     expect(r.body.players[1]).toMatchObject({ ore: "iron", div: 2 });
   });
 
+  it("numbers each player by board position, and search keeps those positions", async () => {
+    await player("Alpha", 1500);
+    await player("Bravo", 1200);
+    await player("Alpaca", 900);
+    await player("x_y_real", 800);
+    const all = await call("GET", `/board?scope=world&season=${encodeURIComponent(SEASON)}`);
+    expect(all.body.players.map((p: { pos: number }) => p.pos)).toEqual([1, 2, 3, 4]);
+    const found = await call("GET", `/board?scope=world&season=${encodeURIComponent(SEASON)}&q=ALP`);
+    expect(found.body.players.map((p: { name: string; pos: number }) => [p.name, p.pos])).toEqual([["Alpha", 1], ["Alpaca", 3]]);
+    const literal = await call("GET", `/board?scope=world&season=${encodeURIComponent(SEASON)}&q=${encodeURIComponent("_")}`);
+    expect(literal.body.players.map((p: { name: string }) => p.name)).toEqual(["x_y_real"]);
+  });
+
   it("friends board shows only your group", async () => {
     const a = await player("Alpha", 1000);
     const b = await player("Bravo", 1200);

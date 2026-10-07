@@ -229,16 +229,24 @@ async function route(req: Request, env: Env, now: number): Promise<Response> {
 
   if (m === "GET" && path === "/board") {
     const season = url.searchParams.get("season") ?? "";
-    const order = `ORDER BY rated DESC, elo DESC, name_key LIMIT ${BOARD_SIZE}`;
-    let rows: Row[];
+    const q = (url.searchParams.get("q") ?? "").trim().toLowerCase().replace(/[\\%_]/g, "\\$&");
+    let where = "season = ?";
+    const args: string[] = [season];
     if (url.searchParams.get("scope") === "group") {
       const p = await me(req, env);
       if (!p.group_id) return json({ players: [] });
-      rows = (await env.DB.prepare(`SELECT ${COLUMNS} FROM players WHERE season = ? AND group_id = ? ${order}`).bind(season, p.group_id).all<Row>()).results;
-    } else {
-      rows = (await env.DB.prepare(`SELECT ${COLUMNS} FROM players WHERE season = ? ${order}`).bind(season).all<Row>()).results;
+      where += " AND group_id = ?";
+      args.push(p.group_id);
     }
-    return json({ players: rows.map(publicPlayer) });
+    const rows = (
+      await env.DB.prepare(
+        `SELECT * FROM (SELECT ${COLUMNS}, name_key, ROW_NUMBER() OVER (ORDER BY rated DESC, elo DESC, name_key) AS pos FROM players WHERE ${where})
+         WHERE name_key LIKE ? ESCAPE '\\' ORDER BY pos LIMIT ${BOARD_SIZE}`,
+      )
+        .bind(...args, `%${q}%`)
+        .all<Row & { pos: number }>()
+    ).results;
+    return json({ players: rows.map((r) => ({ ...publicPlayer(r), pos: r.pos })) });
   }
 
   const one = path.match(/^\/players\/([^/]+)$/);

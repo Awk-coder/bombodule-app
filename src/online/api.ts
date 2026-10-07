@@ -14,6 +14,7 @@ export interface PublicPlayer {
   div: 1 | 2 | 3 | null;
   degree: { ore: Ore; tier: Tier } | null;
   achievements: number;
+  pos?: number; // place on the board it was listed on
 }
 
 export class ApiError extends Error {

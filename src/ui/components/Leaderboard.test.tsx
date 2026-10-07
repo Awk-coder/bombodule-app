@@ -4,7 +4,7 @@ import { act } from "preact/test-utils";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { PublicPlayer } from "../../online/api";
 import { dispatch } from "../../store/store";
-import { Leaderboard } from "./Leaderboard";
+import { Leaderboard, LeaderboardPage } from "./Leaderboard";
 
 const SEASON = "Sem 1, 2026/2027";
 const p = (id: string, name: string, elo: number, over: Partial<PublicPlayer> = {}): PublicPlayer => ({
@@ -27,10 +27,10 @@ afterEach(() => {
 });
 
 const settle = () => act(async () => new Promise((r) => setTimeout(r, 0)));
-async function mount() {
+async function mount(page = false) {
   const root = document.createElement("div");
   roots.push(root);
-  await act(async () => render(<Leaderboard />, root));
+  await act(async () => render(page ? <LeaderboardPage /> : <Leaderboard />, root));
   await settle();
   return root;
 }
@@ -106,4 +106,51 @@ it("is hidden when the app has no server", async () => {
   const root = await mount();
   expect(root.innerHTML).toBe("");
   expect(fetchMock).not.toHaveBeenCalled();
+});
+
+const many = (n: number) => Array.from({ length: n }, (_, i) => p(`id${i}`, `Player ${i}`, 2000 - i * 10, { pos: i + 1 }));
+
+it("mini board shows the top five and links to the full page only past five", async () => {
+  fetchMock.mockResolvedValueOnce(board(many(5)));
+  let root = await mount();
+  expect(root.querySelectorAll(".lb-row")).toHaveLength(5);
+  expect(root.querySelector("a[href='#/leaderboard']")).toBeNull();
+  fetchMock.mockResolvedValueOnce(board(many(8)));
+  root = await mount();
+  expect(root.querySelectorAll(".lb-row")).toHaveLength(5);
+  expect(root.querySelector("a[href='#/leaderboard']")!.textContent).toContain("See full leaderboard");
+});
+
+it("full page lists everyone and searches names on the server, keeping board positions", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  fetchMock.mockResolvedValueOnce(board(many(8)));
+  const root = await mount(true);
+  expect(root.querySelector("h1")!.textContent).toBe("Leaderboard");
+  expect(root.querySelector("a[href='#/ranked']")).toBeTruthy();
+  expect(root.querySelectorAll(".lb-row")).toHaveLength(8);
+  fetchMock.mockResolvedValueOnce(board([p("x", "Player 6", 1940, { pos: 7 })]));
+  const input = root.querySelector<HTMLInputElement>("input[type=search]")!;
+  await act(async () => {
+    input.value = "player 6";
+    input.dispatchEvent(new Event("input"));
+  });
+  await act(async () => {
+    vi.advanceTimersByTime(400);
+  });
+  await settle();
+  expect(fetchMock.mock.calls.at(-1)![0]).toContain("&q=player%206");
+  const rows = root.querySelectorAll(".lb-row");
+  expect(rows).toHaveLength(1);
+  expect(rows[0].querySelector(".lb-pos")!.textContent).toBe("7");
+  fetchMock.mockResolvedValueOnce(board([]));
+  await act(async () => {
+    input.value = "nobody";
+    input.dispatchEvent(new Event("input"));
+  });
+  await act(async () => {
+    vi.advanceTimersByTime(400);
+  });
+  await settle();
+  expect(root.textContent).toContain("No one called");
+  vi.useRealTimers();
 });

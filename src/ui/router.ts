@@ -4,12 +4,14 @@ export type Tab = "home" | "schedule" | "tasks" | "courses" | "ranked" | "settin
 export interface Route {
   tab: Tab;
   courseId?: string;
+  board?: true; // the full leaderboard page, under the Ranked tab
 }
 
 const TABS: Tab[] = ["home", "schedule", "tasks", "courses", "ranked", "settings"];
 
 export function parseHash(hash: string): Route {
   const [, a, b] = hash.replace(/^#/, "").split("/");
+  if (a === "leaderboard") return { tab: "ranked", board: true };
   if (a === "course" && b) return { tab: "courses", courseId: decodeURIComponent(b) };
   return { tab: (TABS as string[]).includes(a) ? (a as Tab) : "home" };
 }
