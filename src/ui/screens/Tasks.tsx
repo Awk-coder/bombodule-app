@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { finishExams, unfinishExams } from "../../domain/actions";
+import { ImportSlip } from "../components/ResultSlip";
 import { addDays, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
@@ -24,7 +25,8 @@ export function Tasks() {
   const today = ymd(now);
   const examWindow = !!sem && today > sem.end && today <= addDays(sem.end, 35);
   const examsOn = examWindow && !state.examsDone.includes(sem.label);
-  const examsDone = examWindow && state.examsDone.includes(sem.label);
+  // Tapped "Finished my last paper" but that semester's slip isn't in yet: not ticked until it is.
+  const examsPending = !!sem && state.examsDone.includes(sem.label) && !state.results.some((r) => r.label === sem.label);
   const row = (t: Task) => (
     <TaskRow key={t.id} task={t} course={t.courseId ? courses.get(t.courseId) : undefined} now={now} onOpen={() => edit(t)} />
   );
@@ -38,11 +40,13 @@ export function Tasks() {
           <small>Tap after your final exam</small>
         </button>
       )}
-      {examsDone && (
-        <button class="card exams-card done" onClick={() => dispatch((s) => unfinishExams(s, sem!.label))}>
-          <b>Exams done</b>
-          <small>Tapped by mistake? Undo</small>
-        </button>
+      {examsPending && (
+        <div class="card exams-card pending">
+          <b>Waiting for your {sem!.label} result slip</b>
+          <small>Your exams count as finished once you import it.</small>
+          <ImportSlip label="Import slip" />
+          <button class="btn ghost" onClick={() => dispatch((s) => unfinishExams(s, sem!.label))}>Undo</button>
+        </div>
       )}
       <h2 class="section-title">Upcoming <span class="count">{upcoming.length}</span></h2>
       {upcoming.length ? upcoming.map(row) : <button class="card muted add-card" onClick={() => edit(null)}>Nothing due. Tap to add a task.</button>}

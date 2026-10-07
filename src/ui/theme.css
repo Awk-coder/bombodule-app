@@ -259,8 +259,8 @@ svg { vertical-align: -2px; }
 .exams-card { display: block; width: 100%; text-align: left; border-color: var(--warn); }
 .exams-card b { color: var(--warn); }
 .exams-card small { display: block; color: var(--text-muted); }
-.exams-card.done { border-color: var(--border); }
-.exams-card.done b { color: var(--text); }
+.exams-card.pending .btn.primary { margin-top: 12px; }
+.exams-card.pending .btn.ghost { padding: 10px 0 0; }
 .btn.ghost.danger { color: var(--danger); }
 .btn.primary.danger { background: var(--danger); border-color: var(--danger); color: var(--bg); }
 /* Coal and Unrated art is near-black; a faint glow keeps the silhouette readable on the dark page. */
@@ -281,3 +281,5 @@ svg { vertical-align: -2px; }
 .how-rank span { margin-left: auto; color: var(--text-muted); }
 .backup-hint { text-align: center; }
 .backup-hint a { color: var(--accent); }
+.grad-pending b { display: block; color: var(--warn); }
+.grad-pending small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }

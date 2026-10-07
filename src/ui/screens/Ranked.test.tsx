@@ -125,3 +125,13 @@ it("reminds you results only live on this phone", () => {
   act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
   expect(mount().querySelector('a[href="#/settings"]')).not.toBeNull();
 });
+
+it("keeps graduation pending until the last semester's slip is in", () => {
+  act(() => dispatch((s) => ({ ...s, graduated: "2026-10-01T00:00:00.000Z", semester: { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2026-10-18" }, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  const root = mount();
+  expect(root.textContent).toContain("Graduation pending");
+  expect(root.textContent).toContain("Sem 1, 2026/2027 result slip");
+  act(() => dispatch((s) => ({ ...s, results: [...s.results, result("Sem 1, 2026/2027", [["X 1", "A"]])] })));
+  expect(root.textContent).not.toContain("Graduation pending");
+  act(() => dispatch((s) => ({ ...s, semester: null })));
+});

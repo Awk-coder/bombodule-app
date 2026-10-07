@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, clearGraduated, deleteTask, finishExams, importResult, removeResult, unfinishExams, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, clearGraduated, examsConfirmed, graduationConfirmed, deleteTask, finishExams, importResult, removeResult, unfinishExams, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
 import { BICS_MON_1, makeState, result } from "./testState";
@@ -257,5 +257,20 @@ describe("undo", () => {
 
   it("takes back graduating", () => {
     expect(clearGraduated(setGraduated(makeState(), new Date())).graduated).toBeUndefined();
+  });
+});
+
+describe("milestones wait for the result slip", () => {
+  it("counts finished exams only once that semester's slip is in", () => {
+    const s = finishExams(finishExams(makeState(), "Sem 2, 2025/2026"), "Sem 1, 2026/2027");
+    expect(examsConfirmed(s)).toEqual([]);
+    expect(examsConfirmed({ ...s, results: [result("Sem 2, 2025/2026", [["X 1", "A"]])] })).toEqual(["Sem 2, 2025/2026"]);
+  });
+
+  it("confirms graduation once the last semester's slip is in", () => {
+    const s = setGraduated(makeState(), new Date());
+    expect(graduationConfirmed(s)).toBe(false);
+    expect(graduationConfirmed({ ...s, results: [result("Sem 1, 2026/2027", [["X 1", "A"]])] })).toBe(true);
+    expect(graduationConfirmed({ ...makeState(), results: [result("Sem 1, 2026/2027", [["X 1", "A"]])] })).toBe(false);
   });
 });

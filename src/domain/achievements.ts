@@ -1,3 +1,4 @@
+import { examsConfirmed, graduationConfirmed } from "./actions";
 import { courseStats } from "./attendance";
 import { onTime } from "./elo";
 import { LETTER_POINTS, cgpa, countedPoint, degree, gpa, isFail, labelKey, sortResults, tierOf } from "./grades";
@@ -83,10 +84,10 @@ const DEFS: Def[] = [
   { id: "roll-call", name: "Roll Call", desc: "Mark your first class", check: (c) => Object.keys(c.s.marks).length > 0 },
   { id: "go-deeper", name: "We Need to Go Deeper", desc: "Reach the middle of the semester", check: (c) => !!c.s.semester && c.today >= midpoint(c.s.semester.start, c.s.semester.end) },
   { id: "the-end-q", name: "The End?", desc: "Classes are over. Finals begin", check: (c) => c.ended },
-  { id: "the-end", name: "The End.", desc: "Finish your last paper", check: (c) => c.s.examsDone.length >= 1 },
+  { id: "the-end", name: "The End.", desc: "Finish your last paper and import that semester's slip", check: (c) => examsConfirmed(c.s).length >= 1 },
   { id: "results-in", name: "Results Are In", desc: "Import the result slip for a semester you tracked", check: (c) => c.results.some((r) => c.s.examsDone.includes(r.label) || r.label === c.s.semester?.label) },
-  { id: "the-end-again", name: "The End... Again...", desc: "Finish a second semester", check: (c) => c.s.examsDone.length >= 2, goal: [(c) => c.s.examsDone.length, 2] },
-  { id: "next-generation", name: "The Next Generation", desc: "Graduate", check: (c) => !!c.s.graduated },
+  { id: "the-end-again", name: "The End... Again...", desc: "Finish a second semester", check: (c) => examsConfirmed(c.s).length >= 2, goal: [(c) => examsConfirmed(c.s).length, 2] },
+  { id: "next-generation", name: "The Next Generation", desc: "Graduate, confirmed by your last result slip", check: (c) => graduationConfirmed(c.s) },
   // Attendance
   { id: "full-house", name: "Full House", desc: "Attend every class of a course for a whole semester", check: (c) => c.ended && c.active.some((x) => perfect(c, x)) },
   { id: "perfect-record", name: "Perfect Record", desc: "Attend every class of every course for a whole semester", check: (c) => c.ended && c.active.length > 0 && c.active.every((x) => perfect(c, x)) },
@@ -134,7 +135,7 @@ const DEFS: Def[] = [
   { id: "last-chance-saloon", name: "Last Chance Saloon", desc: "Pass on a resit", secret: true, hint: "One more try", check: (c) => anyGrade(c, "PR") },
   { id: "objection", name: "Objection!", desc: "A grade changed after rechecking", secret: true, hint: "Ask them to look again", check: (c) => c.results.some((r) => r.regraded) },
   { id: "back-from-the-brink", name: "Back from the Brink", desc: "Climb back above a 2.00 CGPA", secret: true, hint: "From the edge, back up", check: (c) => c.results.some((_, i) => cgpa(c.results.slice(0, i + 1)).cgpa < 2 && c.results.slice(i + 1).some((__, j) => cgpa(c.results.slice(0, i + j + 2)).cgpa >= 2)) },
-  { id: "speedrun", name: "Speedrun", desc: "Graduate in four regular semesters", secret: true, hint: "Out the door, fast", check: (c) => !!c.s.graduated && c.results.filter(regular).length === 4 },
+  { id: "speedrun", name: "Speedrun", desc: "Graduate in four regular semesters", secret: true, hint: "Out the door, fast", check: (c) => graduationConfirmed(c.s) && c.results.filter(regular).length === 4 },
   { id: "balanced-diet", name: "A Balanced Diet", desc: "Collect every grade from A to F", secret: true, hint: "A bit of everything", check: (c) => Object.keys(LETTER_POINTS).every((g) => anyGrade(c, g)) },
   { id: "bare-minimum", name: "Bare Minimum", desc: "A semester GPA of exactly 2.00", secret: true, hint: "Exactly enough", check: (c) => c.results.some((r) => rGpa(r).credits > 0 && rGpa(r).gpa === 2) },
   {

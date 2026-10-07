@@ -151,6 +151,18 @@ export function finishExams(state: AppState, label: string): AppState {
   return state.examsDone.includes(label) ? state : { ...state, examsDone: [...state.examsDone, label] };
 }
 
+const hasSlip = (state: AppState, label: string) => state.results.some((r) => r.label === label);
+
+/** Semesters whose "Finished my last paper" is backed by that semester's result slip. */
+export function examsConfirmed(state: AppState): string[] {
+  return state.examsDone.filter((l) => hasSlip(state, l));
+}
+
+/** Graduation counts once the slip for the semester you graduated in is imported. */
+export function graduationConfirmed(state: AppState): boolean {
+  return !!state.graduated && (!state.semester || hasSlip(state, state.semester.label));
+}
+
 export function unfinishExams(state: AppState, label: string): AppState {
   return { ...state, examsDone: state.examsDone.filter((l) => l !== label) };
 }

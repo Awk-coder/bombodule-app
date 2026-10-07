@@ -1,71 +1,16 @@
-import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { clearGraduated, removeResult, setGraduated } from "../../domain/actions";
+import { clearGraduated, graduationConfirmed, removeResult, setGraduated } from "../../domain/actions";
 import { DELTA, seasonElo } from "../../domain/elo";
-import { DIVISIONS, degree, gpa, rankOf, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
+import { DIVISIONS, degree, gpa, rankOf, sortResults, tierOf } from "../../domain/grades";
 import type { Ore } from "../../domain/grades";
 import type { SemesterResult } from "../../domain/types";
-import type { ParsedResult } from "../../iium/results";
 import { dispatch, useAppState } from "../../store/store";
-import { titleCase } from "../format";
 import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
 import { AchievementGrid } from "../components/AchievementGrid";
+import { ResultPicker, ResultSheet } from "../components/ResultSlip";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel, leakOf } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
-
-function ResultPicker({ imp }: { imp: ReturnType<typeof useResultImport> }) {
-  return (
-    <label class="btn primary" aria-disabled={imp.busy}>
-      {imp.busy ? "Reading…" : "Import result slip"}
-      <input
-        type="file"
-        accept="application/pdf"
-        hidden
-        disabled={imp.busy}
-        onChange={(e) => {
-          const input = e.currentTarget;
-          const file = input.files?.[0];
-          input.value = "";
-          if (file) void imp.start(file);
-        }}
-      />
-    </label>
-  );
-}
-
-function ResultSheet({ r, onClose, onRemove, children }: { r: ParsedResult; onClose: () => void; onRemove?: () => void; children?: ComponentChildren }) {
-  const g = gpa(r.courses).gpa;
-  const mismatch = semesterMismatch({ ...r, remarks: "", importedAt: "" });
-  const [confirm, setConfirm] = useState(false);
-  return (
-    <Sheet open onClose={onClose}>
-      <div class="result-head">
-        <RankBadge kind={tierOf(g).ore} size={48} />
-        <div>
-          <h2>{r.label}</h2>
-          <p class="group-hint">GPA {g.toFixed(2)} · {tierOf(g).tier} tier{r.status ? ` · ${r.status}` : ""}</p>
-        </div>
-      </div>
-      {r.courses.map((c) => (
-        <div class="row" key={c.code}>
-          <div class="grow"><b>{c.code}</b><small>{titleCase(c.title)}</small></div>
-          <b>{c.grade}</b>
-        </div>
-      ))}
-      {mismatch && <p class="error">{mismatch}</p>}
-      {children}
-      {onRemove && !confirm && <button class="btn ghost danger" onClick={() => setConfirm(true)}>Remove result</button>}
-      {onRemove && confirm && (
-        <>
-          <p class="group-hint">Remove {r.label}? You can import the slip again later.</p>
-          <button class="btn primary danger" onClick={onRemove}>Yes, remove</button>
-          <button class="btn ghost" onClick={() => setConfirm(false)}>Cancel</button>
-        </>
-      )}
-    </Sheet>
-  );
-}
 
 const PROMO_KEY = "hadir-last-ore";
 const ORDER = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
@@ -203,12 +148,18 @@ export function Ranked() {
       {results.length > 0 && !state.graduated && (
         <button class="btn ghost" onClick={() => setConfirmGrad(true)}>I've graduated</button>
       )}
+      {state.graduated && !graduationConfirmed(state) && (
+        <div class="card grad-pending">
+          <b>Graduation pending</b>
+          <small>It counts once you import your {state.semester?.label} result slip.</small>
+        </div>
+      )}
       {state.graduated && (
         <button class="btn ghost" onClick={() => dispatch(clearGraduated)}>Undo graduation</button>
       )}
       <Sheet open={confirmGrad} onClose={() => setConfirmGrad(false)}>
         <h2>Mark yourself as graduated?</h2>
-        <p class="group-hint">You can undo this later from this screen.</p>
+        <p class="group-hint">{state.semester && !state.results.some((r) => r.label === state.semester!.label) ? `It counts once you import your ${state.semester.label} result slip. ` : ""}You can undo this later from this screen.</p>
         <button class="btn primary" onClick={() => { dispatch((s) => setGraduated(s, new Date())); setConfirmGrad(false); }}>Yes, I've graduated</button>
         <button class="btn ghost" onClick={() => setConfirmGrad(false)}>Cancel</button>
       </Sheet>
