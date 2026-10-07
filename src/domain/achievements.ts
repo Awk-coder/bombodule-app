@@ -4,7 +4,7 @@ import { onTime } from "./elo";
 import { LETTER_POINTS, cgpa, countedPoint, degree, gpa, isFail, labelKey, sortResults, tierOf } from "./grades";
 import { generateSessions } from "./sessions";
 import { addDays, hhmm, parseYmd, ymd } from "./time";
-import type { AppState, Course, SemesterResult, Session } from "./types";
+import type { AppState, Course, ResultCourse, SemesterResult, Session } from "./types";
 
 export interface Achievement {
   id: string;
@@ -77,6 +77,24 @@ const venueCount = (c: Ctx) => {
   return new Set(Object.entries(c.s.marks).filter(([, m]) => m === "attended").map(([id]) => venue.get(id.split("@")[0])).filter(Boolean)).size;
 };
 const onTimeCount = (c: Ctx) => c.s.tasks.filter(onTime).length;
+const BAKING = ["CCBS 1010", "CCBS 2010"];
+const COOKING = ["CCCK 1010", "CCCK 2010"];
+const codeKey = (code: string) => code.replace(/\s+/g, "").toUpperCase();
+const passedCodes = (c: Ctx) => {
+  const ok = (x: ResultCourse) => {
+    const p = countedPoint(x);
+    return p === null ? ["P", "PA", "PR"].includes(x.grade) : p >= 2;
+  };
+  return new Set(c.results.flatMap((r) => r.courses.filter(ok).map((x) => codeKey(x.code))));
+};
+const passedOf = (codes: string[]) => (c: Ctx) => {
+  const passed = passedCodes(c);
+  return codes.filter((x) => passed.has(codeKey(x))).length;
+};
+const tookAny = (c: Ctx) => {
+  const want = new Set([...BAKING, ...COOKING].map(codeKey));
+  return [...c.active.map((x) => x.code), ...c.results.flatMap((r) => r.courses.map((x) => x.code))].some((x) => want.has(codeKey(x)));
+};
 
 const DEFS: Def[] = [
   // Semester timeline
@@ -122,6 +140,9 @@ const DEFS: Def[] = [
   },
   { id: "how-did-we-get-here", name: "How Did We Get Here?", desc: "Take 23 or more credit hours in a semester", check: (c) => maxCredits(c) >= 23 },
   { id: "redemption-arc", name: "Redemption Arc", desc: "Pass a course you failed before", check: (c) => [...attempts(c).values()].some((ps) => ps.some((p, i) => p < 2 && ps.slice(i + 1).some((q) => q >= 2))) },
+  { id: "we-need-to-cook", name: "We Need to Cook, Jesse", desc: "Take a cooking or baking skill course", check: tookAny },
+  { id: "master-baker", name: "Master Baker", desc: "Pass both levels of Baking", check: (c) => passedOf(BAKING)(c) === BAKING.length, goal: [passedOf(BAKING), BAKING.length] },
+  { id: "gordons-protege", name: "Gordon's Protege", desc: "Pass both levels of Cooking", check: (c) => passedOf(COOKING)(c) === COOKING.length, goal: [passedOf(COOKING), COOKING.length] },
   { id: "those-were-the-days", name: "Those Were the Days", desc: "Import a slip from an earlier semester", check: (c) => !!c.s.semester && c.results.some((r) => labelKey(r.label) < labelKey(c.s.semester!.label)) },
   // Secret
   { id: "voluntary-exile", name: "Voluntary Exile", desc: "Get barred", secret: true, hint: "Too many empty seats", check: (c) => c.active.some((x) => missed(c, x) >= x.absenceLimit) || anyGrade(c, "Y") },

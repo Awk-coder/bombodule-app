@@ -75,11 +75,14 @@ const CASES: Case[] = [
   }, () => [markAll(base(), AFTER, "attended"), AFTER]],
   ["what-am-i-doing", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1", "D"]], { status: "COND. PASS" }), R("Sem 3, 2025/2026", [["X 2", "A"]]), R("Sem 2, 2025/2026", [["X 3", "D"]], { status: "COND. PASS" })] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1", "D"]], { status: "COND. PASS" }), R("Sem 2, 2025/2026", [["X 3", "A"]])] }, NOW]],
   ["lock-in", () => [{ ...base(), results: ["Sem 1, 2024/2025", "Sem 2, 2024/2025", "Sem 1, 2025/2026", "Sem 2, 2025/2026"].map((l) => R(l, [["X 1", "D"]], { status: "COND. PASS" })) }, NOW], () => [{ ...base(), results: ["Sem 1, 2024/2025", "Sem 2, 2024/2025", "Sem 1, 2025/2026"].map((l) => R(l, [["X 1", "D"]], { status: "COND. PASS" })) }, NOW]],
+  ["we-need-to-cook", () => [makeState({ courses: [course("CCCK 1010", "COOKING")] }), NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["CCFM 2061", "A"]])] }, NOW]],
+  ["master-baker", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "A", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "F", 0.5], ["CCCK 1010", "A", 0.5]])] }, NOW]],
+  ["gordons-protege", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "P", 0.5], ["CCCK 2010", "A-", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "A", 0.5], ["CCBS 2010", "A", 0.5]])] }, NOW]],
 ];
 
 describe("achievements", () => {
-  it("has 46 unique ids, 18 secret, and a case for each", () => {
-    expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(46);
+  it("has 49 unique ids, 18 secret, and a case for each", () => {
+    expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(49);
     expect(ACHIEVEMENTS.filter((a) => a.secret)).toHaveLength(18);
     expect(CASES.map((c) => c[0]).sort()).toEqual(ACHIEVEMENTS.map((a) => a.id).sort());
   });
@@ -110,6 +113,10 @@ describe("achievement progress", () => {
     const s = base();
     const tasks = [1, 2, 3].map(() => task({ done: true, completedAt: iso("2026-10-09T12:00+08:00") }));
     expect(progressOf({ ...s, tasks }, NOW, "ten-down")).toEqual([3, 10]);
+  });
+
+  it("counts cooking levels passed", () => {
+    expect(progressOf({ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "A", 0.5]])] }, NOW, "gordons-protege")).toEqual([1, 2]);
   });
 
   it("has no progress for one-off achievements", () => {

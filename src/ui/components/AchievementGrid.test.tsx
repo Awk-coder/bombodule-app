@@ -17,7 +17,7 @@ it("hides locked secrets and shows unlocked ones", () => {
   expect(text).toContain("Objection!");
   expect(text).not.toContain("Voluntary Exile");
   expect(text).toContain("???");
-  expect(text).toContain("2 / 46");
+  expect(text).toContain("2 / 49");
 });
 
 const tile = (root: HTMLElement, text: string) => [...root.querySelectorAll<HTMLElement>(".adv")].find((b) => b.textContent?.includes(text))!;
@@ -30,7 +30,7 @@ it("shows 8 at first, unlocked ones first and newest first, and expands to all",
   expect(names()).toHaveLength(8);
   expect(names().slice(0, 2)).toEqual(["Objection!", "Taking Inventory"]);
   showAll(root);
-  expect(names()).toHaveLength(46);
+  expect(names()).toHaveLength(49);
   act(() => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent === "Show less")!.click());
   expect(names()).toHaveLength(8);
 });

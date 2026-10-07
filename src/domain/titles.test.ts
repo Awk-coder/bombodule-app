@@ -26,6 +26,12 @@ describe("titles", () => {
     expect(unlockedTitles(s).map((t) => t.text)).toEqual(["Mr Perfect"]);
   });
 
+  it("cooking achievements unlock chef titles", () => {
+    const s = makeState({ achievements: { "master-baker": "x", "gordons-protege": "x", "we-need-to-cook": "x" } });
+    expect(unlockedTitles(s).map((t) => t.text)).toEqual(["Master Baker", "Gordon's Protege"]);
+    expect(TITLE_TEXTS).toContain("Gordon's Protege");
+  });
+
   it("Netherite also unlocks the Diamond title", () => {
     const s = makeState({ rankPeaks: { "Sem 1, 2026/2027": "netherite" } });
     expect(unlockedTitles(s).map((t) => t.id)).toEqual(["rank-diamond", "rank-netherite"]);

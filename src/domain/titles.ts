@@ -25,6 +25,8 @@ const ACHIEVEMENT_TITLES: Title[] = [
   { id: "lock-in", text: "Needs to Lock In" },
   { id: "fasting-scholar", text: "Fasting Scholar" },
   { id: "next-generation", text: "Graduate" },
+  { id: "master-baker", text: "Master Baker" },
+  { id: "gordons-protege", text: "Gordon's Protege" },
 ];
 
 const RANK_TITLES: (Title & { ore: Ore })[] = [
