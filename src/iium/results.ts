@@ -8,7 +8,7 @@ export interface ParsedResult {
   remarks: string;
 }
 
-const COURSE = /^([A-Z]{3,4} ?\d{4}[A-Z]?)\s+(.+?)\s+(\d+(?:\.\d+)?)\s+([A-Z]{1,2}[+-]?|\*)(?:\s+(\d*\.\d+))?(?:\s+(\d*\.\d+))?$/;
+const COURSE = /^([A-Z]{3,4} ?\d{4}[A-Z]?)\s+(.+?)\s+(\d*\.?\d+)\s+([A-Z]{1,2}[+-]?|\*)(?:\s+(\d*\.\d+))?(?:\s+(\d*\.\d+))?$/;
 const FIELDS = ["TOTAL CREDIT POINTS", "CUMULATIVE GRADE POINTS", "TOTAL CREDIT HOURS", "CUMULATIVE CREDIT HOURS", "GRADE POINT AVERAGE(GPA)", "CGPA", "STATUS", "REMARKS"];
 
 /** Read the i-Ma'luum "Examination Result" slip. Only labelled fields are read, so personal lines are never kept. */

@@ -51,6 +51,11 @@ describe("parseResults", () => {
     for (const s of ["SITI", "1234567", "X0000000"]) expect(text).not.toContain(s);
   });
 
+  it("reads half-credit courses printed without a leading zero", () => {
+    const rows = SLIP.map((r) => (r[0] === "BICS 4340" ? ["CCFM 2061", "FAMILY MANAGEMENT", ".5", "A", "4.00", "2.00"] : r));
+    expect(parseResults(rows)!.courses).toContainEqual(expect.objectContaining({ code: "CCFM 2061", credits: 0.5, grade: "A", point: 4 }));
+  });
+
   it("reads grades without points", () => {
     const rows = SLIP.map((r) => (r[0] === "BICS 4340" ? ["BICS 4340", "Machine Learning", "3", "W"] : r));
     expect(parseResults(rows)!.courses[2]).toEqual({ code: "BICS 4340", title: "Machine Learning", credits: 3, grade: "W", point: null });
