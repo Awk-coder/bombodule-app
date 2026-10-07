@@ -3,7 +3,7 @@ import { render } from "preact";
 import { act } from "preact/test-utils";
 import { expect, it, vi } from "vitest";
 import { dispatch } from "../../store/store";
-import { AchievementToast } from "./AchievementToast";
+import { AchievementToast, replayToast } from "./AchievementToast";
 
 it("tapping the toast slides it out and dismisses the queue", () => {
   vi.useFakeTimers();
@@ -61,6 +61,23 @@ it("announces tiers, and rare ones stay up 6s and legendary ones 8s", () => {
   act(() => { vi.advanceTimersByTime(600); });
   act(() => { vi.advanceTimersByTime(400); });
   expect(root.querySelector(".adv-toast")).toBeNull();
+  render(null, root);
+  vi.useRealTimers();
+});
+
+it("replaying the same achievement twice plays it twice", () => {
+  vi.useFakeTimers();
+  act(() => dispatch((s) => ({ ...s, achievements: {} })));
+  const root = document.createElement("div");
+  act(() => render(<AchievementToast />, root));
+  act(() => { replayToast("roll-call"); replayToast("roll-call"); });
+  const first = root.querySelector(".adv-toast")!;
+  expect(first.textContent).toContain("Roll Call");
+  act(() => { vi.advanceTimersByTime(4100); });
+  act(() => { vi.advanceTimersByTime(400); });
+  const second = root.querySelector(".adv-toast")!;
+  expect(second.textContent).toContain("Roll Call");
+  expect(second).not.toBe(first); // a fresh element, so it slides in again
   render(null, root);
   vi.useRealTimers();
 });

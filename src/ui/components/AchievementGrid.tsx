@@ -4,6 +4,7 @@ import type { Achievement } from "../../domain/achievements";
 import { useAppState } from "../../store/store";
 import { useNow } from "../useNow";
 import { AchievementArt } from "./AchievementArt";
+import { replayToast } from "./AchievementToast";
 import { Sheet } from "./Sheet";
 
 const SHOWN = 8;
@@ -47,7 +48,12 @@ export function AchievementGrid() {
             )}
             <h2>{hidden(open) ? "Secret achievement" : open.name}</h2>
             <p>{hidden(open) ? `Hint: ${open.hint}` : open.desc}</p>
-            {achievements[open.id] && <p class="group-hint">Unlocked {longDate(achievements[open.id])}</p>}
+            {achievements[open.id] && (
+              <div class="adv-unlocked">
+                <p class="group-hint">Unlocked {longDate(achievements[open.id])}</p>
+                <button class="btn" onClick={() => replayToast(open.id)}>Replay</button>
+              </div>
+            )}
             {progress && (
               <>
                 <div class="adv-progress"><span style={{ width: `${(progress[0] / progress[1]) * 100}%` }} /></div>

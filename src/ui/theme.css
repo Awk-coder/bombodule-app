@@ -251,7 +251,7 @@ svg { vertical-align: -2px; }
 .adv small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 .adv-progress { height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; margin-top: 12px; }
 .adv-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-.adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 20; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
+.adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 30; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
 .adv-toast small { display: block; color: var(--text-muted); font-size: 12px; }
 .adv-toast b { color: var(--accent); }
 .adv-toast.secret { border-color: color-mix(in srgb, #b07ce8 55%, var(--border)); }
@@ -262,6 +262,7 @@ svg { vertical-align: -2px; }
 .adv.rare.on b { color: #c79cff; }
 .adv.legendary.on { border-color: color-mix(in srgb, #f2b43a 70%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, #f2b43a 16%, var(--surface)), var(--surface) 70%); box-shadow: 0 0 14px rgb(242 180 58 / 0.25); }
 .adv.legendary.on b { color: #f7c95c; }
+.adv-unlocked { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .adv-sheet-art { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
 .adv-sheet-art small { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #c79cff; }
 .adv-sheet-art.legendary small { color: #f7c95c; }

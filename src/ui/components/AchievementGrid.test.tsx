@@ -2,9 +2,10 @@
 import { render } from "preact";
 import { act } from "preact/test-utils";
 import { expect, it } from "vitest";
-import { dispatch } from "../../store/store";
+import { dispatch, getState } from "../../store/store";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { AchievementGrid } from "./AchievementGrid";
+import { AchievementToast } from "./AchievementToast";
 import { LEGENDARY_ART } from "./achievementArt";
 
 const showAll = (root: HTMLElement) => act(() => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent?.startsWith("Show all"))!.click());
@@ -75,4 +76,23 @@ it("marks unlocked rare and legendary achievements with their art, and keeps loc
 
 it("has its own art for every legendary achievement", () => {
   expect(Object.keys(LEGENDARY_ART).sort()).toEqual(ACHIEVEMENTS.filter((a) => a.tier === "legendary").map((a) => a.id).sort());
+});
+
+it("replays the notification for an unlocked achievement, without changing anything", () => {
+  act(() => dispatch((s) => ({ ...s, achievements: { "full-house": "2026-10-02T00:00:00.000Z" } })));
+  const before = getState().achievements;
+  const root = document.createElement("div");
+  document.body.append(root);
+  act(() => render(<><AchievementGrid /><AchievementToast /></>, root));
+  showAll(root);
+  act(() => tile(root, "Ten Down").click());
+  expect([...root.querySelectorAll(".sheet button")].some((b) => b.textContent === "Replay")).toBe(false);
+  act(() => (root.querySelector(".sheet-backdrop") as HTMLElement).click());
+  act(() => tile(root, "Full House").click());
+  expect(root.querySelector(".adv-toast")).toBeNull();
+  act(() => [...root.querySelectorAll<HTMLElement>(".sheet button")].find((b) => b.textContent === "Replay")!.click());
+  expect(root.querySelector(".adv-toast")!.textContent).toContain("Full House");
+  expect(getState().achievements).toBe(before);
+  render(null, root);
+  root.remove();
 });
