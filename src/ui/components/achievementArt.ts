@@ -4,7 +4,7 @@ export type PixelArt = { palette: string[]; rows: string[] };
 
 /** One small mark shared by every rare achievement. */
 export const RARE_ART: PixelArt = {
-  palette: ["#f4c431", "#fff6c2"],
+  palette: ["#b07ce8", "#efe2ff"],
   rows: [
     "...0...",
     "...0...",
