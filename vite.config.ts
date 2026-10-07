@@ -28,5 +28,5 @@ export default defineConfig({
       workbox: { globPatterns: ["**/*.{js,mjs,css,html,png,svg,woff,woff2}"], maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 },
     }),
   ],
-  test: { include: ["src/**/*.test.ts", "src/**/*.test.tsx"] },
+  test: { include: ["src/**/*.test.ts", "src/**/*.test.tsx", "server/src/**/*.test.ts"] },
 });

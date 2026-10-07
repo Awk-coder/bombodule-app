@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "capacitor.config.ts"]
+  "include": ["src", "server/src", "capacitor.config.ts"]
 }
