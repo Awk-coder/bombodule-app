@@ -2,6 +2,7 @@ import { App as CapApp } from "@capacitor/app";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
 import { recordAchievements } from "./domain/achievements";
+import { recordPeak } from "./domain/titles";
 import { Hadir } from "./native/hadir";
 import { shareFile } from "./native/share";
 import { dispatch, useAppState, useLoadStatus } from "./store/store";
@@ -57,7 +58,7 @@ export function App() {
   const route = useRoute();
   const now = useNow();
   useEffect(() => {
-    if (status.loaded && !status.error && state.onboarded) dispatch((s) => recordAchievements(s, new Date()));
+    if (status.loaded && !status.error && state.onboarded) dispatch((s) => recordPeak(recordAchievements(s, new Date()), new Date()));
   }, [state, now, status.loaded, status.error]);
 
   if (!status.loaded) return <div class="screen"><div class="skeleton" /><div class="skeleton" /></div>;

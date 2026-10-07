@@ -81,6 +81,13 @@ export interface SemesterResult {
   regraded?: true; // a re-import changed a grade
 }
 
+/** Online leaderboard identity; `key` is the secret the server knows only as a hash. */
+export interface Profile {
+  id: string;
+  key: string;
+  name: string;
+}
+
 export interface AppState {
   version: 1;
   onboarded: boolean;
@@ -96,6 +103,9 @@ export interface AppState {
   examsDone: string[]; // semester labels where "Finished my last paper" was tapped
   graduated?: string; // ISO, set by "I've graduated"
   achievements: Record<string, string>; // id → unlocked ISO time
+  rankPeaks: Record<string, "netherite" | "diamond" | "emerald" | "gold" | "iron" | "coal">; // semester label → highest season rank reached
+  profile?: Profile;
+  title?: string; // chosen title id from domain/titles
 }
 
 export interface Session {
@@ -135,5 +145,6 @@ export function emptyState(): AppState {
     results: [],
     examsDone: [],
     achievements: {},
+    rankPeaks: {},
   };
 }

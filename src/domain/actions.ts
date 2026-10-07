@@ -204,5 +204,6 @@ export function parseImport(json: string): AppState {
     results: Array.isArray(obj.results) ? obj.results : [],
     examsDone: Array.isArray(obj.examsDone) ? obj.examsDone : [],
     achievements: typeof obj.achievements === "object" && obj.achievements !== null ? obj.achievements : {},
+    rankPeaks: typeof obj.rankPeaks === "object" && obj.rankPeaks !== null ? obj.rankPeaks : {},
   } as AppState;
 }
