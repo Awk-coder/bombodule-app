@@ -3,8 +3,7 @@ import { ACHIEVEMENTS } from "../../domain/achievements";
 import { useAppState } from "../../store/store";
 import { AchievementArt } from "./AchievementArt";
 
-const SHOW_MS = 4000;
-const LEGENDARY_MS = 7000;
+const SHOW_MS = { normal: 4000, rare: 6000, legendary: 8000 };
 
 /** Minecraft-style "Advancement Made!" for unlocks that happen while the app is open. */
 export function AchievementToast() {
@@ -27,7 +26,7 @@ export function AchievementToast() {
 
   useEffect(() => {
     if (!queue.length) return;
-    const t = setTimeout(() => setQueue((q) => q.slice(1)), a?.tier === "legendary" ? LEGENDARY_MS : SHOW_MS);
+    const t = setTimeout(() => setQueue((q) => q.slice(1)), SHOW_MS[a?.tier ?? "normal"]);
     return () => clearTimeout(t);
   }, [queue]);
 

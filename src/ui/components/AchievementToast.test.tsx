@@ -15,7 +15,7 @@ it("tapping the toast dismisses the queue", () => {
   expect(root.querySelector(".adv-toast")).toBeNull();
 });
 
-it("announces tiers, and legendary ones stay up longer", () => {
+it("announces tiers, and rare ones stay up 6s and legendary ones 8s", () => {
   vi.useFakeTimers();
   act(() => dispatch((s) => ({ ...s, achievements: {} })));
   const root = document.createElement("div");
@@ -25,12 +25,16 @@ it("announces tiers, and legendary ones stay up longer", () => {
   expect(toast.classList).toContain("legendary");
   expect(toast.textContent).toContain("Legendary achievement");
   expect(toast.querySelector("svg")).not.toBeNull();
-  act(() => { vi.advanceTimersByTime(4500); });
+  act(() => { vi.advanceTimersByTime(7500); });
   expect(root.querySelector(".adv-toast")).not.toBeNull();
-  act(() => { vi.advanceTimersByTime(3000); });
+  act(() => { vi.advanceTimersByTime(1000); });
   expect(root.querySelector(".adv-toast")).toBeNull();
   act(() => dispatch((s) => ({ ...s, achievements: { ...s.achievements, "full-house": "2026-10-01T00:00:00.000Z" } })));
   expect(root.querySelector(".adv-toast")!.textContent).toContain("Rare achievement");
+  act(() => { vi.advanceTimersByTime(5500); });
+  expect(root.querySelector(".adv-toast")).not.toBeNull();
+  act(() => { vi.advanceTimersByTime(1000); });
+  expect(root.querySelector(".adv-toast")).toBeNull();
   render(null, root);
   vi.useRealTimers();
 });
