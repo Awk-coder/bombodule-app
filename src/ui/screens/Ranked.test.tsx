@@ -7,7 +7,7 @@ import { dispatch, getState } from "../../store/store";
 import { Ranked } from "./Ranked";
 
 beforeEach(() => {
-  dispatch((s) => ({ ...s, results: [], tasks: [], graduated: undefined }));
+  dispatch((s) => ({ ...s, results: [], tasks: [], graduated: undefined, achievements: {}, rankPeaks: {}, title: undefined }));
   localStorage.clear();
 });
 
@@ -134,4 +134,13 @@ it("keeps graduation pending until the last semester's slip is in", () => {
   act(() => dispatch((s) => ({ ...s, results: [...s.results, result("Sem 1, 2026/2027", [["X 1", "A"]])] })));
   expect(root.textContent).not.toContain("Graduation pending");
   act(() => dispatch((s) => ({ ...s, semester: null })));
+});
+
+it("shows the chosen title under the season rank, Fallen when it has lapsed", () => {
+  act(() => dispatch((s) => ({ ...s, achievements: { flawless: "x" }, title: "flawless" })));
+  expect(mount().querySelector(".season-title")!.textContent).toBe("Mr Perfect");
+  act(() => dispatch((s) => ({ ...s, semester: { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2027-02-01" }, rankPeaks: { "Sem 1, 2025/2026": "netherite", "Sem 2, 2025/2026": "gold" }, title: "rank-netherite" })));
+  expect(mount().querySelector(".season-title")!.textContent).toBe("Fallen Netherite Grinder");
+  act(() => dispatch((s) => ({ ...s, title: undefined })));
+  expect(mount().querySelector(".season-title")).toBeNull();
 });

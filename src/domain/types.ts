@@ -86,6 +86,7 @@ export interface Profile {
   id: string;
   key: string;
   name: string;
+  group?: string; // friends group invite code
 }
 
 export interface AppState {

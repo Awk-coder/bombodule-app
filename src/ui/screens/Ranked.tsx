@@ -3,11 +3,13 @@ import { clearGraduated, graduationConfirmed, removeResult, setGraduated } from 
 import { DELTA, seasonElo } from "../../domain/elo";
 import { DIVISIONS, degree, gpa, rankOf, sortResults, tierOf } from "../../domain/grades";
 import type { Ore } from "../../domain/grades";
+import { titleText } from "../../domain/titles";
 import type { SemesterResult } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
 import { AchievementGrid } from "../components/AchievementGrid";
+import { Leaderboard } from "../components/Leaderboard";
 import { ResultPicker, ResultSheet } from "../components/ResultSlip";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel, leakOf } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
@@ -69,11 +71,13 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
   const change = useRankChange(season.rated ? rank.ore : null);
   const [how, setHow] = useState(false);
   const [all, setAll] = useState(false);
+  const title = state.title ? titleText(state, state.title) : null;
   return (
     <section class={`season ${change === "up" ? "promoted" : ""}`}>
       <RankBadge kind={kind} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
+      {title && <p class="season-title">{title}</p>}
       {change && <p class={`rank-change ${change}`}>{change === "up" ? "Promoted to" : "Dropped to"} {ORE_NAME[rank.ore]}</p>}
       <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
       {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
@@ -164,6 +168,7 @@ export function Ranked() {
         <button class="btn ghost" onClick={() => setConfirmGrad(false)}>Cancel</button>
       </Sheet>
       {imp.error && <p class="error">{imp.error.message}</p>}
+      <Leaderboard />
       <AchievementGrid />
       {imp.preview && (
         <ResultSheet r={imp.preview} onClose={imp.cancel}>

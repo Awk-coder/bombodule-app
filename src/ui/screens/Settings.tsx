@@ -10,6 +10,7 @@ import { useSync } from "../useSync";
 import { Chips } from "../components/Chips";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
+import { ProfileSection } from "../components/ProfileSection";
 import { Sheet } from "../components/Sheet";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
@@ -55,6 +56,8 @@ export function Settings() {
           <small>{acc ? `${acc.matric ?? "Matric unknown"} · imported ${fmtDate(acc.lastSync)}` : "Import your confirmation slip to load your timetable"}</small>
         </div>
       </div>
+
+      <ProfileSection />
 
       <p class="group-title">Appearance</p>
       <button class="row" onClick={() => setThemeOpen(true)}>

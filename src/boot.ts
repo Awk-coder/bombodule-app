@@ -5,6 +5,7 @@ import { warningFor } from "./domain/planner";
 import { generateSessions } from "./domain/sessions";
 import type { AppState } from "./domain/types";
 import { Hadir } from "./native/hadir";
+import { startProfileSync } from "./online/sync";
 import { drainAnswers, initNotifications, isMark, notifyNow, reschedule } from "./notify/notify";
 import { dispatch, getState, loadState, onStateChange } from "./store/store";
 import { courseHref } from "./ui/router";
@@ -52,6 +53,7 @@ export async function boot(): Promise<void> {
   void Hadir.addListener("answer", () => void drain());
 
   rescheduleSoon();
+  startProfileSync(getState, onStateChange);
   void CapApp.addListener("resume", () => {
     void drain();
     rescheduleSoon();

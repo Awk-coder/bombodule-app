@@ -4,3 +4,5 @@ tests/fixtures/real-*
 *.log
 .superpowers/
 references/
+.env.local
+server/.wrangler/

@@ -284,3 +284,30 @@ svg { vertical-align: -2px; }
 .backup-hint a { color: var(--accent); }
 .grad-pending b { display: block; color: var(--warn); }
 .grad-pending small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+
+/* Titles, leaderboard and profile */
+.season-title { color: var(--text-muted); font-style: italic; font-size: 14px; margin: -2px 0 4px; }
+.leaderboard .chips { margin-bottom: 12px; }
+.lb-hint { margin: 0 0 10px; }
+.lb-error { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lb-error .error { margin: 0; }
+.lb-list { padding: 4px 0; }
+.lb-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 14px; background: none; border: 0; text-align: left; color: inherit; }
+.lb-row.me { background: var(--accent-dim); }
+.lb-pos { width: 22px; text-align: right; color: var(--text-muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.lb-name { flex: 1; min-width: 0; }
+.lb-name b, .lb-name small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-name small { color: var(--text-muted); font-style: italic; font-size: 12px; }
+.lb-elo { font-weight: 700; font-variant-numeric: tabular-nums; }
+.player { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.player h2 { margin: 10px 0 0; }
+.player-title { color: var(--text-muted); font-style: italic; margin: 2px 0 0; }
+.player-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 18px 0 8px; }
+.player-stats > div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.player-stats small { color: var(--text-muted); font-size: 12px; }
+.player-stats span { color: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.player-degree { display: flex; align-items: center; gap: 4px; }
+.group-code { letter-spacing: 2px; color: var(--text); }
+.title-list .row.on { border-color: var(--accent); }
+.row.danger b { color: var(--danger); }
+.btn.primary.danger { background: var(--danger); border-color: var(--danger); }
