@@ -5,6 +5,8 @@ import { useAppState } from "../../store/store";
 import { useNow } from "../useNow";
 import { Sheet } from "./Sheet";
 
+const SHOWN = 8;
+
 const longDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export function AchievementGrid() {
@@ -12,20 +14,24 @@ export function AchievementGrid() {
   const { achievements } = state;
   const now = useNow();
   const [open, setOpen] = useState<Achievement | null>(null);
+  const [all, setAll] = useState(false);
   const got = ACHIEVEMENTS.filter((a) => achievements[a.id]).length;
   const hidden = (a: Achievement) => a.secret && !achievements[a.id];
   const progress = open && !achievements[open.id] ? progressOf(state, now, open.id) : null;
+  // Unlocked first, newest first; locked ones keep their list order.
+  const sorted = [...ACHIEVEMENTS].sort((a, b) => (achievements[b.id] ?? "").localeCompare(achievements[a.id] ?? ""));
   return (
     <>
       <h2 class="section-title">Achievements <span class="count">{got} / {ACHIEVEMENTS.length}</span></h2>
       <div class="adv-grid">
-        {ACHIEVEMENTS.map((a) => (
+        {sorted.slice(0, all ? undefined : SHOWN).map((a) => (
           <button key={a.id} class={`adv ${achievements[a.id] ? "on" : ""} ${a.secret ? "secret" : ""}`} onClick={() => setOpen(a)}>
             <b>{hidden(a) ? "???" : a.name}</b>
             <small>{hidden(a) ? a.hint : a.desc}</small>
           </button>
         ))}
       </div>
+      <button class="link adv-more" onClick={() => setAll(!all)}>{all ? "Show less" : `Show all ${ACHIEVEMENTS.length}`}</button>
       <Sheet open={!!open} onClose={() => setOpen(null)}>
         {open && (
           <>

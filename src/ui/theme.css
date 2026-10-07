@@ -240,7 +240,8 @@ svg { vertical-align: -2px; }
 .history-item b { font-size: 13px; }
 .history-item small { color: var(--text-muted); font-size: 11px; }
 
-.adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 32px; }
+.adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.adv-more { display: block; padding: 0; margin: 0 0 32px; }
 .adv { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; opacity: 0.5; color: var(--text); text-align: left; font: inherit; }
 .adv.on { opacity: 1; border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .adv.secret.on { border-color: color-mix(in srgb, #b07ce8 55%, var(--border)); }
