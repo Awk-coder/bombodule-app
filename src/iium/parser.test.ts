@@ -74,8 +74,8 @@ describe("parseSlip", () => {
       ["UNGS 2290", "1", "R", "KNOWLEDGE & CIVILIZATION IN ISLAM", "2", "MON", "11.30", "- 12.50", "AM", "IRK LR 12 3.71"],
     ));
     expect(p.courses).toEqual([
-      { code: "BICS 1001", name: "Data Structures 2", section: "2" },
-      { code: "UNGS 2290", name: "KNOWLEDGE & CIVILIZATION IN ISLAM", section: "1" },
+      { code: "BICS 1001", name: "Data Structures 2", section: "2", credits: 3 },
+      { code: "UNGS 2290", name: "KNOWLEDGE & CIVILIZATION IN ISLAM", section: "1", credits: 2 },
     ]);
     expect(p.slots).toEqual([
       { code: "BICS 1001", section: "2", day: 2, start: "14:00", end: "15:20", venue: "ICT LR 14A LEVEL 2D", lecturer: "" },

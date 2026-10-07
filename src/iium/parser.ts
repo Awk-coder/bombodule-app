@@ -4,6 +4,7 @@ export interface ParsedCourse {
   code: string;
   name: string;
   section: string;
+  credits: number | null;
 }
 
 export interface ParsedSlot {
@@ -85,7 +86,7 @@ export function groupRows(items: TextItem[], tolerance = 2): string[][] {
     .map((l) => l.cells.sort((a, b) => a.x - b.x).map((c) => c.str.trim()));
 }
 
-const COURSE_ROW = new RegExp(String.raw`^([A-Z]{3,4} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z]{1,2}\s+(.+?)\s+\d+(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`);
+const COURSE_ROW = new RegExp(String.raw`^([A-Z]{3,4} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z]{1,2}\s+(.+?)\s+(\d+)(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`);
 const SLOT_ROW = new RegExp(String.raw`^(?:\d+\s+)?([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*)$`);
 
 /** Read the "Course Registration Confirmation Slip" from i-Ma'luum, given its text lines. */
@@ -124,9 +125,9 @@ export function parseSlip(rows: string[][]): ParsedSchedule {
 
     const c = text.match(COURSE_ROW);
     if (c) {
-      last = { code: c[1].replace(/^([A-Z]+)(\d)/, "$1 $2"), name: c[3], section: c[2] };
+      last = { code: c[1].replace(/^([A-Z]+)(\d)/, "$1 $2"), name: c[3], section: c[2], credits: Number(c[4]) };
       courses.push(last);
-      if (c[4]) addSlots(last, c[4], c[5], c[11] ?? "");
+      if (c[5]) addSlots(last, c[5], c[6], c[12] ?? "");
       continue;
     }
     const s = last && text.match(SLOT_ROW);

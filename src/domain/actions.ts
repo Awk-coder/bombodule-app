@@ -88,6 +88,7 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
       absenceLimit: prev?.absenceLimit ?? DEFAULT_LIMIT,
       active: true,
       ...(sameSemester && prev?.startFrom && { startFrom: prev.startFrom }),
+      ...(p.credits ? { credits: p.credits } : prev?.credits ? { credits: prev.credits } : {}),
     };
   });
   const syncedIds = new Set(synced.map((c) => c.id));

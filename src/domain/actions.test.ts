@@ -13,8 +13,8 @@ const parsed = (over: Partial<ParsedSchedule> = {}): ParsedSchedule => ({
   studentName: "ABDUL WAHID",
   matric: "2212345",
   courses: [
-    { code: "BICS 4350", name: "PRIVACY ENGINEERING", section: "1" },
-    { code: "BIIT 2301", name: "USER EXPERIENCE DESIGN", section: "1" },
+    { code: "BICS 4350", name: "PRIVACY ENGINEERING", section: "1", credits: null },
+    { code: "BIIT 2301", name: "USER EXPERIENCE DESIGN", section: "1", credits: null },
   ],
   slots: [
     { code: "BICS 4350", section: "1", day: 1, start: "11:30", end: "12:50", venue: "ICT LR 14", lecturer: "DR. X" },
@@ -61,6 +61,10 @@ describe("setCourseStart", () => {
 });
 
 describe("applySync", () => {
+  it("sync stores credit hours", () => {
+    const parsed = { sessionName: "Sem 1, 2026/2027", studentName: null, matric: null, courses: [{ code: "BICS 4350", name: "PRIVACY ENGINEERING", section: "1", credits: 3 }], slots: [] };
+    expect(applySync(makeState(), parsed, "2026-10-06").courses[0].credits).toBe(3);
+  });
   it("first sync creates courses, deduped slots, semester and account", () => {
     const s = applySync(emptyState(), parsed({ sessionName: "Sem 1, 2030/2031" }), "2026-10-05");
     expect(s.courses.map((c) => [c.id, c.color, c.absenceLimit, c.active])).toEqual([
