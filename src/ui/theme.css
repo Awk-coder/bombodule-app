@@ -141,7 +141,10 @@ svg { vertical-align: -2px; }
 .sched-scroll::-webkit-scrollbar, .home-scroll::-webkit-scrollbar { display: none; }
 .hour-line { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--border); }
 .hour-line span { position: absolute; right: 0; top: -9px; font-size: 12px; color: var(--text-muted); background: var(--bg); padding-left: 4px; }
-.block { position: absolute; width: calc(var(--col) - 6px); border-radius: 14px; padding: 8px 6px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.block { position: absolute; width: calc(var(--col) - 6px); border-radius: 14px; padding: 8px 6px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Holding a class fills it left to right over 5s; when full, its actual-start sheet opens. */
+.block.holding::after { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0.18; pointer-events: none; transform-origin: left; animation: hold-fill 5s linear forwards; }
+@keyframes hold-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .block .t1 { position: absolute; top: 6px; left: 8px; font-size: 11px; opacity: 0.7; }
 .block .t2 { position: absolute; bottom: 6px; right: 8px; font-size: 11px; opacity: 0.7; }
 .block b { font-size: 17px; line-height: 1.1; }

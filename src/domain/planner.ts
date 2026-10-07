@@ -51,7 +51,7 @@ export function planNotifications(state: AppState, now: Date, horizonDays = 14):
 
   for (const s of sessions) {
     if (state.marks[s.id]) continue;
-    const at = new Date(s.end.getTime() + state.settings.promptDelayMin * 60_000);
+    const at = new Date(s.start.getTime() + state.settings.promptDelayMin * 60_000);
     if (at.getTime() <= nowMs || at.getTime() > horizon) continue;
     const c = courses.get(s.courseId)!;
     const slot = slots.get(s.slotId)!;

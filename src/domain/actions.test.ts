@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, deleteTask, semesterLabelDiffers, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, deleteTask, setCourseStart, semesterLabelDiffers, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
 import { BICS_MON_1, makeState } from "./testState";
@@ -51,6 +51,15 @@ describe("setPaused", () => {
   });
 });
 
+describe("setCourseStart", () => {
+  it("sets a course's actual first class, and clearing it goes back to the scheduled start", () => {
+    const late = setCourseStart(makeState(), "BICS 4350-1", "2026-10-07");
+    expect(late.courses[0].startFrom).toBe("2026-10-07");
+    expect(late.courses[1].startFrom).toBeUndefined();
+    expect("startFrom" in setCourseStart(late, "BICS 4350-1", null).courses[0]).toBe(false);
+  });
+});
+
 describe("applySync", () => {
   it("first sync creates courses, deduped slots, semester and account", () => {
     const s = applySync(emptyState(), parsed({ sessionName: "Sem 1, 2030/2031" }), "2026-10-05");
@@ -76,6 +85,12 @@ describe("applySync", () => {
     expect(again.courses.find((c) => c.id === "BICS 4350-1")).toMatchObject({ color: 0, active: true });
     expect(again.courses.find((c) => c.id === "BIIT 2301-1")).toMatchObject({ active: false });
     expect(again.account).toEqual({ name: "ABDUL WAHID", matric: "2212345", lastSync: "2026-10-20" });
+  });
+
+  it("re-sync keeps a course's late start in the same semester and drops it for a new one", () => {
+    const first = setCourseStart(applySync(emptyState(), parsed(), "2026-10-05"), "BICS 4350-1", "2026-10-07");
+    expect(applySync(first, parsed(), "2026-10-20").courses[0].startFrom).toBe("2026-10-07");
+    expect(applySync(first, parsed({ sessionName: "Sem 2, 2026/2027" }), "2027-03-01", true).courses[0].startFrom).toBeUndefined();
   });
 
   it("re-sync with a moved slot keeps past marks counted", () => {

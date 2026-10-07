@@ -62,7 +62,7 @@ export function Onboarding() {
   return (
     <div class="onboard">
       <h1>Notifications</h1>
-      <p>Bombodule asks "Did you attend?" after each class. Turn these on so the prompts arrive on time.</p>
+      <p>Bombodule asks "Did you attend?" when each class starts. Turn these on so the prompts arrive on time.</p>
       <PermissionRows />
       <button class="btn primary" onClick={() => dispatch(completeOnboarding)}>Finish</button>
     </div>

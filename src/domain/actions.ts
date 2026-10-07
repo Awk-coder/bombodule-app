@@ -10,6 +10,18 @@ export function markSession(state: AppState, sessionId: string, mark: Mark): App
   return { ...state, marks: { ...state.marks, [sessionId]: mark } };
 }
 
+/** The section's classes actually began on `date`; null goes back to the scheduled start. */
+export function setCourseStart(state: AppState, courseId: string, date: string | null): AppState {
+  return {
+    ...state,
+    courses: state.courses.map((c) => {
+      if (c.id !== courseId) return c;
+      const { startFrom: _, ...rest } = c;
+      return date ? { ...rest, startFrom: date } : rest;
+    }),
+  };
+}
+
 export function isPaused(state: AppState): boolean {
   return state.pauses.some((p) => p.to === null);
 }
@@ -52,6 +64,8 @@ export function semesterLabelDiffers(state: AppState, parsed: ParsedSchedule, to
 
 /** A new semester starts only on first sync, when the old one has ended under a new label, or when asked. */
 export function applySync(state: AppState, parsed: ParsedSchedule, today: string, startNewSemester = false): AppState {
+  const sem = state.semester;
+  const sameSemester = !!sem && !startNewSemester && (!parsed.sessionName || parsed.sessionName === sem.label || today <= sem.end);
   const previous = new Map(state.courses.map((c) => [c.id, c]));
   let nextColor = state.courses.length;
   const synced: Course[] = parsed.courses.map((p) => {
@@ -65,13 +79,12 @@ export function applySync(state: AppState, parsed: ParsedSchedule, today: string
       color: prev?.color ?? nextColor++ % PALETTE_SIZE,
       absenceLimit: prev?.absenceLimit ?? DEFAULT_LIMIT,
       active: true,
+      ...(sameSemester && prev?.startFrom && { startFrom: prev.startFrom }),
     };
   });
   const syncedIds = new Set(synced.map((c) => c.id));
   const dropped = state.courses.filter((c) => !syncedIds.has(c.id)).map((c) => ({ ...c, active: false }));
 
-  const sem = state.semester;
-  const sameSemester = !!sem && !startNewSemester && (!parsed.sessionName || parsed.sessionName === sem.label || today <= sem.end);
   const old = new Map(sameSemester ? state.slots.map((s) => [s.id, s]) : []);
   const slots = new Map<string, Slot>();
   for (const s of parsed.slots) {

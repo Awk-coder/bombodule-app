@@ -184,7 +184,7 @@ final class Prompts {
 
     static void ensureChannel(Context ctx) {
         NotificationChannel ch = new NotificationChannel(CHANNEL, "Class check-ins", NotificationManager.IMPORTANCE_HIGH);
-        ch.setDescription("Did you attend? prompts after each class, end-of-day reminders, and absence warnings");
+        ch.setDescription("Did you attend? prompts as each class starts, end-of-day reminders, and absence warnings");
         ctx.getSystemService(NotificationManager.class).createNotificationChannel(ch);
     }
 

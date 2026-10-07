@@ -35,11 +35,11 @@ describe("planNotifications: end-of-day nudge", () => {
 });
 
 describe("planNotifications: attendance", () => {
-  it("plans a prompt at the end of every future unmarked class", () => {
+  it("plans a prompt at the start of every future unmarked class", () => {
     const p = planNotifications(makeState(), at(5, 7)).filter((x) => x.kind === "attendance");
     expect(p).toHaveLength(6);
     expect(p[0]).toMatchObject({
-      at: at(5, 12, 50),
+      at: at(5, 11, 30),
       title: "Did you attend BICS 4350?",
       body: "PRIVACY ENGINEERING · ICT LR 14",
       sessionId: BICS_MON_1,
@@ -59,7 +59,7 @@ describe("planNotifications: attendance", () => {
       "BIIT 2301-1-2-08:30@2026-10-13",
       "BICS 4350-1-3-11:30@2026-10-14",
     ]);
-    expect(p[0].at).toEqual(at(7, 13, 0));
+    expect(p[0].at).toEqual(at(7, 11, 40));
   });
 
   it("gives each prompt the data its card shows", () => {

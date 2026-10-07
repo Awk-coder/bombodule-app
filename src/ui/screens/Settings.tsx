@@ -96,7 +96,7 @@ export function Settings() {
       <div class="field">
         <span>Ask "Did you attend?"</span>
         <Chips
-          options={[0, 5, 10, 15].map((m) => ({ value: m, label: m === 0 ? "At end" : `${m} min` }))}
+          options={[0, 5, 10, 15].map((m) => ({ value: m, label: m === 0 ? "At start" : `${m} min` }))}
           value={state.settings.promptDelayMin}
           onChange={(m) => dispatch((s) => updateSettings(s, { promptDelayMin: m }))}
         />

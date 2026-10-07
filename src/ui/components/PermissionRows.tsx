@@ -6,7 +6,7 @@ export function PermissionRows() {
   if (!status) return <div class="skeleton" />;
   const rows = [
     { ok: status.notifications, label: "Notifications", hint: "Needed for class prompts", fix: requestNotifications },
-    { ok: status.exactAlarms, label: "Alarms & reminders", hint: "Prompts arrive right when class ends", fix: openExactAlarmSettings },
+    { ok: status.exactAlarms, label: "Alarms & reminders", hint: "Prompts arrive right when class starts", fix: openExactAlarmSettings },
     { ok: status.battery, label: "Battery: unrestricted", hint: "Stops Nothing OS from delaying prompts", fix: openBatterySettings },
   ];
   return (

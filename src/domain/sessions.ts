@@ -9,6 +9,7 @@ export function generateSessions(state: AppState, now: Date): Session[] {
   const sem = state.semester;
   if (!sem) return [];
   const active = new Set(state.courses.filter((c) => c.active).map((c) => c.id));
+  const startFrom = new Map(state.courses.map((c) => [c.id, c.startFrom]));
   const slots = state.slots.filter((s) => active.has(s.courseId));
   const out: Session[] = [];
   const today = ymd(now);
@@ -17,6 +18,8 @@ export function generateSessions(state: AppState, now: Date): Session[] {
     const paused = isPausedOn(state.pauses, date);
     for (const slot of slots) {
       if (slot.day !== dow || (slot.from && date < slot.from) || (slot.until && date > slot.until)) continue;
+      const first = startFrom.get(slot.courseId);
+      if (first && date < first) continue;
       const id = `${slot.id}@${date}`;
       const mark = state.marks[id];
       if (paused && !mark) continue;

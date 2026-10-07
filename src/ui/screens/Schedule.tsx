@@ -1,13 +1,15 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
+import { setCourseStart } from "../../domain/actions";
 import { courseStats } from "../../domain/attendance";
 import { generateSessions } from "../../domain/sessions";
 import { hhmm } from "../../domain/time";
-import type { Slot } from "../../domain/types";
-import { useAppState } from "../../store/store";
-import { dayName, fmtTime, titleCase } from "../format";
+import type { AppState, Slot } from "../../domain/types";
+import { dispatch, useAppState } from "../../store/store";
+import { dayName, fmtDate, fmtTime, titleCase } from "../format";
 import { courseColor } from "../palette";
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
+import { Chips } from "../components/Chips";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
 import { Sheet } from "../components/Sheet";
@@ -18,11 +20,47 @@ const toMin = (t: string) => {
   return h * 60 + m;
 };
 const mondayFirst = (d: number) => (d + 6) % 7;
+const HOLD_MS = 5000; // hold a class this long to set its actual start date
+const MOVE_PX = 10; // a drag past this is a scroll, not a hold
+
+/** Every date the course is scheduled to meet this semester, ignoring any late start already set. */
+function scheduledDates(state: AppState, courseId: string, now: Date): string[] {
+  const asScheduled = { ...state, courses: state.courses.map((c) => (c.id === courseId ? { ...c, startFrom: undefined } : c)) };
+  return [...new Set(generateSessions(asScheduled, now).filter((s) => s.courseId === courseId).map((s) => s.date))];
+}
 
 export function Schedule() {
   const state = useAppState();
   const now = useNow();
   const [open, setOpen] = useState<Slot | null>(null);
+  const [startFor, setStartFor] = useState<string | null>(null); // course whose actual start is being set
+  const [holding, setHolding] = useState<string | null>(null);
+  const hold = useRef<{ timer: ReturnType<typeof setTimeout>; x: number; y: number } | null>(null);
+  const held = useRef(false); // swallow the click that ends a completed hold
+
+  const endHold = () => {
+    if (hold.current) clearTimeout(hold.current.timer);
+    hold.current = null;
+    setHolding(null);
+  };
+  const startHold = (s: Slot, e: PointerEvent) => {
+    endHold();
+    held.current = false;
+    setHolding(s.id);
+    hold.current = {
+      x: e.clientX,
+      y: e.clientY,
+      timer: setTimeout(() => {
+        held.current = true;
+        endHold();
+        setStartFor(s.courseId);
+      }, HOLD_MS),
+    };
+  };
+  const moveHold = (e: PointerEvent) => {
+    const h = hold.current;
+    if (h && Math.hypot(e.clientX - h.x, e.clientY - h.y) > MOVE_PX) endHold();
+  };
 
   const courses = new Map(state.courses.filter((c) => c.active).map((c) => [c.id, c]));
   const slots = state.slots.filter((s) => courses.has(s.courseId) && !s.until);
@@ -40,6 +78,8 @@ export function Schedule() {
 
   const openCourse = open ? courses.get(open.courseId) : undefined;
   const openStats = openCourse ? courseStats(openCourse, generateSessions(state, now)) : undefined;
+  const startCourse = startFor ? courses.get(startFor) : undefined;
+  const startDates = startFor ? scheduledDates(state, startFor, now) : [];
 
   return (
     <>
@@ -59,9 +99,18 @@ export function Schedule() {
               return (
                 <button
                   key={s.id}
-                  class="block"
+                  class={`block ${holding === s.id ? "holding" : ""}`}
                   style={`left:calc(var(--col) * ${i});top:${y(toMin(s.start)) + 3}px;height:${(toMin(s.end) - toMin(s.start)) * PX_PER_MIN - 6}px;background:${color.bg};color:${color.fg}`}
-                  onClick={() => setOpen(s)}
+                  onPointerDown={(e) => startHold(s, e)}
+                  onPointerMove={moveHold}
+                  onPointerUp={endHold}
+                  onPointerCancel={endHold}
+                  onPointerLeave={endHold}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (held.current) held.current = false;
+                    else setOpen(s);
+                  }}
                 >
                   <span class="t1">{s.start}</span>
                   <b>{c.code}</b>
@@ -90,6 +139,23 @@ export function Schedule() {
               <Meter missed={openStats.missed} limit={openStats.limit} />
             </div>
             <button class="btn primary" onClick={() => { setOpen(null); go(courseHref(openCourse.id)); }}>Open course</button>
+          </>
+        )}
+      </Sheet>
+
+      <Sheet open={!!startCourse} onClose={() => setStartFor(null)}>
+        {startCourse && (
+          <>
+            <h2>Actual start</h2>
+            <p class="group-hint">{startCourse.code} · Section {startCourse.section}. Classes before this date won't count.</p>
+            <Chips
+              options={startDates.map((d) => ({ value: d, label: fmtDate(d) }))}
+              value={startCourse.startFrom ?? startDates[0]}
+              onChange={(d) => {
+                dispatch((st) => setCourseStart(st, startCourse.id, d === startDates[0] ? null : d));
+                setStartFor(null);
+              }}
+            />
           </>
         )}
       </Sheet>

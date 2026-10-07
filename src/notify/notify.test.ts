@@ -67,7 +67,7 @@ describe("reschedule", () => {
     await reschedule(() => state, new Date(2026, 9, 5, 7));
     expect(scheduled).toHaveLength(1);
     expect(prompts[0]).toEqual({
-      id: expect.any(Number), at: new Date(2026, 9, 5, 12, 50).getTime(), kind: "attendance", sessionId: BICS_MON_1,
+      id: expect.any(Number), at: new Date(2026, 9, 5, 11, 30).getTime(), kind: "attendance", sessionId: BICS_MON_1,
       title: "Did you attend BICS 4350?", body: expect.any(String), route: "#/home",
       code: "BICS 4350", name: "Privacy Engineering", venue: "ICT LR 14", time: "11:30 AM - 12:50 PM",
       missed: 0, limit: 6, color: 0, autoMiss: false,

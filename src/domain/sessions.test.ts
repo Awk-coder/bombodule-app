@@ -61,6 +61,14 @@ describe("generateSessions", () => {
     expect(generateSessions(makeState({ pauses: [{ from: "2026-10-07", to: null }] }), at(5, 7))).toHaveLength(2);
   });
 
+  it("skips a course's classes before its actual start date, marked or not", () => {
+    const st = makeState({ marks: { [BICS_MON_1]: "attended" } });
+    st.courses[0] = { ...st.courses[0], startFrom: "2026-10-07" };
+    const bics = generateSessions(st, at(20, 7)).filter((x) => x.courseId === "BICS 4350-1");
+    expect(bics.map((x) => x.date)).toEqual(["2026-10-07", "2026-10-12", "2026-10-14"]);
+    expect(generateSessions(st, at(20, 7)).filter((x) => x.courseId === "BIIT 2301-1")).toHaveLength(2);
+  });
+
   it("ignores inactive courses", () => {
     const st = makeState();
     st.courses[1] = { ...st.courses[1], active: false };

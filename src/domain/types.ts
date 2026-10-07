@@ -10,6 +10,7 @@ export interface Course {
   color: number; // index into the course palette
   absenceLimit: number; // absences that bar you
   active: boolean; // false when dropped from i-Ma'luum on re-sync
+  startFrom?: string; // YYYY-MM-DD, set when the section's classes actually began later than scheduled
 }
 
 export interface Slot {
