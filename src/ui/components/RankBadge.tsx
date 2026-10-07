@@ -1,141 +1,10 @@
 import type { Ore } from "../../domain/grades";
+import { RANK_ART } from "./rankArt";
 
 export type BadgeKind = Ore | "unrated";
 
-export const BADGES: Record<BadgeKind, string[]> = {
-  coal: [
-    "...............",
-    ".......o.......",
-    "......oao......",
-    "......oao......",
-    ".....oabao.....",
-    ".....oacao.....",
-    "....oabcbao....",
-    "....oacwcao....",
-    "....oabcbao....",
-    ".....oacao.....",
-    ".....oabao.....",
-    "......oao......",
-    "......oao......",
-    ".......o.......",
-    "...............",
-  ],
-  iron: [
-    "...............",
-    ".......o.......",
-    "......obo......",
-    ".....obcbo.....",
-    "....obcwcbo....",
-    "...obccwccbo...",
-    "..oabccwccbao..",
-    ".oabbcwwwcbbao.",
-    "..oabccwccbao..",
-    "...oabcccbao...",
-    "....oabcbao....",
-    ".....oabao.....",
-    "......oao......",
-    ".......o.......",
-    "...............",
-  ],
-  gold: [
-    "...............",
-    ".......o.......",
-    "......oco......",
-    "......obo......",
-    ".....obcbo.....",
-    "....obcwcbo....",
-    ".ooobccwccbooo.",
-    "oacbbcwwwcbbcao",
-    ".ooobccwccbooo.",
-    "....obcwcbo....",
-    ".....obcbo.....",
-    "......obo......",
-    "......oco......",
-    ".......o.......",
-    "...............",
-  ],
-  emerald: [
-    ".......o.......",
-    "..o...oco...o..",
-    ".oco..obo..oco.",
-    "..obo.obo.obo..",
-    "...obobcbobo...",
-    "....obcwcbo....",
-    ".oobbcwwwcbboo.",
-    "ocbbcwwwwwcbbco",
-    ".oobbcwwwcbboo.",
-    "....obcwcbo....",
-    "...obobcbobo...",
-    "..obo.obo.obo..",
-    ".oco..obo..oco.",
-    "..o...oco...o..",
-    ".......o.......",
-  ],
-  diamond: [
-    "...............",
-    "...............",
-    "....ooooooo....",
-    "...obcwwwcbo...",
-    "..obccwwwccbo..",
-    ".obbcccwcccbbo.",
-    "oaabbbbbbbbbaao",
-    ".oabbcccccbbao.",
-    "..oabbcccbbao..",
-    "...oabbcbbao...",
-    "....oabbbao....",
-    ".....oabao.....",
-    "......oao......",
-    ".......o.......",
-    "...............",
-  ],
-  netherite: [
-    "...............",
-    ".o....o.o....o.",
-    "..o..obobo..o..",
-    "...oobcccboo...",
-    "..obcccwcccbo..",
-    ".obcccwwwcccbo.",
-    ".obccwwwwwccbo.",
-    "oobccwwwwwccboo",
-    ".obccwwwwwccbo.",
-    ".obcccwwwcccbo.",
-    "..obcccwcccbo..",
-    "...oobcccboo...",
-    "..o..obobo..o..",
-    ".o....o.o....o.",
-    "...............",
-  ],
-  unrated: [
-    ".......o.......",
-    "......obo......",
-    ".....obbbo.....",
-    "....obwwwbo....",
-    "...obwbbbwbo...",
-    "..obbbbbbwbbo..",
-    ".obbbbbbwbbbbo.",
-    "obbbbbbwbbbbbbo",
-    ".obbbbbbbbbbbo.",
-    "..obbbbwbbbbo..",
-    "...obbbbbbbo...",
-    "....obbbbbo....",
-    ".....obbbo.....",
-    "......obo......",
-    ".......o.......",
-  ],
-};
-
-const PALETTES: Record<BadgeKind, Record<string, string>> = {
-  coal: { o: "#0e0e12", a: "#23232b", b: "#3b3d4a", c: "#5a5e70", w: "#8a90a6" },
-  iron: { o: "#10181a", a: "#4c5a5c", b: "#9fb2b0", c: "#d4e2df", w: "#ffffff" },
-  gold: { o: "#4a2a00", a: "#a55a00", b: "#e39b10", c: "#ffd23a", w: "#fff6a8" },
-  emerald: { o: "#06330f", a: "#128a2c", b: "#2fcf55", c: "#8ff2a4", w: "#e6ffe9" },
-  diamond: { o: "#0a3a40", a: "#138f96", b: "#2ed3d0", c: "#8af5ec", w: "#e8fffd" },
-  netherite: { o: "#1a0f22", a: "#3a2350", b: "#6b3d8f", c: "#b25fd6", w: "#f0b3ff" },
-  unrated: { o: "#000000", a: "#111111", b: "#2a2a2a", c: "#555555", w: "#ffffff" },
-};
-
 export const ORE_COLOR: Record<BadgeKind, string> = {
-  coal: "#9a9fab", iron: "#ffffff", gold: "#ffaa00", emerald: "#55ff55", diamond: "#55ffff", netherite: "#c45cff", unrated: "#bbbbbb",
+  coal: "#8c919c", iron: "#dfe3e8", gold: "#f2b43a", emerald: "#3fd67a", diamond: "#56dcec", netherite: "#b07ce8", unrated: "#55585e",
 };
 
 export const ORE_NAME: Record<BadgeKind, string> = {
@@ -144,11 +13,35 @@ export const ORE_NAME: Record<BadgeKind, string> = {
 
 export const divLabel = (div: 1 | 2 | 3 | null) => (div ? "I".repeat(div) : "");
 
+const GRID = 15;
+
+/** One path per palette colour, each pixel a 1x1 square, centred on a 15x15 grid. */
+const PATHS = Object.fromEntries(
+  Object.entries(RANK_ART).map(([kind, { palette, rows }]) => {
+    const dx = (GRID - rows[0].length) / 2;
+    const dy = (GRID - rows.length) / 2;
+    const d = palette.map(() => "");
+    rows.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch !== ".") d[parseInt(ch, 36)] += `M${x + dx} ${y + dy}h1v1h-1z`;
+    }));
+    return [kind, palette.map((fill, i) => ({ fill, d: d[i] }))];
+  }),
+) as Record<BadgeKind, { fill: string; d: string }[]>;
+
+const LEAK: Partial<Record<Ore, [number, number]>> = { emerald: [0.08, 0.12], diamond: [0.13, 0.17], netherite: [0.2, 0.24] };
+
+/** How strongly the rank's colour bleeds into the page: none below Emerald, a little more each ore and division. */
+export function leakOf(ore: Ore, progress: number): number {
+  const range = LEAK[ore];
+  return range ? range[0] + (range[1] - range[0]) * Math.min(1, Math.max(0, progress)) : 0;
+}
+
 export function RankBadge({ kind, size = 96 }: { kind: BadgeKind; size?: number }) {
-  const pal = PALETTES[kind];
   return (
-    <svg class={`badge badge-${kind}`} width={size} height={size} viewBox="0 0 15 15" shape-rendering="crispEdges" aria-label={ORE_NAME[kind]}>
-      {BADGES[kind].flatMap((row, y) => [...row].map((ch, x) => (ch === "." ? null : <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={pal[ch]} />)))}
-    </svg>
+    <div class={`badge badge-${kind}`} style={{ "--rank": ORE_COLOR[kind], width: `${size}px`, height: `${size}px` }} aria-label={ORE_NAME[kind]}>
+      <svg viewBox={`0 0 ${GRID} ${GRID}`} width={size} height={size} shape-rendering="crispEdges">
+        {PATHS[kind].map((p) => <path key={p.fill} fill={p.fill} d={p.d} />)}
+      </svg>
+    </div>
   );
 }

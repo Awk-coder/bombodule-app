@@ -32,7 +32,7 @@ export function Tasks() {
       <h1 class="page-title">Tasks</h1>
       {examsOn && (
         <button class="card exams-card" onClick={() => dispatch((s) => finishExams(s, sem!.label))}>
-          <b class="pixel">Finished my last paper</b>
+          <b>Finished my last paper</b>
           <small>Tap after your final exam</small>
         </button>
       )}

@@ -21,7 +21,7 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
         {task.done && <IconCheck size={14} />}
       </button>
       <div class="grow">
-        <b>{task.final && <span class="final-tag pixel">FINAL</span>}{task.title}</b>
+        <b>{task.final && <span class="final-tag">FINAL</span>}{task.title}</b>
         <small>{[course?.code, task.done ? fmtDate(ymd(due)) : relDue(due, now)].filter(Boolean).join(" · ")}</small>
       </div>
     </div>

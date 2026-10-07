@@ -29,8 +29,8 @@ export function AchievementToast() {
   if (!a) return null;
   return (
     <div class={`adv-toast ${a.secret ? "secret" : ""}`} role="status" onClick={() => setQueue([])}>
-      <b class="pixel">{a.secret ? "Challenge Complete!" : "Advancement Made!"}</b>
-      <span class="pixel">{a.name}</span>
+      <small>{a.secret ? "Secret achievement" : "Achievement unlocked"}</small>
+      <b>{a.name}</b>
     </div>
   );
 }

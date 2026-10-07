@@ -22,6 +22,7 @@ it("locks the degree and explains why when slips are missing", () => {
   act(() => render(<Ranked />, root));
   expect(root.querySelector(".degree")!.textContent).toContain("earlier result slips");
   expect(root.querySelectorAll(".history .badge")).toHaveLength(1);
+  expect(root.querySelector(".history-item")!.textContent).toContain("2.67");
 });
 
 it("shows the degree tier when totals match", () => {
@@ -30,6 +31,7 @@ it("shows the degree tier when totals match", () => {
   act(() => render(<Ranked />, root));
   expect(root.querySelector(".degree")!.textContent).toContain("Netherite");
   expect(root.querySelector(".degree")!.textContent).toContain("4.00");
+  expect(root.querySelector(".degree .badge")!.textContent).toBe("");
 });
 
 it("shows the season rank, Elo and recent changes", () => {
@@ -41,7 +43,9 @@ it("shows the season rank, Elo and recent changes", () => {
   expect(season.textContent).toContain("915");
   expect(season.textContent).toContain("Gold I");
   expect(season.textContent).toContain("+15");
-  expect(season.querySelector(".elo-bar > span")).not.toBeNull();
+  expect(season.querySelector(".season-elo")!.textContent).toBe("915");
+  expect(season.querySelector(".badge")!.textContent).toBe("");
+  expect(season.querySelector(".elo-bar")).toBeNull();
 });
 
 it("asks before marking you graduated", () => {

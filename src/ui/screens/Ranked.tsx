@@ -10,7 +10,7 @@ import { titleCase } from "../format";
 import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
 import { AchievementGrid } from "../components/AchievementGrid";
-import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
+import { ORE_COLOR, ORE_NAME, RankBadge, divLabel, leakOf } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
 
 function ResultPicker({ imp }: { imp: ReturnType<typeof useResultImport> }) {
@@ -68,31 +68,27 @@ function usePromotion(ore: string): boolean {
   return promoted;
 }
 
-export function SeasonCard() {
+export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonElo>; rank: ReturnType<typeof rankOf> }) {
   const state = useAppState();
-  const now = useNow();
-  const season = seasonElo(state, now);
-  const rank = rankOf(season.elo);
   const kind = season.rated ? rank.ore : "unrated";
   const promoted = usePromotion(rank.ore);
   return (
-    <section class={`card season ${promoted ? "promoted" : ""}`}>
-      <div class="season-head">
-        <RankBadge kind={kind} size={112} />
-        <div>
-          <small>{state.semester?.label ?? "This semester"}{season.rated ? "" : " · placement pending"}</small>
-          <b class="pixel" style={`color:${ORE_COLOR[rank.ore]}`}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</b>
-          <span class="pixel elo">{season.elo} Elo</span>
-        </div>
-      </div>
-      <div class="elo-bar"><span style={`width:${Math.round(rank.progress * 100)}%`} /></div>
+    <section class={`season ${promoted ? "promoted" : ""}`}>
+      <RankBadge kind={kind} size={180} />
+      <b class="season-elo">{season.elo}</b>
+      <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
+      <p class="season-sub">{state.semester?.label ?? "This semester"}{season.rated ? "" : " · placement pending"}</p>
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
-      {season.changes.slice(0, 4).map((c) => (
-        <div class="elo-change" key={c.taskId}>
-          <span class={`pixel ${c.delta > 0 ? "up" : "down"}`}>{c.delta > 0 ? `+${c.delta}` : c.delta}</span>
-          <span>{c.title}</span>
+      {season.changes.length > 0 && (
+        <div class="card elo-changes">
+          {season.changes.slice(0, 4).map((c) => (
+            <div class="elo-change" key={c.taskId}>
+              <span class={c.delta > 0 ? "up" : "down"}>{c.delta > 0 ? `+${c.delta}` : c.delta}</span>
+              <span>{c.title}</span>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </section>
   );
 }
@@ -105,18 +101,23 @@ export function Ranked() {
   const results = sortResults(state.results);
   const d = degree(results);
   const dKind = d?.ok ? tierOf(d.cgpa).ore : "unrated";
+  const now = useNow();
+  const season = seasonElo(state, now);
+  const rank = rankOf(season.elo);
+  const leak = season.rated ? leakOf(rank.ore, rank.progress) : 0;
 
   return (
-    <div class="ranked">
-      <h1 class="page-title pixel">Ranked</h1>
-      <SeasonCard />
+    <div class="ranked" style={leak ? { "--leak-color": ORE_COLOR[rank.ore], "--leak": `${Math.round(leak * 100)}%` } : undefined}>
+      {leak > 0 && <div class="rank-leak" aria-hidden />}
+      <h1 class="page-title">Ranked</h1>
+      <SeasonCard season={season} rank={rank} />
 
       <section class="card degree">
-        <RankBadge kind={dKind} size={112} />
+        <RankBadge kind={dKind} size={76} />
         <div>
           <small>Degree rank</small>
-          <b class="pixel" style={`color:${ORE_COLOR[dKind]}`}>{ORE_NAME[dKind]}{d?.ok ? ` · ${tierOf(d.cgpa).tier}` : ""}</b>
-          {d?.ok && <span class="pixel">CGPA {d.cgpa.toFixed(2)}</span>}
+          <b style={{ color: ORE_COLOR[dKind] }}>{ORE_NAME[dKind]}{d?.ok ? ` · ${tierOf(d.cgpa).tier}` : ""}</b>
+          {d?.ok && <span>CGPA {d.cgpa.toFixed(2)}</span>}
           {!d && <small>Import every semester's result slip to get ranked.</small>}
           {d && !d.ok && <small>{d.reason}</small>}
         </div>
@@ -124,15 +125,15 @@ export function Ranked() {
 
       {results.length > 0 && (
         <>
-          <h2 class="section-title pixel">History</h2>
+          <h2 class="section-title">History</h2>
           <div class="history">
             {results.map((r) => {
               const g = gpa(r.courses).gpa;
               return (
                 <button key={r.label} class="history-item" onClick={() => setOpen(r)}>
-                  <RankBadge kind={tierOf(g).ore} size={48} />
+                  <RankBadge kind={tierOf(g).ore} size={64} />
+                  <b>{g.toFixed(2)}</b>
                   <small>{r.label.replace("Sem ", "S").replace(/, (\d{2})(\d{2})\/\d{2}(\d{2})/, " $2/$3")}</small>
-                  <b class="pixel">{g.toFixed(2)}</b>
                 </button>
               );
             })}
