@@ -6,6 +6,8 @@ import { dispatch, useAppState } from "../../store/store";
 import { IconChevron } from "./icons";
 import { Sheet } from "./Sheet";
 
+export const PUBLIC_NOTE = "Your name, title, season rank, degree rank and achievement count will be public on the worldwide board. Your CGPA and results stay on this phone.";
+
 type Open = "create" | "rename" | "title" | "join" | "leave" | "delete" | null;
 
 const setProfile = (p: Profile | undefined) => dispatch((s) => ({ ...s, profile: p }));
@@ -124,7 +126,7 @@ export function ProfileSection() {
 
       <Sheet open={open !== null} onClose={() => setOpen(null)}>
         {open === "create" &&
-          nameSheet("Create profile", "Create", () => void create(), "Your name, title, season rank, degree rank and achievement count will be public on the worldwide board. Your CGPA and results stay on this phone.")}
+          nameSheet("Create profile", "Create", () => void create(), PUBLIC_NOTE)}
         {open === "rename" && nameSheet("Rename", "Save", () => void rename())}
         {open === "title" && (
           <>
