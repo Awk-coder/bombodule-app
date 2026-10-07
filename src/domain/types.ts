@@ -11,6 +11,7 @@ export interface Course {
   absenceLimit: number; // absences that bar you
   active: boolean; // false when dropped from i-Ma'luum on re-sync
   startFrom?: string; // YYYY-MM-DD, set when the section's classes actually began later than scheduled
+  credits?: number; // credit hours, from the confirmation slip's Chr column
 }
 
 export interface Slot {
@@ -32,6 +33,8 @@ export interface Task {
   due: string; // ISO datetime
   note: string;
   done: boolean;
+  completedAt?: string; // ISO, set when ticked done
+  final?: boolean; // the course's final assignment
 }
 
 /** Inclusive YYYY-MM-DD range; `to: null` means still paused. */
@@ -60,6 +63,24 @@ export interface Semester {
   autoMissFrom?: string; // classes from this date not answered by the end of their day count as missed
 }
 
+export interface ResultCourse {
+  code: string;
+  title: string;
+  credits: number;
+  grade: string; // letter grade or a code like W, EX, Y
+  point: number | null; // as printed; null when the slip shows none
+}
+
+export interface SemesterResult {
+  label: string; // "Sem 2, 2025/2026"
+  courses: ResultCourse[];
+  printed: { gpa: number; cgpa: number; credits: number; cumCredits: number; cumPoints: number };
+  status: string; // e.g. "COND. PASS"
+  remarks: string;
+  importedAt: string; // ISO
+  regraded?: true; // a re-import changed a grade
+}
+
 export interface AppState {
   version: 1;
   onboarded: boolean;
@@ -71,6 +92,10 @@ export interface AppState {
   tasks: Task[];
   pauses: PauseInterval[];
   settings: Settings;
+  results: SemesterResult[];
+  examsDone: string[]; // semester labels where "Finished my last paper" was tapped
+  graduated?: string; // ISO, set by "I've graduated"
+  achievements: Record<string, string>; // id → unlocked ISO time
 }
 
 export interface Session {
@@ -107,5 +132,8 @@ export function emptyState(): AppState {
     tasks: [],
     pauses: [],
     settings: { ...DEFAULT_SETTINGS },
+    results: [],
+    examsDone: [],
+    achievements: {},
   };
 }

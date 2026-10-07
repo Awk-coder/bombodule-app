@@ -171,6 +171,17 @@ describe("tasks", () => {
 });
 
 describe("serialize / parseImport", () => {
+  it("fills ranked fields missing from older saves", () => {
+    const old = JSON.parse(serialize(makeState()));
+    delete old.results;
+    delete old.examsDone;
+    delete old.achievements;
+    const s = parseImport(JSON.stringify(old));
+    expect(s.results).toEqual([]);
+    expect(s.examsDone).toEqual([]);
+    expect(s.achievements).toEqual({});
+  });
+
   it("round-trips", () => {
     const s = markSession(makeState(), BICS_MON_1, "attended");
     expect(parseImport(serialize(s))).toEqual(s);

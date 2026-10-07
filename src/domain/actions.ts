@@ -145,5 +145,8 @@ export function parseImport(json: string): AppState {
     ...obj,
     pauses: Array.isArray(obj.pauses) ? obj.pauses : [],
     settings: { ...DEFAULT_SETTINGS, ...obj.settings },
+    results: Array.isArray(obj.results) ? obj.results : [],
+    examsDone: Array.isArray(obj.examsDone) ? obj.examsDone : [],
+    achievements: typeof obj.achievements === "object" && obj.achievements !== null ? obj.achievements : {},
   } as AppState;
 }
