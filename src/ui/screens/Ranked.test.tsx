@@ -6,7 +6,17 @@ import { result } from "../../domain/testState";
 import { dispatch, getState } from "../../store/store";
 import { Ranked } from "./Ranked";
 
-beforeEach(() => dispatch((s) => ({ ...s, results: [] })));
+beforeEach(() => {
+  dispatch((s) => ({ ...s, results: [], tasks: [], graduated: undefined }));
+  localStorage.clear();
+});
+
+const mount = () => {
+  const root = document.createElement("div");
+  act(() => render(<Ranked />, root));
+  return root;
+};
+const button = (root: HTMLElement, t: string) => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent?.includes(t))!;
 
 it("shows Unrated degree before any slip", () => {
   const root = document.createElement("div");
@@ -60,4 +70,58 @@ it("asks before marking you graduated", () => {
   act(() => find("I've graduated")!.click());
   act(() => find("Yes, I've graduated")!.click());
   expect(getState().graduated).toBeTruthy();
+});
+
+it("explains how ranking works with the full ladder", () => {
+  const root = mount();
+  act(() => button(root, "How ranking works").click());
+  const sheet = root.querySelector(".sheet")!.textContent!;
+  for (const t of ["+15", "+45", "-10", "-20", "-60", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
+  expect(root.querySelectorAll(".sheet .badge").length).toBe(6);
+});
+
+it("tells you how to get placed while unrated", () => {
+  expect(mount().querySelector(".season")!.textContent).toContain("Import last semester's slip to get placed");
+});
+
+it("removes a result from its sheet after confirming", () => {
+  act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  const root = mount();
+  act(() => (root.querySelector(".history-item") as HTMLElement).click());
+  expect(root.querySelector(".sheet .badge")).not.toBeNull();
+  act(() => button(root, "Remove result").click());
+  expect(getState().results).toHaveLength(1);
+  act(() => button(root, "Yes, remove").click());
+  expect(getState().results).toHaveLength(0);
+});
+
+it("lets you undo graduating", () => {
+  act(() => dispatch((s) => ({ ...s, graduated: "2026-10-01T00:00:00.000Z", results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  const root = mount();
+  expect(button(root, "I've graduated")).toBeUndefined();
+  act(() => button(root, "Undo graduation").click());
+  expect(getState().graduated).toBeUndefined();
+});
+
+it("says when you ranked up or down", () => {
+  act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["X 1", "B"]])] })));
+  localStorage.setItem("hadir-last-ore", "gold");
+  expect(mount().textContent).toContain("Promoted to Emerald");
+  localStorage.setItem("hadir-last-ore", "diamond");
+  expect(mount().textContent).toContain("Dropped to Emerald");
+});
+
+it("shows four Elo changes until you ask for all", () => {
+  const due = new Date(Date.now() - 86_400_000).toISOString();
+  const tasks = [1, 2, 3, 4, 5, 6].map((i) => ({ id: `t${i}`, courseId: null, title: `Task ${i}`, due, note: "", done: true }));
+  act(() => dispatch((s) => ({ ...s, tasks })));
+  const root = mount();
+  expect(root.querySelectorAll(".elo-change")).toHaveLength(4);
+  act(() => button(root, "Show all 6").click());
+  expect(root.querySelectorAll(".elo-change")).toHaveLength(6);
+});
+
+it("reminds you results only live on this phone", () => {
+  act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  expect(mount().querySelector('a[href="#/settings"]')).not.toBeNull();
 });

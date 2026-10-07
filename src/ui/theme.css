@@ -22,7 +22,9 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text) 12%, transparent) transparent; }
-html, body { overscroll-behavior: none; margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
+html, body { overscroll-behavior: none; margin: 0; color: var(--text); font-family: var(--sans); font-size: 15px; }
+/* Page colour on html only, so the Ranked colour leak (z-index -1) can sit between it and the content. */
+html { background: var(--bg); }
 /* Opaque strip behind the transparent status bar so scrolled content doesn't show through it. */
 body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 15; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -208,7 +210,6 @@ svg { vertical-align: -2px; }
 .final-tag { color: var(--warn); font-size: 11px; font-weight: 800; letter-spacing: 0.06em; margin-right: 6px; }
 
 /* Ranked: app styling; only the badge carries the rank's shape and colour. */
-.ranked { position: relative; isolation: isolate; }
 .rank-leak { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(120% 55% at 50% 0%, color-mix(in srgb, var(--leak-color) var(--leak), transparent), transparent 72%), radial-gradient(90% 40% at 50% 100%, color-mix(in srgb, var(--leak-color) calc(var(--leak) / 2), transparent), transparent 70%); animation: leak-breathe 6s ease-in-out infinite; }
 @keyframes leak-breathe { 50% { opacity: 0.75; } }
 
@@ -240,13 +241,15 @@ svg { vertical-align: -2px; }
 .history-item small { color: var(--text-muted); font-size: 11px; }
 
 .adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 32px; }
-.adv { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; opacity: 0.5; }
+.adv { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; opacity: 0.5; color: var(--text); text-align: left; font: inherit; }
 .adv.on { opacity: 1; border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .adv.secret.on { border-color: color-mix(in srgb, #b07ce8 55%, var(--border)); }
 .adv b { display: block; font-size: 14px; }
 .adv.on b { color: var(--accent); }
 .adv.secret.on b { color: #b07ce8; }
 .adv small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.adv-progress { height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; margin-top: 12px; }
+.adv-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 20; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
 .adv-toast small { display: block; color: var(--text-muted); font-size: 12px; }
 .adv-toast b { color: var(--accent); }
@@ -256,3 +259,25 @@ svg { vertical-align: -2px; }
 .exams-card { display: block; width: 100%; text-align: left; border-color: var(--warn); }
 .exams-card b { color: var(--warn); }
 .exams-card small { display: block; color: var(--text-muted); }
+.exams-card.done { border-color: var(--border); }
+.exams-card.done b { color: var(--text); }
+.btn.ghost.danger { color: var(--danger); }
+.btn.primary.danger { background: var(--danger); border-color: var(--danger); color: var(--bg); }
+/* Coal and Unrated art is near-black; a faint glow keeps the silhouette readable on the dark page. */
+.badge-coal svg, .badge-unrated svg { filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.28)); }
+.result-head { display: flex; align-items: center; gap: 14px; }
+.result-head h2 { margin-bottom: 2px; }
+.rank-change { font-size: 13px; font-weight: 700; margin: 4px 0 2px; }
+.rank-change.up { color: var(--accent); }
+.rank-change.down { color: var(--danger); }
+.show-all { display: block; margin: 4px 0 8px; padding: 0; }
+.how-link { margin: 12px auto 0; }
+.how-rules > div { display: flex; gap: 12px; font-size: 14px; padding: 7px 0; }
+.how-rules b { min-width: 38px; font-weight: 800; }
+.how-rules .up { color: var(--accent); }
+.how-rules .down { color: var(--danger); }
+.how-title { font-family: var(--serif); color: var(--accent); font-size: 18px; margin: 18px 0 6px; }
+.how-rank { display: flex; align-items: center; gap: 12px; padding: 4px 0; font-size: 14px; }
+.how-rank span { margin-left: auto; color: var(--text-muted); }
+.backup-hint { text-align: center; }
+.backup-hint a { color: var(--accent); }

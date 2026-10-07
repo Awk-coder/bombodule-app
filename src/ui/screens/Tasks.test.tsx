@@ -39,3 +39,13 @@ it("offers Finished my last paper after classes end, once", () => {
   expect(getState().examsDone).toEqual(["Sem 1, 2026/2027"]);
   expect(root.textContent).not.toContain("Finished my last paper");
 });
+
+it("lets you undo Finished my last paper", () => {
+  const today = ymd(new Date());
+  act(() => dispatch((s) => ({ ...s, examsDone: ["Sem 1, 2026/2027"], semester: { label: "Sem 1, 2026/2027", start: addDays(today, -100), end: addDays(today, -3) } })));
+  const root = document.createElement("div");
+  act(() => render(<Tasks />, root));
+  const undo = [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent?.includes("Undo"))!;
+  act(() => undo.click());
+  expect(getState().examsDone).toEqual([]);
+});

@@ -1,8 +1,9 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { setGraduated } from "../../domain/actions";
-import { seasonElo } from "../../domain/elo";
-import { degree, gpa, rankOf, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
+import { clearGraduated, removeResult, setGraduated } from "../../domain/actions";
+import { DELTA, seasonElo } from "../../domain/elo";
+import { DIVISIONS, degree, gpa, rankOf, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
+import type { Ore } from "../../domain/grades";
 import type { SemesterResult } from "../../domain/types";
 import type { ParsedResult } from "../../iium/results";
 import { dispatch, useAppState } from "../../store/store";
@@ -33,13 +34,19 @@ function ResultPicker({ imp }: { imp: ReturnType<typeof useResultImport> }) {
   );
 }
 
-function ResultSheet({ r, onClose, children }: { r: ParsedResult; onClose: () => void; children?: ComponentChildren }) {
+function ResultSheet({ r, onClose, onRemove, children }: { r: ParsedResult; onClose: () => void; onRemove?: () => void; children?: ComponentChildren }) {
   const g = gpa(r.courses).gpa;
   const mismatch = semesterMismatch({ ...r, remarks: "", importedAt: "" });
+  const [confirm, setConfirm] = useState(false);
   return (
     <Sheet open onClose={onClose}>
-      <h2>{r.label}</h2>
-      <p class="group-hint">GPA {g.toFixed(2)} · {tierOf(g).tier} tier{r.status ? ` · ${r.status}` : ""}</p>
+      <div class="result-head">
+        <RankBadge kind={tierOf(g).ore} size={48} />
+        <div>
+          <h2>{r.label}</h2>
+          <p class="group-hint">GPA {g.toFixed(2)} · {tierOf(g).tier} tier{r.status ? ` · ${r.status}` : ""}</p>
+        </div>
+      </div>
       {r.courses.map((c) => (
         <div class="row" key={c.code}>
           <div class="grow"><b>{c.code}</b><small>{titleCase(c.title)}</small></div>
@@ -48,6 +55,14 @@ function ResultSheet({ r, onClose, children }: { r: ParsedResult; onClose: () =>
       ))}
       {mismatch && <p class="error">{mismatch}</p>}
       {children}
+      {onRemove && !confirm && <button class="btn ghost danger" onClick={() => setConfirm(true)}>Remove result</button>}
+      {onRemove && confirm && (
+        <>
+          <p class="group-hint">Remove {r.label}? You can import the slip again later.</p>
+          <button class="btn primary danger" onClick={onRemove}>Yes, remove</button>
+          <button class="btn ghost" onClick={() => setConfirm(false)}>Cancel</button>
+        </>
+      )}
     </Sheet>
   );
 }
@@ -55,40 +70,82 @@ function ResultSheet({ r, onClose, children }: { r: ParsedResult; onClose: () =>
 const PROMO_KEY = "hadir-last-ore";
 const ORDER = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
 
-/** True once when the ore went up since the screen was last shown. */
-function usePromotion(ore: string): boolean {
-  const [promoted] = useState(() => {
+/** "up" or "down" once when the ore changed since the screen was last shown. */
+function useRankChange(ore: string | null): "up" | "down" | null {
+  const [change] = useState((): "up" | "down" | null => {
+    if (!ore) return null;
     let last: string | null = null;
     try {
       last = localStorage.getItem(PROMO_KEY);
       localStorage.setItem(PROMO_KEY, ore);
     } catch {}
-    return last !== null && ORDER.indexOf(ore) > ORDER.indexOf(last);
+    if (last === null || last === ore || !ORDER.includes(last)) return null;
+    return ORDER.indexOf(ore) > ORDER.indexOf(last) ? "up" : "down";
   });
-  return promoted;
+  return change;
+}
+
+const ORES = ORDER as Ore[];
+const range = (ore: Ore) => {
+  const divs = DIVISIONS.filter((d) => d.ore === ore);
+  const next = DIVISIONS[DIVISIONS.indexOf(divs.at(-1)!) + 1];
+  return next ? `${divs[0].min}–${next.min - 1}` : `${divs[0].min}+`;
+};
+
+function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const fmt = (n: number) => (n > 0 ? `+${n}` : String(n));
+  return (
+    <Sheet open={open} onClose={onClose}>
+      <h2>How ranking works</h2>
+      <p class="group-hint">Your season Elo starts from last semester's GPA and moves with your tasks. It starts over each semester, from your newest result slip.</p>
+      <div class="how-rules">
+        <div><b class="up">{fmt(DELTA.onTime)}</b><span>Task done on time</span></div>
+        <div><b class="up">{fmt(DELTA.finalOnTime)}</b><span>Final assignment done on time</span></div>
+        <div><b class="down">{fmt(DELTA.late)}</b><span>Task done late</span></div>
+        <div><b class="down">{fmt(DELTA.missed)}</b><span>Task missed</span></div>
+        <div><b class="down">{fmt(DELTA.finalMissed)}</b><span>Final assignment missed</span></div>
+      </div>
+      <h3 class="how-title">Ranks</h3>
+      {[...ORES].reverse().map((ore) => (
+        <div class="how-rank" key={ore}>
+          <RankBadge kind={ore} size={40} />
+          <b style={{ color: ORE_COLOR[ore] }}>{ORE_NAME[ore]}</b>
+          <span>{range(ore)}</span>
+        </div>
+      ))}
+      <p class="group-hint">Each rank below Netherite has divisions I, II and III. Your degree rank is separate: it comes from your CGPA once every result slip is imported.</p>
+    </Sheet>
+  );
 }
 
 export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonElo>; rank: ReturnType<typeof rankOf> }) {
   const state = useAppState();
   const kind = season.rated ? rank.ore : "unrated";
-  const promoted = usePromotion(rank.ore);
+  const change = useRankChange(season.rated ? rank.ore : null);
+  const [how, setHow] = useState(false);
+  const [all, setAll] = useState(false);
   return (
-    <section class={`season ${promoted ? "promoted" : ""}`}>
+    <section class={`season ${change === "up" ? "promoted" : ""}`}>
       <RankBadge kind={kind} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
-      <p class="season-sub">{state.semester?.label ?? "This semester"}{season.rated ? "" : " · placement pending"}</p>
+      {change && <p class={`rank-change ${change}`}>{change === "up" ? "Promoted to" : "Dropped to"} {ORE_NAME[rank.ore]}</p>}
+      <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
+      {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
       {season.changes.length > 0 && (
         <div class="card elo-changes">
-          {season.changes.slice(0, 4).map((c) => (
+          {season.changes.slice(0, all ? undefined : 4).map((c) => (
             <div class="elo-change" key={c.taskId}>
               <span class={c.delta > 0 ? "up" : "down"}>{c.delta > 0 ? `+${c.delta}` : c.delta}</span>
               <span>{c.title}</span>
             </div>
           ))}
+          {!all && season.changes.length > 4 && <button class="link show-all" onClick={() => setAll(true)}>Show all {season.changes.length}</button>}
         </div>
       )}
+      <button class="link how-link" onClick={() => setHow(true)}>How ranking works</button>
+      <HowRanking open={how} onClose={() => setHow(false)} />
     </section>
   );
 }
@@ -142,12 +199,16 @@ export function Ranked() {
       )}
 
       <ResultPicker imp={imp} />
+      {results.length > 0 && <p class="group-hint backup-hint">Results are saved on this phone only. <a href="#/settings">Back them up in Settings</a>.</p>}
       {results.length > 0 && !state.graduated && (
         <button class="btn ghost" onClick={() => setConfirmGrad(true)}>I've graduated</button>
       )}
+      {state.graduated && (
+        <button class="btn ghost" onClick={() => dispatch(clearGraduated)}>Undo graduation</button>
+      )}
       <Sheet open={confirmGrad} onClose={() => setConfirmGrad(false)}>
         <h2>Mark yourself as graduated?</h2>
-        <p class="group-hint">This can't be undone.</p>
+        <p class="group-hint">You can undo this later from this screen.</p>
         <button class="btn primary" onClick={() => { dispatch((s) => setGraduated(s, new Date())); setConfirmGrad(false); }}>Yes, I've graduated</button>
         <button class="btn ghost" onClick={() => setConfirmGrad(false)}>Cancel</button>
       </Sheet>
@@ -159,7 +220,7 @@ export function Ranked() {
           <button class="btn ghost" onClick={imp.cancel}>Cancel</button>
         </ResultSheet>
       )}
-      {open && <ResultSheet r={open} onClose={() => setOpen(null)} />}
+      {open && <ResultSheet r={open} onClose={() => setOpen(null)} onRemove={() => { dispatch((s) => removeResult(s, open.label)); setOpen(null); }} />}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { finishExams } from "../../domain/actions";
+import { finishExams, unfinishExams } from "../../domain/actions";
 import { addDays, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
@@ -22,7 +22,9 @@ export function Tasks() {
   };
   const sem = state.semester;
   const today = ymd(now);
-  const examsOn = !!sem && today > sem.end && today <= addDays(sem.end, 35) && !state.examsDone.includes(sem.label);
+  const examWindow = !!sem && today > sem.end && today <= addDays(sem.end, 35);
+  const examsOn = examWindow && !state.examsDone.includes(sem.label);
+  const examsDone = examWindow && state.examsDone.includes(sem.label);
   const row = (t: Task) => (
     <TaskRow key={t.id} task={t} course={t.courseId ? courses.get(t.courseId) : undefined} now={now} onOpen={() => edit(t)} />
   );
@@ -34,6 +36,12 @@ export function Tasks() {
         <button class="card exams-card" onClick={() => dispatch((s) => finishExams(s, sem!.label))}>
           <b>Finished my last paper</b>
           <small>Tap after your final exam</small>
+        </button>
+      )}
+      {examsDone && (
+        <button class="card exams-card done" onClick={() => dispatch((s) => unfinishExams(s, sem!.label))}>
+          <b>Exams done</b>
+          <small>Tapped by mistake? Undo</small>
         </button>
       )}
       <h2 class="section-title">Upcoming <span class="count">{upcoming.length}</span></h2>
