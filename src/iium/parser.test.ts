@@ -27,6 +27,9 @@ describe("parseTimeRange", () => {
     ["11.30 - 12.50 PM", ["11:30", "12:50"]],
     ["11.30 - 12.50 AM", ["11:30", "12:50"]], // the slip prints noon-crossing classes either way
     ["12.00 - 1.20 PM", ["12:00", "13:20"]],
+    ["5.00 - 6.20 PM", ["17:00", "18:20"]],
+    ["8.30 - 9.50 PM", ["20:30", "21:50"]],
+    ["8.00 - 10.00 PM", ["20:00", "22:00"]],
   ] as const)("%s", (text, range) => expect(parseTimeRange(text)).toEqual(range));
 
   it("rejects junk", () => {

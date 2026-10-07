@@ -54,3 +54,11 @@ it("a shorter press is a normal tap", () => {
   expect(root.textContent).not.toContain("Actual start");
   expect(root.textContent).toContain("Open course");
 });
+
+it("shows night classes, stretching the grid to 10pm", () => {
+  act(() => dispatch((s) => ({ ...s, slots: [...s.slots, { ...s.slots[0], id: "night", day: 4, start: "20:30", end: "21:50" }] })));
+  const night = [...root.querySelectorAll<HTMLElement>(".block")].filter((b) => b.textContent?.includes("BICS 4350"));
+  expect(night.length).toBe(3);
+  const labels = [...root.querySelectorAll(".hour-line span")].map((l) => l.textContent);
+  expect(labels.at(-1)).toBe("22:00");
+});
