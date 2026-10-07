@@ -4,12 +4,14 @@ import { useAppState } from "../../store/store";
 import { AchievementArt } from "./AchievementArt";
 
 const SHOW_MS = { normal: 4000, rare: 6000, legendary: 8000 };
+const EXIT_MS = 400; // matches the toast-out animation
 
 /** Minecraft-style "Advancement Made!" for unlocks that happen while the app is open. */
 export function AchievementToast() {
   const { achievements } = useAppState();
   const seen = useRef<Set<string> | null>(null);
   const [queue, setQueue] = useState<string[]>([]);
+  const [leaving, setLeaving] = useState<"one" | "all" | null>(null);
 
   useEffect(() => {
     const ids = Object.keys(achievements);
@@ -25,15 +27,25 @@ export function AchievementToast() {
   const a = ACHIEVEMENTS.find((x) => x.id === queue[0]);
 
   useEffect(() => {
-    if (!queue.length) return;
-    const t = setTimeout(() => setQueue((q) => q.slice(1)), SHOW_MS[a?.tier ?? "normal"]);
+    if (!queue.length || leaving) return;
+    const t = setTimeout(() => setLeaving("one"), SHOW_MS[a?.tier ?? "normal"]);
     return () => clearTimeout(t);
-  }, [queue]);
+  }, [queue, leaving]);
+
+  // Slide out the way it came in, then show the next one.
+  useEffect(() => {
+    if (!leaving) return;
+    const t = setTimeout(() => {
+      setQueue((q) => (leaving === "all" ? [] : q.slice(1)));
+      setLeaving(null);
+    }, EXIT_MS);
+    return () => clearTimeout(t);
+  }, [leaving]);
 
   if (!a) return null;
   const label = a.tier === "legendary" ? "Legendary achievement" : a.tier === "rare" ? "Rare achievement" : a.secret ? "Secret achievement" : "Achievement unlocked";
   return (
-    <div key={a.id} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""}`} role="status" onClick={() => setQueue([])}>
+    <div key={a.id} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""} ${leaving ? "leaving" : ""}`} role="status" onClick={() => setLeaving("all")}>
       <AchievementArt a={a} size={a.tier === "legendary" ? 64 : 20} />
       <div>
         <small>{label}</small>

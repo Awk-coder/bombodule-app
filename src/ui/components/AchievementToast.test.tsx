@@ -5,14 +5,38 @@ import { expect, it, vi } from "vitest";
 import { dispatch } from "../../store/store";
 import { AchievementToast } from "./AchievementToast";
 
-it("tapping the toast dismisses the queue", () => {
+it("tapping the toast slides it out and dismisses the queue", () => {
+  vi.useFakeTimers();
   act(() => dispatch((s) => ({ ...s, achievements: {} })));
   const root = document.createElement("div");
   act(() => render(<AchievementToast />, root));
   act(() => dispatch((s) => ({ ...s, achievements: { "taking-inventory": "2026-10-01T00:00:00.000Z", "roll-call": "2026-10-01T00:00:00.000Z" } })));
   expect(root.textContent).toContain("Taking Inventory");
   act(() => root.querySelector<HTMLElement>(".adv-toast")!.click());
+  expect(root.querySelector(".adv-toast")!.classList).toContain("leaving");
+  act(() => { vi.advanceTimersByTime(600); });
+  act(() => { vi.advanceTimersByTime(400); });
   expect(root.querySelector(".adv-toast")).toBeNull();
+  render(null, root);
+  vi.useRealTimers();
+});
+
+it("slides out the way it came in before the next one shows", () => {
+  vi.useFakeTimers();
+  act(() => dispatch((s) => ({ ...s, achievements: {} })));
+  const root = document.createElement("div");
+  act(() => render(<AchievementToast />, root));
+  act(() => dispatch((s) => ({ ...s, achievements: { "taking-inventory": "2026-10-01T00:00:00.000Z", "roll-call": "2026-10-01T00:00:00.000Z" } })));
+  act(() => { vi.advanceTimersByTime(3900); });
+  expect(root.querySelector(".adv-toast")!.classList).not.toContain("leaving");
+  act(() => { vi.advanceTimersByTime(200); });
+  expect(root.querySelector(".adv-toast")!.classList).toContain("leaving");
+  expect(root.textContent).toContain("Taking Inventory");
+  act(() => { vi.advanceTimersByTime(1000); });
+  expect(root.textContent).toContain("Roll Call");
+  expect(root.querySelector(".adv-toast")!.classList).not.toContain("leaving");
+  render(null, root);
+  vi.useRealTimers();
 });
 
 it("announces tiers, and rare ones stay up 6s and legendary ones 8s", () => {
@@ -27,13 +51,15 @@ it("announces tiers, and rare ones stay up 6s and legendary ones 8s", () => {
   expect(toast.querySelector("svg")).not.toBeNull();
   act(() => { vi.advanceTimersByTime(7500); });
   expect(root.querySelector(".adv-toast")).not.toBeNull();
-  act(() => { vi.advanceTimersByTime(1000); });
+  act(() => { vi.advanceTimersByTime(600); }); // starts sliding out
+  act(() => { vi.advanceTimersByTime(400); });
   expect(root.querySelector(".adv-toast")).toBeNull();
   act(() => dispatch((s) => ({ ...s, achievements: { ...s.achievements, "full-house": "2026-10-01T00:00:00.000Z" } })));
   expect(root.querySelector(".adv-toast")!.textContent).toContain("Rare achievement");
   act(() => { vi.advanceTimersByTime(5500); });
   expect(root.querySelector(".adv-toast")).not.toBeNull();
-  act(() => { vi.advanceTimersByTime(1000); });
+  act(() => { vi.advanceTimersByTime(600); });
+  act(() => { vi.advanceTimersByTime(400); });
   expect(root.querySelector(".adv-toast")).toBeNull();
   render(null, root);
   vi.useRealTimers();

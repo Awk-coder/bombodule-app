@@ -274,6 +274,11 @@ svg { vertical-align: -2px; }
 .adv-toast.legendary small { color: #c79cff; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .adv-toast.legendary b { display: block; color: #fff; font-size: 18px; margin-top: 2px; }
 .adv-toast.legendary .adv-art { animation: art-pop 0.7s 0.2s both; }
+.adv-toast.leaving { animation: toast-out 0.4s ease-in forwards; }
+.adv-toast.legendary.leaving { animation: legendary-out 0.4s ease-in forwards; }
+.adv-toast.leaving::after { display: none; }
+@keyframes toast-out { to { transform: translate(-50%, -120%); opacity: 0; } }
+@keyframes legendary-out { to { transform: translate(-50%, -140%) scale(0.8); opacity: 0; } }
 @keyframes toast-shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
 @keyframes legendary-in { from { transform: translate(-50%, -140%) scale(0.8); opacity: 0; } }
 @keyframes legendary-glow { from { box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); } to { box-shadow: 0 8px 24px rgb(0 0 0 / 0.4), 0 0 28px 4px rgb(176 124 232 / 0.55); } }
