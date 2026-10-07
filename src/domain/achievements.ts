@@ -175,6 +175,13 @@ const DEFS: Def[] = [
     },
   },
   { id: "what-am-i-doing", name: "What Am I Doing?", desc: "COND. PASS two semesters in a row", secret: true, hint: "Conditions apply, twice", check: (c) => condStreak(c) >= 2 },
+  {
+    id: "from-the-ashes", name: "From the Ashes", desc: "A Netherite semester after a Coal one", secret: true, hint: "Burned, then forged",
+    check: (c) => {
+      const ores = c.results.filter((r) => rGpa(r).credits > 0).map((r) => tierOf(rGpa(r).gpa).ore);
+      return ores.some((o, i) => o === "coal" && ores.slice(i + 1).includes("netherite"));
+    },
+  },
   { id: "lock-in", name: "You Need to Lock In", desc: "COND. PASS four semesters in a row", secret: true, hint: "Conditions apply, again and again", check: (c) => condStreak(c) >= 4 },
 ];
 
