@@ -58,8 +58,16 @@ it("shows the season rank, Elo and recent changes", () => {
   expect(season.querySelector(".elo-bar")).toBeNull();
 });
 
+it("offers graduating only after the semester's last paper", () => {
+  const sem = { label: "Sem 1, 2026/2027", start: "2026-10-05", end: "2027-02-01" };
+  act(() => dispatch((s) => ({ ...s, graduated: undefined, semester: sem, examsDone: [], results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  expect(button(mount(), "I've graduated")).toBeUndefined();
+  act(() => dispatch((s) => ({ ...s, examsDone: [sem.label] })));
+  expect(button(mount(), "I've graduated")).toBeTruthy();
+});
+
 it("asks before marking you graduated", () => {
-  act(() => dispatch((s) => ({ ...s, graduated: undefined, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  act(() => dispatch((s) => ({ ...s, graduated: undefined, semester: null, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
   const root = document.createElement("div");
   act(() => render(<Ranked />, root));
   const find = (t: string) => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent === t);

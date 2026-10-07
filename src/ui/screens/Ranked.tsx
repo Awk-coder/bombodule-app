@@ -110,6 +110,7 @@ export function Ranked() {
   const now = useNow();
   const season = seasonElo(state, now);
   const rank = rankOf(season.elo);
+  const lastPaperDone = !state.semester || state.examsDone.includes(state.semester.label);
   const leak = season.rated ? leakOf(rank.ore, rank.progress) : 0;
 
   return (
@@ -149,7 +150,7 @@ export function Ranked() {
 
       <ResultPicker imp={imp} />
       {results.length > 0 && <p class="group-hint backup-hint">Results are saved on this phone only. <a href="#/settings">Back them up in Settings</a>.</p>}
-      {results.length > 0 && !state.graduated && (
+      {results.length > 0 && !state.graduated && lastPaperDone && (
         <button class="btn ghost" onClick={() => setConfirmGrad(true)}>I've graduated</button>
       )}
       {state.graduated && !graduationConfirmed(state) && (

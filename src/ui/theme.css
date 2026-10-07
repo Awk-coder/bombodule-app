@@ -280,7 +280,7 @@ svg { vertical-align: -2px; }
 .how-title { font-family: var(--serif); color: var(--accent); font-size: 18px; margin: 18px 0 6px; }
 .how-rank { display: flex; align-items: center; gap: 12px; padding: 4px 0; font-size: 14px; }
 .how-rank span { margin-left: auto; color: var(--text-muted); }
-.backup-hint { text-align: center; }
+.backup-hint { text-align: center; margin-top: 12px; }
 .backup-hint a { color: var(--accent); }
 .grad-pending b { display: block; color: var(--warn); }
 .grad-pending small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }
