@@ -1,5 +1,6 @@
 import { emptyState } from "./types";
-import type { AppState, Course, Day, Slot } from "./types";
+import type { AppState, Course, Day, SemesterResult, Slot } from "./types";
+import { LETTER_POINTS, gpa } from "./grades";
 
 export function course(code: string, name: string, color = 0): Course {
   return { id: `${code}-1`, code, name, section: "1", color, absenceLimit: 6, active: true };
@@ -26,3 +27,18 @@ export function makeState(over: Partial<AppState> = {}): AppState {
 }
 
 export const BICS_MON_1 = "BICS 4350-1-1-11:30@2026-10-05";
+
+/** A result slip whose printed numbers equal what the app computes for it alone. */
+export function result(label: string, courses: [string, string, number?][], over: Partial<SemesterResult> = {}): SemesterResult {
+  const cs = courses.map(([code, grade, credits = 3]) => ({ code, title: code, credits, grade, point: LETTER_POINTS[grade] ?? null }));
+  const g = gpa(cs);
+  return {
+    label,
+    courses: cs,
+    printed: { gpa: g.gpa, cgpa: g.gpa, credits: g.credits, cumCredits: g.credits, cumPoints: g.points },
+    status: "PASS",
+    remarks: "",
+    importedAt: "2026-01-01T00:00:00.000Z",
+    ...over,
+  };
+}
