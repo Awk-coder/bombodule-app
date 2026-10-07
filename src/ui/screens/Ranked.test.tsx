@@ -31,3 +31,15 @@ it("shows the degree tier when totals match", () => {
   expect(root.querySelector(".degree")!.textContent).toContain("Netherite");
   expect(root.querySelector(".degree")!.textContent).toContain("4.00");
 });
+
+it("shows the season rank, Elo and recent changes", () => {
+  const due = new Date(Date.now() - 86_400_000).toISOString();
+  act(() => dispatch((s) => ({ ...s, results: [], tasks: [{ id: "x", courseId: null, title: "Lab 1", due, note: "", done: true, completedAt: new Date(Date.now() - 2 * 86_400_000).toISOString() }] })));
+  const root = document.createElement("div");
+  act(() => render(<Ranked />, root));
+  const season = root.querySelector(".season")!;
+  expect(season.textContent).toContain("915");
+  expect(season.textContent).toContain("Gold I");
+  expect(season.textContent).toContain("+15");
+  expect(season.querySelector(".elo-bar > span")).not.toBeNull();
+});

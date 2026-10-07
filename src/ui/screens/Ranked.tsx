@@ -1,12 +1,14 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { degree, gpa, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
+import { seasonElo } from "../../domain/elo";
+import { degree, gpa, rankOf, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
 import type { SemesterResult } from "../../domain/types";
 import type { ParsedResult } from "../../iium/results";
 import { useAppState } from "../../store/store";
 import { titleCase } from "../format";
+import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
-import { ORE_COLOR, ORE_NAME, RankBadge } from "../components/RankBadge";
+import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
 
 function ResultPicker({ imp }: { imp: ReturnType<typeof useResultImport> }) {
@@ -48,8 +50,49 @@ function ResultSheet({ r, onClose, children }: { r: ParsedResult; onClose: () =>
   );
 }
 
+const PROMO_KEY = "hadir-last-ore";
+const ORDER = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
+
+/** True once when the ore went up since the screen was last shown. */
+function usePromotion(ore: string): boolean {
+  const [promoted] = useState(() => {
+    let last: string | null = null;
+    try {
+      last = localStorage.getItem(PROMO_KEY);
+      localStorage.setItem(PROMO_KEY, ore);
+    } catch {}
+    return last !== null && ORDER.indexOf(ore) > ORDER.indexOf(last);
+  });
+  return promoted;
+}
+
 export function SeasonCard() {
-  return null; // replaced in Task 10
+  const state = useAppState();
+  const now = useNow();
+  const season = seasonElo(state, now);
+  const rank = rankOf(season.elo);
+  const kind = season.rated ? rank.ore : "unrated";
+  const promoted = usePromotion(rank.ore);
+  return (
+    <section class={`card season ${promoted ? "promoted" : ""}`}>
+      <div class="season-head">
+        <RankBadge kind={kind} size={112} />
+        <div>
+          <small>{state.semester?.label ?? "This semester"}{season.rated ? "" : " · placement pending"}</small>
+          <b class="pixel" style={`color:${ORE_COLOR[rank.ore]}`}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</b>
+          <span class="pixel elo">{season.elo} Elo</span>
+        </div>
+      </div>
+      <div class="elo-bar"><span style={`width:${Math.round(rank.progress * 100)}%`} /></div>
+      <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
+      {season.changes.slice(0, 4).map((c) => (
+        <div class="elo-change" key={c.taskId}>
+          <span class={`pixel ${c.delta > 0 ? "up" : "down"}`}>{c.delta > 0 ? `+${c.delta}` : c.delta}</span>
+          <span>{c.title}</span>
+        </div>
+      ))}
+    </section>
+  );
 }
 
 export function Ranked() {

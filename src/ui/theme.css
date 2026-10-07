@@ -215,3 +215,15 @@ svg { vertical-align: -2px; }
 .history-item small { color: var(--text-muted); font-size: 11px; }
 .task-final { border-color: color-mix(in srgb, #ffaa00 55%, var(--border)); }
 .final-tag { color: #ffaa00; font-size: 11px; margin-right: 6px; }
+.season-head { display: flex; align-items: center; gap: 16px; }
+.season-head > div { display: flex; flex-direction: column; gap: 4px; }
+.season-head small, .elo-next { color: var(--text-muted); font-size: 13px; }
+.season-head b { font-size: 26px; }
+.elo { font-size: 18px; }
+.elo-bar { height: 10px; background: #1b1b1f; border: 2px solid #000; margin: 14px 0 6px; image-rendering: pixelated; }
+.elo-bar > span { display: block; height: 100%; background: repeating-linear-gradient(90deg, #55ff55 0 6px, #3ccf3c 6px 8px); }
+.elo-change { display: flex; gap: 10px; font-size: 14px; margin-top: 8px; }
+.elo-change .up { color: #55ff55; min-width: 36px; }
+.elo-change .down { color: #ff5555; min-width: 36px; }
+.season.promoted .badge { animation: promote 1.2s steps(6) 1; }
+@keyframes promote { 0% { transform: scale(0.4); filter: brightness(3); } 60% { transform: scale(1.15); } 100% { transform: scale(1); filter: none; } }
