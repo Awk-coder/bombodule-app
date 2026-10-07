@@ -36,7 +36,11 @@ const perfect = (c: Ctx, course: Course) => {
   return list.length > 0 && list.every((x) => x.status === "attended");
 };
 const missed = (c: Ctx, course: Course) => courseStats(course, c.sessions).missed;
-const hijriMonth = (d: Date) => Number(new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { month: "numeric", timeZone: "Asia/Kuala_Lumpur" }).formatToParts(d).find((p) => p.type === "month")?.value);
+let hijri: Intl.DateTimeFormat | undefined;
+const hijriMonth = (d: Date) => {
+  hijri ??= new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { month: "numeric", timeZone: "Asia/Kuala_Lumpur" });
+  return Number(hijri.formatToParts(d).find((p) => p.type === "month")?.value);
+};
 
 /** Attempts per course code in slip order, counted grades only. */
 function attempts(c: Ctx): Map<string, number[]> {
@@ -142,8 +146,9 @@ const DEFS: Def[] = [
   {
     id: "fasting-scholar", name: "Fasting Scholar", desc: "Attend every class in Ramadan", secret: true,
     check: (c) => {
+      if (!c.ended) return false;
       const ram = c.sessions.filter((x) => hijriMonth(x.start) === 9);
-      return c.ended && ram.length > 0 && ram.every((x) => x.status === "attended");
+      return ram.length > 0 && ram.every((x) => x.status === "attended");
     },
   },
   { id: "what-am-i-doing", name: "What Am I Doing?", desc: "COND. PASS two semesters in a row", secret: true, check: (c) => condStreak(c) >= 2 },

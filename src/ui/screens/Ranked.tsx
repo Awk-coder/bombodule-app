@@ -101,6 +101,7 @@ export function Ranked() {
   const state = useAppState();
   const imp = useResultImport();
   const [open, setOpen] = useState<SemesterResult | null>(null);
+  const [confirmGrad, setConfirmGrad] = useState(false);
   const results = sortResults(state.results);
   const d = degree(results);
   const dKind = d?.ok ? tierOf(d.cgpa).ore : "unrated";
@@ -141,8 +142,14 @@ export function Ranked() {
 
       <ResultPicker imp={imp} />
       {results.length > 0 && !state.graduated && (
-        <button class="btn ghost" onClick={() => dispatch((s) => setGraduated(s, new Date()))}>I've graduated</button>
+        <button class="btn ghost" onClick={() => setConfirmGrad(true)}>I've graduated</button>
       )}
+      <Sheet open={confirmGrad} onClose={() => setConfirmGrad(false)}>
+        <h2>Mark yourself as graduated?</h2>
+        <p class="group-hint">This can't be undone.</p>
+        <button class="btn primary" onClick={() => { dispatch((s) => setGraduated(s, new Date())); setConfirmGrad(false); }}>Yes, I've graduated</button>
+        <button class="btn ghost" onClick={() => setConfirmGrad(false)}>Cancel</button>
+      </Sheet>
       {imp.error && <p class="error">{imp.error.message}</p>}
       <AchievementGrid />
       {imp.preview && (

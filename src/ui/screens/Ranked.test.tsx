@@ -3,7 +3,7 @@ import { render } from "preact";
 import { act } from "preact/test-utils";
 import { beforeEach, expect, it } from "vitest";
 import { result } from "../../domain/testState";
-import { dispatch } from "../../store/store";
+import { dispatch, getState } from "../../store/store";
 import { Ranked } from "./Ranked";
 
 beforeEach(() => dispatch((s) => ({ ...s, results: [] })));
@@ -42,4 +42,18 @@ it("shows the season rank, Elo and recent changes", () => {
   expect(season.textContent).toContain("Gold I");
   expect(season.textContent).toContain("+15");
   expect(season.querySelector(".elo-bar > span")).not.toBeNull();
+});
+
+it("asks before marking you graduated", () => {
+  act(() => dispatch((s) => ({ ...s, graduated: undefined, results: [result("Sem 2, 2025/2026", [["BICS 4350", "B-"]])] })));
+  const root = document.createElement("div");
+  act(() => render(<Ranked />, root));
+  const find = (t: string) => [...root.querySelectorAll<HTMLElement>("button")].find((b) => b.textContent === t);
+  act(() => find("I've graduated")!.click());
+  expect(getState().graduated).toBeUndefined();
+  act(() => find("Cancel")!.click());
+  expect(getState().graduated).toBeUndefined();
+  act(() => find("I've graduated")!.click());
+  act(() => find("Yes, I've graduated")!.click());
+  expect(getState().graduated).toBeTruthy();
 });

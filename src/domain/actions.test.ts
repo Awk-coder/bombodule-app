@@ -231,6 +231,12 @@ describe("result slips", () => {
     expect(importResult(a, changed, now).results[0].regraded).toBe(true);
   });
 
+  it("does not mark a pending grade being released as a regrade", () => {
+    const pending = { ...parsed, courses: parsed.courses.map((c) => (c.code === "BIIT 2301" ? { ...c, grade: "*", point: null } : c)) };
+    const a = importResult(makeState(), pending, now);
+    expect(importResult(a, parsed, now).results[0].regraded).toBeUndefined();
+  });
+
   it("records exams done once per semester, and graduation", () => {
     const a = finishExams(finishExams(makeState(), "Sem 1, 2026/2027"), "Sem 1, 2026/2027");
     expect(a.examsDone).toEqual(["Sem 1, 2026/2027"]);

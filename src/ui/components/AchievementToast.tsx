@@ -28,7 +28,7 @@ export function AchievementToast() {
   const a = ACHIEVEMENTS.find((x) => x.id === queue[0]);
   if (!a) return null;
   return (
-    <div class={`adv-toast ${a.secret ? "secret" : ""}`} role="status">
+    <div class={`adv-toast ${a.secret ? "secret" : ""}`} role="status" onClick={() => setQueue([])}>
       <b class="pixel">{a.secret ? "Challenge Complete!" : "Advancement Made!"}</b>
       <span class="pixel">{a.name}</span>
     </div>

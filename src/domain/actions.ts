@@ -1,6 +1,7 @@
 import { DEFAULT_LIMIT, DEFAULT_SETTINGS, PALETTE_SIZE, SEMESTER_DAYS, emptyState } from "./types";
 import type { AppState, Course, Mark, Settings, Slot, Task } from "./types";
 import { IIUM_CALENDAR } from "./calendar";
+import { countedPoint } from "./grades";
 import { addDays } from "./time";
 import type { ParsedSchedule } from "../iium/parser";
 import type { ParsedResult } from "../iium/results";
@@ -135,8 +136,13 @@ function newSemester(state: AppState, label: string, today: string): Pick<AppSta
 /** Save a semester's result slip; re-importing replaces it and notes whether any grade changed. */
 export function importResult(state: AppState, parsed: ParsedResult, now: Date): AppState {
   const prev = state.results.find((r) => r.label === parsed.label);
-  const grade = (code: string) => prev?.courses.find((c) => c.code === code)?.grade;
-  const regraded = !!prev && (prev.regraded || parsed.courses.some((c) => grade(c.code) !== undefined && grade(c.code) !== c.grade));
+  const old = (code: string) => prev?.courses.find((c) => c.code === code);
+  // A pending grade (*, IP, I) being released is not a regrade; only a final grade changing is.
+  const changed = (c: ParsedResult["courses"][number]) => {
+    const o = old(c.code);
+    return !!o && countedPoint(o) !== null && o.grade !== c.grade;
+  };
+  const regraded = !!prev && (prev.regraded || parsed.courses.some(changed));
   const next = { ...parsed, importedAt: now.toISOString(), ...(regraded && { regraded: true as const }) };
   return { ...state, results: [...state.results.filter((r) => r.label !== parsed.label), next] };
 }

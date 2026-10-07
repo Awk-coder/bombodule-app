@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ACHIEVEMENTS, earned, recordAchievements } from "./achievements";
 import { generateSessions } from "./sessions";
 import { course, makeState, result, slot } from "./testState";
@@ -96,4 +96,11 @@ describe("achievements", () => {
     const settled = recordAchievements(a, NOW);
     expect(settled).toBe(a);
   });
+});
+
+it("skips the Hijri calendar while the semester is running", () => {
+  const spy = vi.spyOn(Intl, "DateTimeFormat");
+  earned(markAll(base(), NOW, "attended"), NOW);
+  expect(spy.mock.calls.filter((c) => String(c[0]).includes("islamic"))).toHaveLength(0);
+  spy.mockRestore();
 });
