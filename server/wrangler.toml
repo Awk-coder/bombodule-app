@@ -5,4 +5,4 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "bombodule"
-database_id = "REPLACE_WITH_ID_FROM_d1_create"
+database_id = "831c53d1-50e0-4cef-a88b-f2db5ab12548"
