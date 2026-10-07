@@ -142,8 +142,8 @@ const DEFS: Def[] = [
   { id: "how-did-we-get-here", tier: "rare", name: "How Did We Get Here?", desc: "Take 23 or more credit hours in a semester", check: (c) => maxCredits(c) >= 23 },
   { id: "redemption-arc", tier: "rare", name: "Redemption Arc", desc: "Pass a course you failed before", check: (c) => [...attempts(c).values()].some((ps) => ps.some((p, i) => p < 2 && ps.slice(i + 1).some((q) => q >= 2))) },
   { id: "we-need-to-cook", name: "We Need to Cook, Jesse", desc: "Take a cooking or baking skill course", check: tookAny },
-  { id: "master-baker", tier: "rare", name: "Master Baker", desc: "Pass both levels of Baking", check: (c) => passedOf(BAKING)(c) === BAKING.length, goal: [passedOf(BAKING), BAKING.length] },
-  { id: "gordons-protege", tier: "rare", name: "Gordon's Protege", desc: "Pass both levels of Cooking", check: (c) => passedOf(COOKING)(c) === COOKING.length, goal: [passedOf(COOKING), COOKING.length] },
+  { id: "master-baker", tier: "rare", name: "Master Baker", desc: "Pass both levels of Baking", secret: true, hint: "Rise to the occasion, twice", check: (c) => passedOf(BAKING)(c) === BAKING.length, goal: [passedOf(BAKING), BAKING.length] },
+  { id: "gordons-protege", tier: "rare", name: "Gordon's Protege", desc: "Pass both levels of Cooking", secret: true, hint: "Yes, chef! Twice over", check: (c) => passedOf(COOKING)(c) === COOKING.length, goal: [passedOf(COOKING), COOKING.length] },
   { id: "those-were-the-days", name: "Those Were the Days", desc: "Import a slip from an earlier semester", check: (c) => !!c.s.semester && c.results.some((r) => labelKey(r.label) < labelKey(c.s.semester!.label)) },
   // Secret
   { id: "voluntary-exile", tier: "rare", name: "Voluntary Exile", desc: "Get barred", secret: true, hint: "Too many empty seats", check: (c) => c.active.some((x) => missed(c, x) >= x.absenceLimit) || anyGrade(c, "Y") },

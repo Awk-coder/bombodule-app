@@ -82,9 +82,9 @@ const CASES: Case[] = [
 ];
 
 describe("achievements", () => {
-  it("has 50 unique ids, 19 secret, and a case for each", () => {
+  it("has 50 unique ids, 21 secret, and a case for each", () => {
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(50);
-    expect(ACHIEVEMENTS.filter((a) => a.secret)).toHaveLength(19);
+    expect(ACHIEVEMENTS.filter((a) => a.secret)).toHaveLength(21);
     expect(CASES.map((c) => c[0]).sort()).toEqual(ACHIEVEMENTS.map((a) => a.id).sort());
   });
 
