@@ -202,3 +202,14 @@ svg { vertical-align: -2px; }
 .theme-opt b { display: block; font-size: 14px; margin: 8px 4px 2px; }
 .theme-dot { display: inline-flex; width: 44px; height: 24px; flex: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
 .theme-dot span { flex: 1; }
+.pixel { font-family: "Pixelify Sans", var(--sans); letter-spacing: 0.02em; }
+.greeting { position: relative; }
+.gear { position: absolute; right: 0; top: 0; padding: 8px; color: var(--text-muted); }
+.ranked .degree { display: flex; align-items: center; gap: 16px; }
+.ranked .degree > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ranked .degree b { font-size: 24px; }
+.ranked .degree small { color: var(--text-muted); }
+.badge { image-rendering: pixelated; flex: none; }
+.history { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; }
+.history-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; color: var(--text); }
+.history-item small { color: var(--text-muted); font-size: 11px; }

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "preact/hooks";
 
-export type Tab = "home" | "schedule" | "tasks" | "courses" | "settings";
+export type Tab = "home" | "schedule" | "tasks" | "courses" | "ranked" | "settings";
 export interface Route {
   tab: Tab;
   courseId?: string;
 }
 
-const TABS: Tab[] = ["home", "schedule", "tasks", "courses", "settings"];
+const TABS: Tab[] = ["home", "schedule", "tasks", "courses", "ranked", "settings"];
 
 export function parseHash(hash: string): Route {
   const [, a, b] = hash.replace(/^#/, "").split("/");

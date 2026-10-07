@@ -11,12 +11,13 @@ import { CourseDetail } from "./ui/screens/CourseDetail";
 import { Courses } from "./ui/screens/Courses";
 import { Home } from "./ui/screens/Home";
 import { Onboarding } from "./ui/screens/Onboarding";
+import { Ranked } from "./ui/screens/Ranked";
 import { Schedule } from "./ui/screens/Schedule";
 import { Settings } from "./ui/screens/Settings";
 import { Tasks } from "./ui/screens/Tasks";
 import { applyTheme } from "./ui/themes";
 
-const SCREENS: Record<Tab, () => JSX.Element> = { home: Home, schedule: Schedule, tasks: Tasks, courses: Courses, settings: Settings };
+const SCREENS: Record<Tab, () => JSX.Element> = { home: Home, schedule: Schedule, tasks: Tasks, courses: Courses, ranked: Ranked, settings: Settings };
 
 function LoadError({ message, raw }: { message: string; raw: string }) {
   return (

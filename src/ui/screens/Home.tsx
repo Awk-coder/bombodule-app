@@ -8,7 +8,7 @@ import { dispatch, useAppState } from "../../store/store";
 import { dayName, fmtDate, fmtTime, greeting, minutesLeft, relDue, shortName, titleCase } from "../format";
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
-import { IconCheck, IconClock, IconPin } from "../components/icons";
+import { IconCheck, IconClock, IconPin, IconSettings } from "../components/icons";
 import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
@@ -88,6 +88,7 @@ export function Home() {
   return (
     <>
       <header class="greeting">
+        <a class="gear" href="#/settings" aria-label="Settings"><IconSettings size={22} /></a>
         <p>{greeting(now)}</p>
         <h1>{state.account?.name ? shortName(state.account.name) : "Student"}</h1>
       </header>
