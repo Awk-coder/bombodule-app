@@ -12,7 +12,7 @@ Uni app only. Agreed in chat 2026-10-07; the user said "go ahead and build" afte
   - a hand-picked set of achievements unlock one each;
   - reaching **Diamond** or **Netherite** in a season unlocks that rank's title. It shows plainly for the rest of that semester and all of the next; if the next semester passes without reaching that rank again it reads "Fallen …" until the rank is reached again.
 - Server: Cloudflare Worker + D1, in `server/`. Phone identifies itself with a random key; server stores only its SHA-256 hash.
-- Boards only list players on the viewer's semester label. Server rejects Elo outside 0–5000, ranks that don't match the Elo, and more than one update per player per 10 s.
+- Boards only list players on the viewer's semester label. Server rejects Elo outside 0–5000 and more than one stats update per player per 10 s; it works out the season rank from the Elo itself, so a phone can't claim a rank its Elo doesn't earn.
 
 ## Server API
 
@@ -21,7 +21,7 @@ All JSON. `Authorization: Bearer <key>` where marked (auth).
 | Method | Path | Body | Result |
 |---|---|---|---|
 | POST | /players | `{ name }` | `201 { id, key, name }`, `409` name taken, `400` invalid |
-| GET | /me (auth) | | `{ player, group }` |
+| GET | /me (auth) | | `{ player }`, with the group code as `player.group` |
 | PATCH | /me (auth) | `{ name?, title?, stats? }` | `204`, `409` name taken, `429` too soon |
 | DELETE | /me (auth) | | `204` |
 | POST | /groups (auth) | | `{ code }` (creator joins, leaves any old group) |
@@ -47,3 +47,9 @@ All JSON. `Authorization: Bearer <key>` where marked (auth).
 - "The next semester" is the latest semester the app has recorded before the current one.
 - No name moderation beyond the character rules; deleting a profile is the remedy.
 - Unrated players are listed below rated ones.
+- Only stats pushes are rate-limited; renames, titles and group changes are not.
+- The group code is kept on the phone (`profile.group`) so Settings and the boards need no extra request.
+- The board rows already carry the whole public profile, so tapping a player opens the sheet instantly with no fetch.
+- The title picker works without a server (titles show under your season rank either way).
+- Deleting a profile the server no longer knows still clears it from the phone.
+- Group codes are 6 characters from A–Z and 2–9 without I, O, 0 and 1; joining ignores case.
