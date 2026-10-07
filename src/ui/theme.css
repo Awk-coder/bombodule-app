@@ -240,3 +240,5 @@ svg { vertical-align: -2px; }
 .adv-toast.secret b { color: #ff55ff; }
 .adv-toast span { color: #fff; }
 @keyframes toast-in { from { transform: translate(-50%, -120%); } }
+.exams-card { display: block; width: 100%; text-align: left; border: 2px solid #ffaa00; }
+.exams-card small { display: block; color: var(--text-muted); }

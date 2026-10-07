@@ -1,10 +1,11 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
+import { setGraduated } from "../../domain/actions";
 import { seasonElo } from "../../domain/elo";
 import { degree, gpa, rankOf, semesterMismatch, sortResults, tierOf } from "../../domain/grades";
 import type { SemesterResult } from "../../domain/types";
 import type { ParsedResult } from "../../iium/results";
-import { useAppState } from "../../store/store";
+import { dispatch, useAppState } from "../../store/store";
 import { titleCase } from "../format";
 import { useNow } from "../useNow";
 import { useResultImport } from "../useResultImport";
@@ -139,6 +140,9 @@ export function Ranked() {
       )}
 
       <ResultPicker imp={imp} />
+      {results.length > 0 && !state.graduated && (
+        <button class="btn ghost" onClick={() => dispatch((s) => setGraduated(s, new Date()))}>I've graduated</button>
+      )}
       {imp.error && <p class="error">{imp.error.message}</p>}
       <AchievementGrid />
       {imp.preview && (
