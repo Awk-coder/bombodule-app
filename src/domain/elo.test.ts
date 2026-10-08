@@ -8,7 +8,7 @@ const task = (id: string, due: string, over: Partial<Task> = {}): Task => ({ id,
 
 describe("seasonElo", () => {
   it("is unrated at 900 without a previous slip", () => {
-    expect(seasonElo(makeState(), now)).toEqual({ rated: false, placement: 900, elo: 900, changes: [] });
+    expect(seasonElo(makeState(), now)).toMatchObject({ rated: false, placement: 900, elo: 900, changes: [] });
   });
 
   it("places from the latest earlier slip only", () => {
@@ -46,21 +46,26 @@ describe("seasonElo", () => {
     expect(seasonElo(s, now).placement).toBe(1999);
   });
 
-  it("awards credit load bonuses for heavy semesters", () => {
-    // 15 credits (5 courses x 3 credits) gets +80 load bonus
+  it("awards credit load bonuses for heavy overload (> 18 credits)", () => {
+    // 15 credits (<= 18) gets +0 overload bonus
     const courses5 = Array.from({ length: 5 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
     const s5 = makeState({ results: [result("Sem 2, 2025/2026", courses5)] });
-    // A is 4.00 (base 2300) + 80 load bonus = 2380
-    expect(seasonElo(s5, now).placement).toBe(2380);
+    // A is 4.00 (base 2300) + 0 overload bonus = 2300
+    expect(seasonElo(s5, now).placement).toBe(2300);
 
-    // 21 credits (7 courses x 3 credits) gets +120 overload bonus
+    // 18 credits (<= 18) gets +0 overload bonus
+    const courses6 = Array.from({ length: 6 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
+    const s6 = makeState({ results: [result("Sem 2, 2025/2026", courses6)] });
+    expect(seasonElo(s6, now).placement).toBe(2300);
+
+    // 21 credits (7 courses x 3 credits, 3 cr > 18) gets +30 overload bonus (10 * 3)
     const courses7 = Array.from({ length: 7 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
     const s7 = makeState({ results: [result("Sem 2, 2025/2026", courses7)] });
-    expect(seasonElo(s7, now).placement).toBe(2420);
+    expect(seasonElo(s7, now).placement).toBe(2330);
   });
 
-  it("awards underdog comeback bonus and 1.35x task velocity when jumping >= 1.0 GPA", () => {
-    // Sem 1 was 1.67 (D), Sem 2 was 3.67 (A-): delta is +2.00 (>= 1.0)
+  it("awards underdog comeback bonus only when leaping from <= 2.20 GPA, and strictly once", () => {
+    // Sem 1 was 1.67 (D, <= 2.20), Sem 2 was 3.67 (A-): delta is +2.00 (>= 1.0)
     // 1 course x 3 credits has 0 load bonus, so base 1783 + 100 comeback bonus = 1883
     const s = makeState({
       results: [
@@ -73,8 +78,31 @@ describe("seasonElo", () => {
     });
     const season = seasonElo(s, now);
     expect(season.placement).toBe(1883);
+    expect(season.comebackActive).toBe(true);
     // Task delta has 1.35x velocity: round(6 * 1.35) = 8
     expect(season.changes[0].delta).toBe(8);
+
+    // When student advances to Sem 3 (e.g. 3.67 GPA), they already used their one-time comeback
+    const sNext = makeState({
+      results: [
+        result("Sem 1, 2024/2025", [["X 1000", "D"]]),
+        result("Sem 2, 2024/2025", [["X 1000", "A-"]]),
+        result("Sem 1, 2025/2026", [["X 1000", "A-"]]),
+      ],
+    });
+    const seasonNext = seasonElo(sNext, now);
+    expect(seasonNext.placement).toBe(1783); // base only, no repeat comeback
+    expect(seasonNext.comebackActive).toBe(false);
+
+    // If previous GPA was > 2.20 (e.g., 2.67), no comeback bonus even if jumping >= 1.0
+    const sNoComeback = makeState({
+      results: [
+        result("Sem 1, 2024/2025", [["X 1000", "B-"]]), // 2.67
+        result("Sem 2, 2024/2025", [["X 1000", "A-"]]), // 3.67 (+1.00)
+      ],
+    });
+    expect(seasonElo(sNoComeback, now).placement).toBe(1783);
+    expect(seasonElo(sNoComeback, now).comebackActive).toBe(false);
   });
 
   it("caps positive task Elo gains at 5 tasks per calendar week", () => {

@@ -65,7 +65,10 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div><b class="down">{DELTA.missed}</b><span>Task missed</span></div>
         <div><b class="down">{DELTA.finalMissed}</b><span>Final assignment missed</span></div>
       </div>
-      <p class="group-hint">Max 5 on-time tasks per week give Elo. Short semesters (Sem 3) are capped at Diamond III. Tasks give diminishing returns in Netherite to keep the top tier competitive.</p>
+      <p class="group-hint"><b>Weekly Cap:</b> Max 5 on-time tasks per calendar week give positive Elo.</p>
+      <p class="group-hint"><b>Overload Bonus:</b> Semesters with &gt;18 credits gain +10 Elo for every credit above 18.</p>
+      <p class="group-hint"><b>One-Time Comeback:</b> Students with &le;2.20 GPA in a past semester gain a one-time +100 Elo bonus and 1.35× task velocity buff when jumping &ge;+1.0 GPA (+50 Elo for &ge;+0.5). Once you climb you must stay there.</p>
+      <p class="group-hint"><b>Short Semesters:</b> Sem 3 is capped at Diamond III (max 1999 Elo) without bonuses.</p>
       <h3 class="how-title">Ranks</h3>
       {[...ORES].reverse().map((ore) => (
         <div class="how-rank" key={ore}>
@@ -86,16 +89,32 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
   const [how, setHow] = useState(false);
   const [all, setAll] = useState(false);
   const title = state.title ? titleText(state, state.title) : null;
+  const pb = season.placementBreakdown;
   return (
     <section class={`season ${change === "up" ? "promoted" : ""}`}>
       <RankBadge kind={kind} div={season.rated ? rank.div : null} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
       {title && <p class="season-title">{title}</p>}
+      {season.comebackActive && (
+        <span class="buff-pill">🔥 1.35× Comeback Velocity Active</span>
+      )}
       {change && <p class={`rank-change ${change}`}>{change === "up" ? "Promoted to" : "Dropped to"} {ORE_NAME[rank.ore]} {divLabel(rank.div)}</p>}
       <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
       {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
+      {season.rated && pb && (pb.loadBonus > 0 || pb.comebackBonus > 0) && (
+        <small class="placement-breakdown">
+          Placed {season.placement} Elo (Base {pb.base}
+          {pb.loadBonus > 0 ? ` + ${pb.loadBonus} Overload` : ""}
+          {pb.comebackBonus > 0 ? ` + ${pb.comebackBonus} Comeback` : ""})
+        </small>
+      )}
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
+      {season.rated && (
+        <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`}>
+          <span>{season.weeklyTaskCount >= 5 ? "⚡ Weekly task cap reached (5/5)" : `⚡ Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
+        </div>
+      )}
       {season.changes.length > 0 && (
         <div class="card elo-changes">
           {season.changes.slice(0, all ? undefined : 4).map((c) => (

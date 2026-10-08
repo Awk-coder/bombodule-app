@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { finishExams, unfinishExams } from "../../domain/actions";
+import { seasonElo } from "../../domain/elo";
 import { ImportSlip } from "../components/ResultSlip";
 import { addDays, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
@@ -27,6 +28,7 @@ export function Tasks() {
   const examsOn = examWindow && !state.examsDone.includes(sem.label);
   // Tapped "Finished my last paper" but that semester's slip isn't in yet: not ticked until it is.
   const examsPending = !!sem && state.examsDone.includes(sem.label) && !state.results.some((r) => r.label === sem.label);
+  const season = seasonElo(state, now);
   const row = (t: Task) => (
     <TaskRow key={t.id} task={t} course={t.courseId ? courses.get(t.courseId) : undefined} now={now} onOpen={() => edit(t)} />
   );
@@ -46,6 +48,11 @@ export function Tasks() {
           <small>Your exams count as finished once you import it.</small>
           <ImportSlip label="Import slip" />
           <button class="btn ghost" onClick={() => dispatch((s) => unfinishExams(s, sem!.label))}>Undo</button>
+        </div>
+      )}
+      {season.rated && (
+        <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`} style={{ marginBottom: "16px" }}>
+          <span>{season.weeklyTaskCount >= 5 ? "⚡ Weekly task cap reached (5/5)" : `⚡ Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
         </div>
       )}
       <h2 class="section-title">Upcoming <span class="count">{upcoming.length}</span></h2>
