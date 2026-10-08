@@ -3,11 +3,34 @@ import type { TextItem } from "./parser";
 
 let result: TextItem[] | Error = [];
 vi.mock("./pdf", () => ({
+  loadPdfDoc: async () => {
+    if (result instanceof Error) throw result;
+    return {
+      numPages: 1,
+      getPage: async () => ({
+        render: () => ({ promise: Promise.resolve() }),
+        getViewport: () => ({ width: 100, height: 100 }),
+      }),
+      destroy: async () => {},
+    };
+  },
+  textItems: async () => {
+    if (result instanceof Error) throw result;
+    return result;
+  },
   readPdf: async () => {
     if (result instanceof Error) throw result;
     return result;
   },
 }));
+
+vi.mock("./ocr", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("./ocr")>();
+  return {
+    ...mod,
+    ocrPdf: async () => "",
+  };
+});
 
 const { SyncError, readSlip } = await import("./sync");
 const row = (y: number, ...cells: string[]): TextItem[] => cells.map((str, i) => ({ str, x: i * 10, y }));

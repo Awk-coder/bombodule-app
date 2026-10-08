@@ -8,16 +8,23 @@ export function useResultImport() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [preview, setPreview] = useState<ParsedResult | null>(null);
+  const [progress, setProgress] = useState<{ message: string; percent?: number } | null>(null);
 
   async function start(file: Blob) {
     setBusy(true);
     setError(null);
+    setProgress(null);
     try {
-      setPreview(await readResultSlip(file));
+      setPreview(
+        await readResultSlip(file, (message, percent) => {
+          setProgress({ message, percent });
+        }),
+      );
     } catch (e) {
       setError(e as Error);
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -28,5 +35,21 @@ export function useResultImport() {
     setPreview(null);
   }
 
-  return { busy, error, preview, start, confirm, cancel: () => setPreview(null) };
+  function updatePreviewCourse(index: number, patch: Partial<ParsedResult["courses"][number]>) {
+    if (!preview) return;
+    const courses = [...preview.courses];
+    courses[index] = { ...courses[index], ...patch };
+    setPreview({ ...preview, courses });
+  }
+
+  return {
+    busy,
+    error,
+    preview,
+    progress,
+    start,
+    confirm,
+    updatePreviewCourse,
+    cancel: () => setPreview(null),
+  };
 }

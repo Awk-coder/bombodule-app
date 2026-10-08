@@ -6,3 +6,4 @@ tests/fixtures/real-*
 references/
 .env.local
 server/.wrangler/
+*.traineddata

@@ -37,6 +37,18 @@ export function SyncPreviewSheet({ sync }: { sync: SyncState }) {
 }
 
 export function SyncErrorCard({ sync }: { sync: SyncState }) {
+  if (sync.progress) {
+    return (
+      <div class="card sync-progress">
+        <p class="group-hint">{sync.progress.message}</p>
+        {sync.progress.percent !== undefined && (
+          <div class="adv-progress">
+            <span style={{ width: `${sync.progress.percent}%` }} />
+          </div>
+        )}
+      </div>
+    );
+  }
   if (!sync.error) return null;
   return (
     <div class="card">
@@ -45,14 +57,14 @@ export function SyncErrorCard({ sync }: { sync: SyncState }) {
   );
 }
 
-/** A label styled by the caller that opens the system file picker for the slip PDF. */
+/** A label styled by the caller that opens the system file picker for the slip PDF or image. */
 export function SlipPicker({ sync, class: cls, children }: { sync: SyncState; class: string; children: ComponentChildren }) {
   return (
     <label class={cls} aria-disabled={sync.busy}>
       {children}
       <input
         type="file"
-        accept="application/pdf"
+        accept="application/pdf,image/png,image/jpeg,.png,.jpg,.jpeg"
         hidden
         disabled={sync.busy}
         onChange={(e) => {

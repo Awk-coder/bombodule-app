@@ -1,8 +1,9 @@
 import type { TextItem } from "./parser";
 
-interface PdfDoc {
+export interface PdfDoc {
   numPages: number;
-  getPage(n: number): Promise<{ getTextContent(): Promise<{ items: unknown[] }> }>;
+  getPage(n: number): Promise<any>;
+  destroy?(): Promise<void>;
 }
 
 /** Positioned text from every page; later pages sit below earlier ones. */
@@ -18,13 +19,25 @@ export async function textItems(doc: PdfDoc): Promise<TextItem[]> {
   return out;
 }
 
-export async function readPdf(data: ArrayBuffer): Promise<TextItem[]> {
-  const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+export async function loadPdfDoc(data: ArrayBuffer): Promise<PdfDoc> {
+  const isNode = typeof window === "undefined" && typeof process !== "undefined" && !!process.versions?.node;
+  const pdfjs: any = isNode
+    ? await import("pdfjs-dist/legacy/build/pdf.mjs")
+    : await import("pdfjs-dist");
+
+  if (!isNode) {
+    pdfjs.GlobalWorkerOptions.workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+  }
+
   const task = pdfjs.getDocument({ data: new Uint8Array(data) });
+  return await task.promise;
+}
+
+export async function readPdf(data: ArrayBuffer): Promise<TextItem[]> {
+  const doc = await loadPdfDoc(data);
   try {
-    return await textItems(await task.promise);
+    return await textItems(doc);
   } finally {
-    void task.destroy();
+    if (doc.destroy) void doc.destroy();
   }
 }

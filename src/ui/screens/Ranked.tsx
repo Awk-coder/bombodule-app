@@ -149,6 +149,16 @@ export function Ranked() {
       )}
 
       <ResultPicker imp={imp} />
+      {imp.progress && (
+        <div class="card sync-progress" style="margin-top: 8px;">
+          <p class="group-hint">{imp.progress.message}</p>
+          {imp.progress.percent !== undefined && (
+            <div class="adv-progress">
+              <span style={{ width: `${imp.progress.percent}%` }} />
+            </div>
+          )}
+        </div>
+      )}
       {results.length > 0 && <p class="group-hint backup-hint">Results are saved on this phone only. <a href="#/settings">Back them up in Settings</a>.</p>}
       {results.length > 0 && !state.graduated && lastPaperDone && (
         <button class="btn ghost" onClick={() => setConfirmGrad(true)}>I've graduated</button>
@@ -172,7 +182,7 @@ export function Ranked() {
       <Leaderboard />
       <AchievementGrid />
       {imp.preview && (
-        <ResultSheet r={imp.preview} onClose={imp.cancel}>
+        <ResultSheet r={imp.preview} onClose={imp.cancel} onUpdateCourse={imp.updatePreviewCourse}>
           <button class="btn primary" onClick={imp.confirm}>Save result</button>
           <button class="btn ghost" onClick={imp.cancel}>Cancel</button>
         </ResultSheet>

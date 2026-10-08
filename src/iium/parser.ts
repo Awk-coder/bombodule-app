@@ -120,8 +120,8 @@ export function parseSlip(rows: string[][]): ParsedSchedule {
     const text = cells.join(" ").replace(/\s+/g, " ").trim();
     session ??= text.match(/Session\s*:\s*(\d{4}\/\d{4})/)?.[1] ?? null;
     semester ??= text.match(/Semester\s*:\s*(\d)/)?.[1] ?? null;
-    if (/^Matric No\b/.test(text)) matric = after(cells, /^Matric No/)?.match(/\d{7}/)?.[0] ?? null;
-    if (/^Name\b/.test(text)) studentName = after(cells, /^Name/);
+    if (/^Matric No\b/i.test(text)) matric = text.match(/Matric\s*No\s*[:@©~0O-]?\s*(\d{7})/i)?.[1] ?? after(cells, /^Matric No/i)?.match(/\d{7}/)?.[0] ?? null;
+    if (/^Name\b/i.test(text)) studentName = text.match(/Name\s*[:@©~0O-]?\s*([A-Za-z' ]+?)(?:\s+Matric|\s*$)/i)?.[1]?.trim() ?? after(cells, /^Name/i);
 
     const c = text.match(COURSE_ROW);
     if (c) {

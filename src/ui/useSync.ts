@@ -9,16 +9,23 @@ export function useSync() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [preview, setPreview] = useState<ParsedSchedule | null>(null);
+  const [progress, setProgress] = useState<{ message: string; percent?: number } | null>(null);
 
   async function start(file: Blob) {
     setBusy(true);
     setError(null);
+    setProgress(null);
     try {
-      setPreview(await readSlip(file));
+      setPreview(
+        await readSlip(file, (message, percent) => {
+          setProgress({ message, percent });
+        }),
+      );
     } catch (e) {
       setError(e as Error);
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -29,7 +36,15 @@ export function useSync() {
     setPreview(null);
   }
 
-  return { busy, error, preview, start, confirm, cancel: () => setPreview(null) };
+  return {
+    busy,
+    error,
+    preview,
+    progress,
+    start,
+    confirm,
+    cancel: () => setPreview(null),
+  };
 }
 
 export type SyncState = ReturnType<typeof useSync>;
