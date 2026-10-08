@@ -4,7 +4,7 @@ Attendance, tasks and ranked GPA for IIUM students. Import your i-Ma'luum slips 
 
 ## Download
 
-**[⬇ Download the latest APK](https://github.com/Awk-coder/bombodule-app/releases/latest/download/bombodule.apk)** (Android 7 or newer)
+**[⬇ Download the latest APK](https://github.com/Awk-coder/bombodule-app/releases/latest/download/Uni-Ranked.apk)** (Android 7 or newer)
 
 Changes in each version are on the [Releases page](https://github.com/Awk-coder/bombodule-app/releases).
 
