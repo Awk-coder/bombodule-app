@@ -1,24 +1,27 @@
-"""Generates Hadir icon sources for @capacitor/assets: green tile with a dark check mark."""
-from PIL import Image, ImageDraw
+"""Generates Uni Ranked app icons from Cinzel Decorative 'R'."""
+from PIL import Image, ImageDraw, ImageFont
 
-GREEN, DARK, S = (72, 222, 124, 255), (6, 33, 15, 255), 1024
+DARK_BG = (11, 12, 14, 255) # #0B0C0E
+WHITE = (255, 255, 255, 255)
+FONT_PATH = "/tmp/fonts/CinzelDecorative-Bold.ttf"
 
+def render_r(size, scale_factor=0.68, bg_color=DARK_BG):
+    img = Image.new("RGBA", (size, size), bg_color or (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    font_size = int(size * scale_factor)
+    font = ImageFont.truetype(FONT_PATH, font_size)
+    bbox = draw.textbbox((0, 0), "R", font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    tx = (size - tw) // 2 - bbox[0]
+    ty = (size - th) // 2 - bbox[1]
+    draw.text((tx, ty), "R", font=font, fill=WHITE)
+    return img
 
-def check(draw, scale, offset):
-    pts = [(300, 540), (450, 690), (740, 360)]
-    pts = [(offset + x * scale, offset + y * scale) for x, y in pts]
-    draw.line(pts, fill=DARK, width=int(110 * scale), joint="curve")
-    for x, y in (pts[0], pts[-1]):
-        r = 55 * scale
-        draw.ellipse([x - r, y - r, x + r, y + r], fill=DARK)
-
-
-full = Image.new("RGBA", (S, S), GREEN)
-check(ImageDraw.Draw(full), 1.0, 0)
+full = render_r(1024, scale_factor=0.68, bg_color=DARK_BG)
 full.save("assets/icon-only.png")
 
-fg = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-check(ImageDraw.Draw(fg), 0.62, S * 0.19)  # keep inside the adaptive-icon safe zone
+fg = render_r(1024, scale_factor=0.52, bg_color=None)
 fg.save("assets/icon-foreground.png")
 
-Image.new("RGBA", (S, S), GREEN).save("assets/icon-background.png")
+Image.new("RGBA", (1024, 1024), DARK_BG).save("assets/icon-background.png")

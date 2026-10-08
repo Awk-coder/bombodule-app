@@ -5,7 +5,7 @@ import { apiUrl, call } from "../../online/api";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate } from "../format";
 import { useSync } from "../useSync";
-import { IconClock } from "../components/icons";
+import { IconLogo } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { PUBLIC_NOTE } from "../components/ProfileSection";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
@@ -72,7 +72,7 @@ export function Onboarding() {
   if (step === 0) {
     return (
       <div class="onboard">
-        <div class="logo"><IconClock size={30} /></div>
+        <div class="logo"><IconLogo size={36} /></div>
         <h1>Uni Ranked</h1>
         <p>Track attendance and tasks for your IIUM classes, so you never get barred.</p>
         <p>In i-Ma'luum, open your Course Registration Confirmation Slip and print it to PDF. Import that file and Uni Ranked builds your timetable.</p>
