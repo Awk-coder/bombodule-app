@@ -13,7 +13,14 @@ export const TIERS: { tier: Tier; ore: Ore; minGpa: number }[] = [
 ];
 
 export const round2 = (x: number) => Math.round((x + Number.EPSILON) * 100) / 100;
-export const tierOf = (g: number) => TIERS.find((t) => round2(g) >= t.minGpa)!;
+export const tierOf = (g: number, label?: string) => {
+  const match = TIERS.find((t) => round2(g) >= t.minGpa)!;
+  if (label?.startsWith("Sem 3") && match.tier === "S") {
+    // Short semesters are always considered less, max Diamond III
+    return { tier: "A" as Tier, ore: "diamond" as Ore, minGpa: 3.5 };
+  }
+  return match;
+};
 
 export const LETTER_POINTS: Record<string, number> = { A: 4, "A-": 3.67, "B+": 3.33, B: 3, "B-": 2.67, "C+": 2.33, C: 2, D: 1.67, "D-": 1.33, E: 1, F: 0 };
 const ZERO = new Set(["Y", "FR"]); // barred and fail-on-resit count as F

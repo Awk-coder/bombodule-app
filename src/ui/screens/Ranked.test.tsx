@@ -50,10 +50,10 @@ it("shows the season rank, Elo and recent changes", () => {
   const root = document.createElement("div");
   act(() => render(<Ranked />, root));
   const season = root.querySelector(".season")!;
-  expect(season.textContent).toContain("915");
+  expect(season.textContent).toContain("906");
   expect(season.textContent).toContain("Gold I");
-  expect(season.textContent).toContain("+15");
-  expect(season.querySelector(".season-elo")!.textContent).toBe("915");
+  expect(season.textContent).toContain("+6");
+  expect(season.querySelector(".season-elo")!.textContent).toBe("906");
   expect(season.querySelector(".badge")!.textContent).toBe("");
   expect(season.querySelector(".elo-bar")).toBeNull();
 });
@@ -84,7 +84,7 @@ it("explains how ranking works with the full ladder", () => {
   const root = mount();
   act(() => button(root, "How ranking works").click());
   const sheet = root.querySelector(".sheet")!.textContent!;
-  for (const t of ["+15", "+45", "-10", "-20", "-60", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
+  for (const t of ["+6", "+18", "-4", "-12", "-30", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
   expect(root.querySelectorAll(".sheet .badge").length).toBe(6);
 });
 
@@ -113,10 +113,10 @@ it("lets you undo graduating", () => {
 
 it("says when you ranked up or down", () => {
   act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["X 1", "B"]])] })));
-  localStorage.setItem("hadir-last-ore", "gold");
-  expect(mount().textContent).toContain("Promoted to Emerald");
-  localStorage.setItem("hadir-last-ore", "diamond");
-  expect(mount().textContent).toContain("Dropped to Emerald");
+  localStorage.setItem("uni-ranked-last-rank-key", "gold-1");
+  expect(mount().textContent).toContain("Promoted to Emerald I");
+  localStorage.setItem("uni-ranked-last-rank-key", "diamond-1");
+  expect(mount().textContent).toContain("Dropped to Emerald I");
 });
 
 it("shows four Elo changes until you ask for all", () => {
