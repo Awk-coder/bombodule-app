@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["apple-touch-icon.png"],
       manifest: {
-        name: "Bombodule",
-        short_name: "Bombodule",
+        name: "Uni Ranked",
+        short_name: "Uni Ranked",
         description: "Class attendance, tasks and ranked GPA for IIUM students",
         start_url: "./",
         scope: "./",

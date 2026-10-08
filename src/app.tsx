@@ -29,7 +29,7 @@ function LoadError({ message, raw }: { message: string; raw: string }) {
     <div class="onboard">
       <h1>Couldn't load your data</h1>
       <p>{message}. Nothing has been changed or deleted. Export the saved data to keep a copy.</p>
-      <button class="btn primary" onClick={() => void shareFile("bombodule-raw.json", raw)}>Export saved data</button>
+      <button class="btn primary" onClick={() => void shareFile("uni-ranked-raw.json", raw)}>Export saved data</button>
     </div>
   );
 }

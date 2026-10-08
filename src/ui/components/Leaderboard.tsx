@@ -151,7 +151,7 @@ export function LeaderboardPage() {
           <BoardBody board={board} empty={q.trim() ? `No one called "${q.trim()}" this semester.` : "Nobody on this board yet this semester."} />
         </div>
       ) : (
-        <p class="group-hint">The leaderboard needs a semester and an internet connection to the Bombodule server.</p>
+        <p class="group-hint">The leaderboard needs a semester and an internet connection to the Uni Ranked server.</p>
       )}
     </>
   );

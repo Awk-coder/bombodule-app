@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.awk.hadir",
-  appName: "Bombodule",
+  appName: "Uni Ranked",
   webDir: "dist",
   backgroundColor: "#0B0C0E",
   plugins: {

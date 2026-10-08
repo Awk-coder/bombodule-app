@@ -144,7 +144,7 @@ export function Settings() {
       <PermissionRows />
 
       <p class="group-title">Backup</p>
-      <button class="row" onClick={() => void shareFile(`bombodule-backup-${today}.json`, serialize(state))}>
+      <button class="row" onClick={() => void shareFile(`uni-ranked-backup-${today}.json`, serialize(state))}>
         <div class="grow"><b>Export data</b><small>Save a backup file (Drive, Telegram, …)</small></div>
         <IconChevron />
       </button>
