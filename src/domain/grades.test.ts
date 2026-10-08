@@ -35,6 +35,11 @@ describe("cgpa", () => {
   it("a passed retake replaces the fail", () => {
     expect(cgpa([s2, s1])).toEqual({ cgpa: 3.5, credits: 6, points: 21 });
   });
+  it("a passed retake replaces the fail even if code spacing differed", () => {
+    const sFail = result("Sem 1, 2025/2026", [["BIIT 2301", "F"], ["X 1000", "A"]]);
+    const sPass = result("Sem 2, 2025/2026", [["BIIT2301", "B"]]);
+    expect(cgpa([sFail, sPass])).toEqual({ cgpa: 3.5, credits: 6, points: 21 });
+  });
   it("a lower retake of a passed course keeps the better grade", () => {
     const s3 = result("Sem 1, 2026/2027", [["X 1000", "C"]]);
     expect(cgpa([s1, s2, s3]).cgpa).toBe(3.5);

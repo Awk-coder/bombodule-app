@@ -11,6 +11,15 @@ import { boot } from "./boot";
 render(<App />, document.getElementById("app")!);
 void boot();
 
-// Offline support for the web/home-screen build; the native shell serves files itself.
-if (!Capacitor.isNativePlatform()) void import("virtual:pwa-register").then((m) => m.registerSW({ immediate: true }));
+// Offline support for the web/home-screen build; automatically reloads when an update is ready.
+if (!Capacitor.isNativePlatform()) {
+  let refreshing = false;
+  navigator?.serviceWorker?.addEventListener("controllerchange", () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+  void import("virtual:pwa-register").then((m) => m.registerSW({ immediate: true }));
+}
 

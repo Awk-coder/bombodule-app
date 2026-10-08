@@ -64,8 +64,12 @@ export function preprocessCanvas(ctx: any, width: number, height: number): void 
   ctx.putImageData(imgData, 0, 0);
 }
 
-/** Renders a single PDF page to a canvas at 3x scale, grayscaled and contrast-boosted. */
-export async function renderPdfPageToCanvas(page: any, scale = 3): Promise<any> {
+/** Renders a single PDF page to a canvas, scaled for crisp OCR and capped to 2400px to prevent memory crashes. */
+export async function renderPdfPageToCanvas(page: any, preferredScale = 3): Promise<any> {
+  const baseViewport = page.getViewport({ scale: 1 });
+  const maxDim = Math.max(baseViewport.width, baseViewport.height);
+  const maxAllowedScale = 2400 / Math.max(1, maxDim);
+  const scale = Math.max(1.5, Math.min(preferredScale, maxAllowedScale));
   const viewport = page.getViewport({ scale });
   const { canvas, ctx } = await createOffscreenCanvas(viewport.width, viewport.height);
   await page.render({ canvasContext: ctx, viewport }).promise;
@@ -131,22 +135,43 @@ export async function recognizeCanvas(
   }
 }
 
-/** Render all pages of an image PDF at 3x scale and perform OCR. */
+/** Render all pages of an image PDF and perform OCR using a single shared worker. */
 export async function ocrPdf(
   doc: any,
   onProgress?: ProgressCallback,
 ): Promise<string> {
-  const parts: string[] = [];
-  for (let p = 1; p <= doc.numPages; p++) {
-    onProgress?.(`Rendering page ${p} of ${doc.numPages}…`);
-    const page = await doc.getPage(p);
-    const canvas = await renderPdfPageToCanvas(page, 3);
-    const text = await recognizeCanvas(canvas, (msg, pct) => {
-      onProgress?.(doc.numPages > 1 ? `Page ${p}/${doc.numPages}: ${msg}` : msg, pct);
+  const { createWorker, PSM } = await import("tesseract.js");
+  const worker = await createWorker("eng", 1, {
+    logger: (m) => {
+      if (!onProgress) return;
+      if (m.status === "loading tesseract core" || m.status === "initializing tesseract") {
+        onProgress("Loading OCR engine…");
+      } else if (m.status === "loading language traineddata") {
+        onProgress("Loading OCR language data…");
+      } else if (m.status === "recognizing text") {
+        const pct = Math.round((m.progress ?? 0) * 100);
+        onProgress(`Scanning document… ${pct}%`, pct);
+      }
+    },
+  });
+
+  try {
+    await worker.setParameters({
+      tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
     });
-    parts.push(text);
+    const parts: string[] = [];
+    for (let p = 1; p <= doc.numPages; p++) {
+      onProgress?.(doc.numPages > 1 ? `Rendering page ${p} of ${doc.numPages}…` : "Rendering document…");
+      const page = await doc.getPage(p);
+      const canvas = await renderPdfPageToCanvas(page);
+      const input = canvas.toBuffer ? canvas.toBuffer("image/png") : canvas;
+      const res = await worker.recognize(input);
+      parts.push(res.data.text);
+    }
+    return parts.join("\n");
+  } finally {
+    await worker.terminate();
   }
-  return parts.join("\n");
 }
 
 /** Converts raw text (from OCR or text dumps) into standard rows of cells. */

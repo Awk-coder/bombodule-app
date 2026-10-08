@@ -129,7 +129,14 @@ export function ProfileSection() {
 
       <Sheet open={open !== null} onClose={() => setOpen(null)}>
         {open === "create" &&
-          nameSheet("Create profile", "Create", () => void create(), PUBLIC_NOTE)}
+          nameSheet(
+            "Create profile",
+            "Create",
+            () => void create(),
+            state.account?.matric
+              ? `${PUBLIC_NOTE} Your profile is linked to your matric number for automatic recovery if you reinstall.`
+              : `${PUBLIC_NOTE} Tip: Import your confirmation slip first under Settings → Timetable so your profile is linked to your matric number for recovery.`,
+          )}
         {open === "rename" && nameSheet("Rename", "Save", () => void rename())}
         {open === "title" && (
           <>

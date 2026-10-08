@@ -56,7 +56,8 @@ export function cgpa(results: SemesterResult[]): { cgpa: number; credits: number
   for (const r of sortResults(results)) {
     for (const c of r.courses) {
       if (countedPoint(c) === null) continue;
-      attempts.set(c.code, [...(attempts.get(c.code) ?? []), c]);
+      const key = c.code.replace(/\s+/g, "").toUpperCase();
+      attempts.set(key, [...(attempts.get(key) ?? []), c]);
     }
   }
   const kept = [...attempts.values()].map((list) => {

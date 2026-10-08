@@ -119,6 +119,13 @@ it("skips the Hijri calendar while the semester is running", () => {
   spy.mockRestore();
 });
 
+it("does not end Sem 1, 2026/2027 before its official calendar end date even if end date was changed", () => {
+  const s = makeState({ semester: { label: "Sem 1, 2026/2027", start: "2026-09-28", end: "2026-10-05" } });
+  const mid = new Date("2026-10-12T12:00:00+08:00");
+  expect(earned(s, mid)).not.toContain("full-house");
+  expect(earned(s, mid)).not.toContain("the-end-q");
+});
+
 describe("achievement progress", () => {
   it("counts toward goals like Ten Down", () => {
     const s = base();

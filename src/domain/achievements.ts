@@ -1,5 +1,6 @@
 import { examsConfirmed, graduationConfirmed } from "./actions";
 import { courseStats } from "./attendance";
+import { IIUM_CALENDAR } from "./calendar";
 import { onTime } from "./elo";
 import { LETTER_POINTS, cgpa, countedPoint, degree, gpa, isFail, labelKey, sortResults, tierOf } from "./grades";
 import { generateSessions } from "./sessions";
@@ -192,6 +193,13 @@ function TIER_INDEX(g: number): number {
 
 export const ACHIEVEMENTS: Achievement[] = DEFS.map(({ check: _, goal: __, ...a }) => a);
 
+function isSemesterEnded(state: AppState, today: string): boolean {
+  if (!state.semester) return false;
+  const cal = IIUM_CALENDAR[state.semester.label];
+  if (cal && state.semester.start === cal.start && today < cal.end) return false;
+  return today > state.semester.end;
+}
+
 function ctxOf(state: AppState, now: Date): Ctx {
   const today = ymd(now);
   return {
@@ -201,7 +209,7 @@ function ctxOf(state: AppState, now: Date): Ctx {
     sessions: generateSessions(state, now),
     active: state.courses.filter((x) => x.active),
     results: sortResults(state.results),
-    ended: !!state.semester && today > state.semester.end,
+    ended: isSemesterEnded(state, today),
   };
 }
 
