@@ -23,6 +23,13 @@ export class ApiError extends Error {
   }
 }
 
+/** Computes SHA-256 hash of a student matric number for zero-knowledge identity reclaim. */
+export async function hashMatric(matric: string | null | undefined): Promise<string | null> {
+  if (!matric || !matric.trim()) return null;
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(matric.trim()));
+  return Array.from(new Uint8Array(d), (x) => x.toString(16).padStart(2, "0")).join("");
+}
+
 export async function call<T = void>(path: string, opts: { method?: string; key?: string; body?: unknown } = {}): Promise<T> {
   const headers: Record<string, string> = {};
   if (opts.body !== undefined) headers["Content-Type"] = "application/json";

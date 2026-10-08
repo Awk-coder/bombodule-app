@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 import { titleText, unlockedTitles } from "../../domain/titles";
 import type { Profile } from "../../domain/types";
-import { ApiError, apiUrl, call } from "../../online/api";
+import { ApiError, apiUrl, call, hashMatric } from "../../online/api";
 import { dispatch, useAppState } from "../../store/store";
 import { IconChevron } from "./icons";
 import { Sheet } from "./Sheet";
@@ -40,7 +40,10 @@ export function ProfileSection() {
     }
   }
 
-  const create = () => run(async () => setProfile(await call<Profile>("/players", { method: "POST", body: { name: text } })));
+  const create = () => run(async () => {
+    const matricHash = await hashMatric(state.account?.matric);
+    setProfile(await call<Profile>("/players", { method: "POST", body: { name: text, matricHash } }));
+  });
   const rename = () => run(async () => {
     await call("/me", { method: "PATCH", key: profile!.key, body: { name: text } });
     setProfile({ ...profile!, name: text.trim().replace(/ +/g, " ") });

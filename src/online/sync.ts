@@ -1,5 +1,5 @@
 import type { AppState } from "../domain/types";
-import { ApiError, apiUrl, call } from "./api";
+import { ApiError, apiUrl, call, hashMatric } from "./api";
 import { profileStats } from "./stats";
 
 const DEBOUNCE_MS = 2000;
@@ -22,7 +22,8 @@ export function startProfileSync(getState: () => AppState, onStateChange: (hook:
     const sending = JSON.stringify([state.profile.key, payload]);
     if (sending === lastSent) return;
     try {
-      await call("/me", { method: "PATCH", key: state.profile.key, body: payload });
+      const matricHash = await hashMatric(state.account?.matric);
+      await call("/me", { method: "PATCH", key: state.profile.key, body: { ...payload, matricHash } });
       lastSent = sending;
     } catch (e) {
       if (!(e instanceof ApiError)) throw e;

@@ -17,9 +17,11 @@ CREATE TABLE IF NOT EXISTS players (
   degree_tier TEXT,
   achievements INTEGER NOT NULL DEFAULT 0,
   group_id TEXT REFERENCES groups(id),
+  matric_hash TEXT,                 -- SHA-256 of student matric number, for seamless reclaim across reinstalls
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS players_board ON players (season, rated, elo);
 CREATE INDEX IF NOT EXISTS players_group ON players (group_id);
+CREATE INDEX IF NOT EXISTS players_matric ON players (matric_hash);

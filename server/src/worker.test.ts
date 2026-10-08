@@ -74,6 +74,28 @@ describe("profiles", () => {
     expect((await call("GET", "/me", { key: p.key })).status).toBe(401);
     await player("Wahid");
   });
+
+  it("reclaims an account on reinstall when matricHash matches", async () => {
+    const matricHash = "a".repeat(64);
+    const r1 = await call("POST", "/players", { body: { name: "Musa", matricHash } });
+    expect(r1.status).toBe(201);
+    const oldKey = r1.body.key;
+
+    // A stranger tries to take the name with different or no matricHash -> 409
+    expect((await call("POST", "/players", { body: { name: "Musa" } })).status).toBe(409);
+    expect((await call("POST", "/players", { body: { name: "Musa", matricHash: "b".repeat(64) } })).status).toBe(409);
+
+    // The student reinstalls and creates profile with same name and matching matricHash -> 200 reclaim!
+    const r2 = await call("POST", "/players", { body: { name: "Musa", matricHash } });
+    expect(r2.status).toBe(200);
+    expect(r2.body.id).toBe(r1.body.id);
+    expect(r2.body.name).toBe("Musa");
+    expect(r2.body.key).not.toBe(oldKey);
+
+    // Old key is revoked, new key works
+    expect((await call("GET", "/me", { key: oldKey })).status).toBe(401);
+    expect((await call("GET", "/me", { key: r2.body.key })).status).toBe(200);
+  });
 });
 
 describe("stats", () => {

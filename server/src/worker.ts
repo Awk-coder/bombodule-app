@@ -27,6 +27,7 @@ interface Row {
   degree_tier: string | null;
   achievements: number;
   group_id: string | null;
+  matric_hash: string | null;
   updated_at: number;
 }
 
@@ -41,7 +42,7 @@ const SEASON = /^Sem [1-3], \d{4}\/\d{4}$/;
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const STATS_EVERY_MS = 10_000;
 const BOARD_SIZE = 100;
-const COLUMNS = "id, name, title, season, rated, elo, degree_ore, degree_tier, achievements, group_id, updated_at";
+const COLUMNS = "id, name, title, season, rated, elo, degree_ore, degree_tier, achievements, group_id, matric_hash, updated_at";
 
 class HttpError extends Error {
   constructor(readonly status: number, message: string) {
@@ -155,6 +156,9 @@ async function patchMe(req: Request, env: Env, now: number) {
     }
   }
   if (b.title !== undefined) await env.DB.prepare("UPDATE players SET title = ? WHERE id = ?").bind(b.title as string | null, player.id).run();
+  if (typeof b.matricHash === "string" && /^[a-f0-9]{64}$/i.test(b.matricHash.trim()) && !player.matric_hash) {
+    await env.DB.prepare("UPDATE players SET matric_hash = ? WHERE id = ?").bind(b.matricHash.trim().toLowerCase(), player.id).run();
+  }
   if (stats) {
     await env.DB.prepare("UPDATE players SET season = ?, rated = ?, elo = ?, degree_ore = ?, degree_tier = ?, achievements = ?, updated_at = ? WHERE id = ?")
       .bind(stats.season, stats.rated ? 1 : 0, stats.elo, stats.degreeOre, stats.degreeTier, stats.achievements, now, player.id)
@@ -169,12 +173,28 @@ async function route(req: Request, env: Env, now: number): Promise<Response> {
   const m = req.method;
 
   if (m === "POST" && path === "/players") {
-    const name = checkName((await body(req)).name);
+    const b = await body(req);
+    const name = checkName(b.name);
+    const matricHash = typeof b.matricHash === "string" && /^[a-f0-9]{64}$/i.test(b.matricHash.trim()) ? b.matricHash.trim().toLowerCase() : null;
+    const nameKey = name.toLowerCase();
+
+    // Check if player name already exists
+    const existing = await env.DB.prepare("SELECT id, name, matric_hash FROM players WHERE name_key = ?").bind(nameKey).first<{ id: string; name: string; matric_hash: string | null }>();
+    if (existing) {
+      // Reclaim account if the student's matricHash matches
+      if (matricHash && existing.matric_hash && existing.matric_hash === matricHash) {
+        const key = randomString(32);
+        await env.DB.prepare("UPDATE players SET key_hash = ?, updated_at = ? WHERE id = ?").bind(await sha256(key), now, existing.id).run();
+        return json({ id: existing.id, key, name: existing.name }, 200);
+      }
+      throw new HttpError(409, "Name taken");
+    }
+
     const id = crypto.randomUUID();
     const key = randomString(32);
     try {
-      await env.DB.prepare("INSERT INTO players (id, name, name_key, key_hash, created_at) VALUES (?, ?, ?, ?, ?)")
-        .bind(id, name, name.toLowerCase(), await sha256(key), now)
+      await env.DB.prepare("INSERT INTO players (id, name, name_key, key_hash, matric_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+        .bind(id, name, nameKey, await sha256(key), matricHash, now)
         .run();
     } catch (e) {
       if (isUnique(e)) throw new HttpError(409, "Name taken");
