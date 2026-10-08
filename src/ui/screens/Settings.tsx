@@ -91,6 +91,26 @@ export function Settings() {
         </>
       )}
 
+      <p class="group-title">Degree rank</p>
+      <label class="field">
+        <span>Exempted credit hours (max 3)</span>
+        <input
+          type="number"
+          min="0"
+          max="3"
+          step="0.5"
+          value={state.settings.exemptedCredits || ""}
+          placeholder="0"
+          onInput={(e) => {
+            const raw = e.currentTarget.value.trim();
+            const val = raw === "" ? 0 : parseFloat(raw) || 0;
+            const clamped = Math.min(3, Math.max(0, val));
+            dispatch((s) => updateSettings(s, { exemptedCredits: clamped }));
+          }}
+        />
+      </label>
+      <p class="group-hint">If any courses were exempted, counts up to 3 credit hours so your degree rank unlocks.</p>
+
       <p class="group-title">Prompts</p>
       <div class="row">
         <div class="grow"><b>Pause prompts</b><small>For mid-sem break and holidays</small></div>

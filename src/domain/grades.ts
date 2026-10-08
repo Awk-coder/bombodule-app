@@ -81,22 +81,24 @@ export interface Degree {
 }
 
 /** The app's own CGPA; `ok` only when it reproduces the latest slip, i.e. every past slip is imported. */
-export function degree(results: SemesterResult[]): Degree | null {
+export function degree(results: SemesterResult[], exemptedCredits = 0): Degree | null {
   if (!results.length) return null;
   const latest = sortResults(results).at(-1)!;
   const c = cgpa(results);
   const unknown = unknownGrades(results);
+  const exempt = Math.min(3, Math.max(0, round2(Number(exemptedCredits) || 0)));
+  const effectiveCredits = round2(c.credits + exempt);
   let reason: string | null = null;
   if (unknown.length) reason = `Unknown grade codes: ${unknown.join(", ")}`;
-  else if (c.credits !== latest.printed.cumCredits) {
+  else if (effectiveCredits !== latest.printed.cumCredits) {
     const missing = missingSemesters(results);
     const first = sortResults(results)[0].label;
     reason = missing.length
       ? `Missing ${missing.join(", ")}. Import ${missing.length > 1 ? "those slips" : "that slip"} to get ranked.`
-      : `Found ${c.credits} of ${latest.printed.cumCredits} credit hours. Import the slips before ${first}.`;
+      : `Found ${effectiveCredits} of ${latest.printed.cumCredits} credit hours. Import the slips before ${first}.`;
   }
   else if (c.cgpa !== latest.printed.cgpa) reason = `Calculated CGPA ${c.cgpa.toFixed(2)}, slip says ${latest.printed.cgpa.toFixed(2)}.`;
-  return { cgpa: c.cgpa, credits: c.credits, ok: !reason, reason };
+  return { cgpa: c.cgpa, credits: effectiveCredits, ok: !reason, reason };
 }
 
 /** Regular semesters (Sem 1 and 2) between the first and last imported slip that have no slip. */

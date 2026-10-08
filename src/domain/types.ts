@@ -48,6 +48,7 @@ export interface Settings {
   taskReminderTime: string; // "HH:MM", day before due
   warningsEnabled: boolean;
   theme: string; // ThemeId from ui/themes
+  exemptedCredits?: number; // 0..3 credit hours exempted from degree calculation
 }
 
 export interface Account {
@@ -129,6 +130,7 @@ export const DEFAULT_SETTINGS: Settings = {
   taskReminderTime: "20:00",
   warningsEnabled: true,
   theme: "dark",
+  exemptedCredits: 0,
 };
 
 export function emptyState(): AppState {

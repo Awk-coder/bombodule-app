@@ -105,7 +105,7 @@ export function Ranked() {
   const [open, setOpen] = useState<SemesterResult | null>(null);
   const [confirmGrad, setConfirmGrad] = useState(false);
   const results = sortResults(state.results);
-  const d = degree(results);
+  const d = degree(results, state.settings.exemptedCredits);
   const dKind = d?.ok ? tierOf(d.cgpa).ore : "unrated";
   const now = useNow();
   const season = seasonElo(state, now);

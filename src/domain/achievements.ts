@@ -135,7 +135,7 @@ const DEFS: Def[] = [
   {
     id: "top-of-the-class", tier: "rare", name: "Top of the Class", desc: "Reach S tier",
     check: (c) => {
-      const d = degree(c.results);
+      const d = degree(c.results, c.s.settings.exemptedCredits);
       return c.results.some((r) => rGpa(r).credits > 0 && tierOf(rGpa(r).gpa).tier === "S") || (!!d?.ok && tierOf(d.cgpa).tier === "S");
     },
   },

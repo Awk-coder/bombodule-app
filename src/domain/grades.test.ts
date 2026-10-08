@@ -46,6 +46,14 @@ describe("degree", () => {
     const ok = { ...REAL, printed: { ...REAL.printed, cgpa: 1.95, cumCredits: 21 } };
     expect(degree([ok])).toMatchObject({ cgpa: 1.95, ok: true, reason: null });
   });
+  it("accounts for exempted credit hours up to 3", () => {
+    const slip = { ...REAL, printed: { ...REAL.printed, cgpa: 1.95, cumCredits: 24 } };
+    expect(degree([slip], 0)!.ok).toBe(false);
+    expect(degree([slip], 3)!.ok).toBe(true);
+    expect(degree([slip], 5)!.ok).toBe(true);
+    const slip5 = { ...REAL, printed: { ...REAL.printed, cgpa: 1.95, cumCredits: 25 } };
+    expect(degree([slip5], 5)!.ok).toBe(false);
+  });
   it("stays locked when semesters are missing", () => {
     const d = degree([{ ...REAL, printed: { ...REAL.printed, cgpa: 2.54, cumCredits: 68.5 } }])!;
     expect(d.ok).toBe(false);

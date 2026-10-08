@@ -7,7 +7,7 @@ import type { AppState } from "../domain/types";
 export function profileStats(state: AppState, now: Date) {
   if (!state.semester) return null;
   const season = seasonElo(state, now);
-  const d = degree(state.results);
+  const d = degree(state.results, state.settings.exemptedCredits);
   const tier = d?.ok ? tierOf(d.cgpa) : null;
   return {
     title: state.title ? titleText(state, state.title) : null,
