@@ -26,7 +26,7 @@ const PATHS = Object.fromEntries(
     }));
     return [kind, palette.map((fill, i) => ({ fill, d: d[i] }))];
   }),
-) as Record<BadgeKind, { fill: string; d: string }[]>;
+) as Record<string, { fill: string; d: string }[]>;
 
 const LEAK: Partial<Record<Ore, [number, number]>> = { emerald: [0.08, 0.12], diamond: [0.13, 0.17], netherite: [0.2, 0.24] };
 
@@ -36,11 +36,12 @@ export function leakOf(ore: Ore, progress: number): number {
   return range ? range[0] + (range[1] - range[0]) * Math.min(1, Math.max(0, progress)) : 0;
 }
 
-export function RankBadge({ kind, size = 96 }: { kind: BadgeKind; size?: number }) {
+export function RankBadge({ kind, div, size = 96 }: { kind: BadgeKind; div?: 1 | 2 | 3 | null; size?: number }) {
+  const artKey = kind === "diamond" && div === 3 ? "diamond3" : kind;
   return (
     <div class={`badge badge-${kind}`} style={{ "--rank": ORE_COLOR[kind], width: `${size}px`, height: `${size}px` }} aria-label={ORE_NAME[kind]}>
       <svg viewBox={`0 0 ${GRID} ${GRID}`} width={size} height={size} shape-rendering="crispEdges">
-        {PATHS[kind].map((p) => <path key={p.fill} fill={p.fill} d={p.d} />)}
+        {PATHS[artKey].map((p) => <path key={p.fill} fill={p.fill} d={p.d} />)}
       </svg>
     </div>
   );

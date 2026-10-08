@@ -34,3 +34,13 @@ it("colour leak starts at Emerald and grows with rank and progress", () => {
   expect(leakOf("diamond", 0)).toBeGreaterThan(leakOf("emerald", 1) - 0.001);
   expect(leakOf("netherite", 0)).toBeLessThanOrEqual(0.3);
 });
+
+it("renders diamond III with netherite corner pixels", () => {
+  const normal = document.createElement("div");
+  render(<RankBadge kind="diamond" div={2} />, normal);
+  const d3 = document.createElement("div");
+  render(<RankBadge kind="diamond" div={3} />, d3);
+  expect(d3.innerHTML).not.toEqual(normal.innerHTML);
+  expect(d3.querySelector('path[fill="#9f66b6"]')).not.toBeNull();
+  expect(normal.querySelector('path[fill="#9f66b6"]')).toBeNull();
+});

@@ -50,7 +50,7 @@ const CASES: Case[] = [
   ["level-up", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1000", "C"]]), R("Sem 2, 2025/2026", [["Y 1000", "B"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1000", "B"]]), R("Sem 2, 2025/2026", [["Y 1000", "C"]])] }, NOW]],
   ["overpowered", () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A"], ["B 1", "A"], ["C 1", "A-"], ["D 1", "B+"]])] }, NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A"], ["B 1", "A"], ["C 1", "A"], ["D 1", "D"]])] }, NOW]],
   ["flawless", () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A"]])] }, NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A-"]])] }, NOW]],
-  ["top-of-the-class", () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A-"]])] }, NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "B+"]])] }, NOW]],
+  ["top-of-the-class", () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A"]])] }, NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["A 1", "A-"]])] }, NOW]],
   ["how-did-we-get-here", () => [{ ...base(), courses: base().courses.map((c) => ({ ...c, credits: 12 })) }, NOW], () => [{ ...base(), courses: base().courses.map((c) => ({ ...c, credits: 11 })) }, NOW]],
   ["redemption-arc", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1", "F"]]), R("Sem 2, 2025/2026", [["X 1", "C"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["X 1", "F"]])] }, NOW]],
   ["those-were-the-days", () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["X 1", "A"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2026/2027", [["X 1", "A"]])] }, NOW]],
@@ -78,7 +78,7 @@ const CASES: Case[] = [
   ["we-need-to-cook", () => [makeState({ courses: [course("CCCK 1010", "COOKING")] }), NOW], () => [{ ...base(), results: [R("Sem 2, 2025/2026", [["CCFM 2061", "A"]])] }, NOW]],
   ["master-baker", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "A", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "F", 0.5], ["CCCK 1010", "A", 0.5]])] }, NOW]],
   ["gordons-protege", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "P", 0.5], ["CCCK 2010", "A-", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "A", 0.5], ["CCBS 2010", "A", 0.5]])] }, NOW]],
-  ["from-the-ashes", () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "D"]]), R("Sem 2, 2024/2025", [["X 2", "B"]]), R("Sem 1, 2025/2026", [["X 3", "A-"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "A"]]), R("Sem 2, 2024/2025", [["X 2", "D"]])] }, NOW]],
+  ["from-the-ashes", () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "D"]]), R("Sem 2, 2024/2025", [["X 2", "B"]]), R("Sem 1, 2025/2026", [["X 3", "A"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "A"]]), R("Sem 2, 2024/2025", [["X 2", "D"]])] }, NOW]],
 ];
 
 describe("achievements", () => {

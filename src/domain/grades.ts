@@ -4,7 +4,7 @@ export type Tier = "S" | "A" | "B" | "C" | "D" | "F";
 export type Ore = "netherite" | "diamond" | "emerald" | "gold" | "iron" | "coal";
 
 export const TIERS: { tier: Tier; ore: Ore; minGpa: number }[] = [
-  { tier: "S", ore: "netherite", minGpa: 3.67 },
+  { tier: "S", ore: "netherite", minGpa: 3.8 },
   { tier: "A", ore: "diamond", minGpa: 3.5 },
   { tier: "B", ore: "emerald", minGpa: 3 },
   { tier: "C", ore: "gold", minGpa: 2.5 },
@@ -120,7 +120,7 @@ export function semesterMismatch(r: SemesterResult): string | null {
   return g === r.printed.gpa ? null : `Calculated GPA ${g.toFixed(2)}, slip says ${r.printed.gpa.toFixed(2)}.`;
 }
 
-const GPA_PTS = [0, 2, 2.5, 3, 3.5, 3.67, 4];
+const GPA_PTS = [0, 2, 2.5, 3, 3.5, 3.8, 4];
 const ELO_PTS = [0, 600, 900, 1200, 1500, 2000, 2300];
 
 export function eloFromGpa(g: number): number {

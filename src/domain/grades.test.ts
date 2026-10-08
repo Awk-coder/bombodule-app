@@ -15,8 +15,8 @@ describe("gpa", () => {
 });
 
 describe("tiers and elo", () => {
-  it.each([[4, "S"], [3.67, "S"], [3.66, "A"], [3.5, "A"], [3, "B"], [2.54, "C"], [2, "D"], [1.95, "F"]] as const)("%s → %s", (g, t) => expect(tierOf(g).tier).toBe(t));
-  it.each([[1.95, 585], [2.54, 924], [2, 600], [3.67, 2000], [4, 2300], [0, 0]] as const)("gpa %s → elo %s", (g, e) => expect(eloFromGpa(g)).toBe(e));
+  it.each([[4, "S"], [3.8, "S"], [3.79, "A"], [3.5, "A"], [3, "B"], [2.54, "C"], [2, "D"], [1.95, "F"]] as const)("%s → %s", (g, t) => expect(tierOf(g).tier).toBe(t));
+  it.each([[1.95, 585], [2.54, 924], [2, 600], [3.8, 2000], [4, 2300], [0, 0]] as const)("gpa %s → elo %s", (g, e) => expect(eloFromGpa(g)).toBe(e));
   it("ranks", () => {
     expect(rankOf(585)).toMatchObject({ ore: "coal", div: 3, min: 500, next: 600 });
     expect(rankOf(924)).toMatchObject({ ore: "gold", div: 1, next: 1000 });

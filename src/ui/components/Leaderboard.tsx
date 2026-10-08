@@ -19,7 +19,7 @@ function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose
   return (
     <Sheet open onClose={onClose}>
       <div class="player">
-        <RankBadge kind={kind} size={96} />
+        <RankBadge kind={kind} div={player.rated ? player.div : null} size={96} />
         <h2>{player.name}</h2>
         {player.title && <p class="player-title">{player.title}</p>}
         <div class="player-stats">
@@ -103,7 +103,7 @@ function BoardBody({ board, limit, empty }: { board: ReturnType<typeof useBoard>
           {load.players.slice(0, limit).map((p, i) => (
             <button key={p.id} class={`lb-row ${p.id === profile?.id ? "me" : ""}`} onClick={() => setOpen(p)}>
               <span class="lb-pos">{p.pos ?? i + 1}</span>
-              <RankBadge kind={p.rated && p.ore ? p.ore : "unrated"} size={32} />
+              <RankBadge kind={p.rated && p.ore ? p.ore : "unrated"} div={p.rated ? p.div : null} size={32} />
               <span class="lb-name">
                 <b>{p.name}</b>
                 {p.title && <small>{p.title}</small>}

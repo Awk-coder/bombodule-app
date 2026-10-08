@@ -74,7 +74,7 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
   const title = state.title ? titleText(state, state.title) : null;
   return (
     <section class={`season ${change === "up" ? "promoted" : ""}`}>
-      <RankBadge kind={kind} size={180} />
+      <RankBadge kind={kind} div={season.rated ? rank.div : null} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
       {title && <p class="season-title">{title}</p>}
