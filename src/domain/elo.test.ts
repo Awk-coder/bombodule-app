@@ -30,8 +30,8 @@ describe("seasonElo", () => {
       ],
     });
     const season = seasonElo(s, now);
-    expect(Object.fromEntries(season.changes.map((c) => [c.taskId, c.delta]))).toEqual({ on: 6, fin: 18, late: -4, miss: -12, finmiss: -30, legacy: 6 });
-    expect(season.elo).toBe(900 + 6 + 18 - 4 - 12 - 30 + 6);
+    expect(Object.fromEntries(season.changes.map((c) => [c.taskId, c.delta]))).toEqual({ on: 6, fin: 35, late: -4, miss: -12, finmiss: -30, legacy: 6 });
+    expect(season.elo).toBe(900 + 6 + 35 - 4 - 12 - 30 + 6);
     expect(season.changes[0].taskId).toBe("finmiss"); // newest first
   });
 
@@ -92,17 +92,23 @@ describe("seasonElo", () => {
     expect(season.changes.some((c) => c.title.includes("weekly cap"))).toBe(true);
   });
 
-  it("applies diminishing returns in Netherite (+4) and past 2300 (+2)", () => {
-    // Below Netherite (<2000): normal task gives +6, final gives +18
+  it("applies diminishing returns in Netherite (+4 until 2200, +2 until 2350, +1 past 2350)", () => {
+    // Below Netherite (<2000): normal task gives +6, final gives +35
     expect(taskGain(1500, false)).toBe(6);
-    expect(taskGain(1500, true)).toBe(18);
+    expect(taskGain(1500, true)).toBe(35);
 
-    // In Netherite (2000-2299): normal task gives +4, final gives +12
+    // In Netherite entry (2000-2199): normal task gives +4, final gives +12
     expect(taskGain(2050, false)).toBe(4);
     expect(taskGain(2050, true)).toBe(12);
 
-    // Peak tier (2300+): normal task gives +2, final gives +6 (super slow progression)
-    expect(taskGain(2350, false)).toBe(2);
-    expect(taskGain(2350, true)).toBe(6);
+    // Netherite elite (2200-2349): normal task gives +2, final gives +6
+    expect(taskGain(2250, false)).toBe(2);
+    expect(taskGain(2250, true)).toBe(6);
+
+    // Peak tier (2350+): normal task gives +1, final gives +3 (no min-maxing spam)
+    expect(taskGain(2350, false)).toBe(1);
+    expect(taskGain(2350, true)).toBe(3);
+    expect(taskGain(2500, false)).toBe(1);
+    expect(taskGain(2500, true)).toBe(3);
   });
 });

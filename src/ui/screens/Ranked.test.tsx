@@ -84,7 +84,7 @@ it("explains how ranking works with the full ladder", () => {
   const root = mount();
   act(() => button(root, "How ranking works").click());
   const sheet = root.querySelector(".sheet")!.textContent!;
-  for (const t of ["+6", "+18", "-4", "-12", "-30", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
+  for (const t of ["+6", "+35", "-4", "-12", "-30", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
   expect(root.querySelectorAll(".sheet .badge").length).toBe(6);
 });
 
