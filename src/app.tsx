@@ -8,6 +8,8 @@ import { shareFile } from "./native/share";
 import { dispatch, useAppState, useLoadStatus } from "./store/store";
 import { AchievementToast } from "./ui/components/AchievementToast";
 import { TabBar } from "./ui/components/TabBar";
+import { UpdateBanner } from "./ui/components/UpdateBanner";
+import { useUpdater } from "./ui/useUpdater";
 import { go, parseHash, useRoute } from "./ui/router";
 import type { Tab } from "./ui/router";
 import { CourseDetail } from "./ui/screens/CourseDetail";
@@ -51,6 +53,7 @@ function useBackButton() {
 export function App() {
   const status = useLoadStatus();
   const state = useAppState();
+  const updater = useUpdater();
   useBackButton();
   const theme = state.settings.theme;
   useEffect(() => {
@@ -69,7 +72,10 @@ export function App() {
   const Screen = SCREENS[route.tab];
   return (
     <>
-      <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>{route.courseId ? <CourseDetail id={route.courseId} /> : route.board ? <LeaderboardPage /> : <Screen />}</main>
+      <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>
+        <UpdateBanner updater={updater} />
+        {route.courseId ? <CourseDetail id={route.courseId} /> : route.board ? <LeaderboardPage /> : <Screen />}
+      </main>
       <TabBar current={route.tab} />
       <AchievementToast />
     </>

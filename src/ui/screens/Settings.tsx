@@ -7,6 +7,7 @@ import { shareFile } from "../../native/share";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate, initials, shortName } from "../format";
 import { useSync } from "../useSync";
+import { useUpdater } from "../useUpdater";
 import { Chips } from "../components/Chips";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
@@ -19,6 +20,7 @@ import { THEMES, themeById } from "../themes";
 export function Settings() {
   const state = useAppState();
   const sync = useSync();
+  const updater = useUpdater();
   const [pendingImport, setPendingImport] = useState<AppState | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -154,6 +156,29 @@ export function Settings() {
         <input type="file" accept="application/json,.json" hidden onChange={(e) => void onImportFile(e)} />
       </label>
       {importError && <p class="error">{importError}</p>}
+
+      <p class="group-title">Updates</p>
+      <div class="row">
+        <div class="grow">
+          <b>Uni Ranked v{updater.currentVersion}</b>
+          <small>
+            {updater.checking
+              ? "Checking GitHub for updates…"
+              : updater.info?.updateAvailable
+              ? `New version ${updater.info.latestVersion} available!`
+              : "App is up to date"}
+          </small>
+        </div>
+        {updater.info?.updateAvailable ? (
+          <button class="btn primary sm" disabled={updater.downloading} onClick={() => void updater.install()}>
+            {updater.downloading ? `${updater.progress}%` : "Update"}
+          </button>
+        ) : (
+          <button class="btn ghost sm" disabled={updater.checking} onClick={() => void updater.check()}>
+            {updater.checking ? "Checking…" : "Check now"}
+          </button>
+        )}
+      </div>
 
       <Sheet open={!!pendingImport} onClose={() => setPendingImport(null)}>
         <h2>Replace all data?</h2>

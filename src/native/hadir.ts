@@ -21,6 +21,12 @@ export interface PromptItem {
   autoMiss?: boolean;
 }
 
+export interface DownloadProgress {
+  percent: number;
+  bytes: number;
+  total: number;
+}
+
 export interface HadirPlugin {
   isIgnoringBatteryOptimizations(): Promise<{ value: boolean }>;
   openBatterySettings(): Promise<void>;
@@ -28,7 +34,11 @@ export interface HadirPlugin {
   schedulePrompts(options: { items: PromptItem[] }): Promise<void>; // replaces everything scheduled before
   /** Answers given on prompt cards since the last call, and the route of the last tapped one. */
   takeAnswers(): Promise<{ answers: { sessionId: string; mark: string }[]; route?: string }>;
+  canInstallApk(): Promise<{ value: boolean }>;
+  openInstallPermissionSettings(): Promise<void>;
+  downloadAndInstall(options: { url: string }): Promise<void>;
   addListener(event: "answer", fn: () => void): Promise<PluginListenerHandle>; // a card was answered while the app runs
+  addListener(event: "downloadProgress", fn: (data: DownloadProgress) => void): Promise<PluginListenerHandle>;
 }
 
 export const Hadir = registerPlugin<HadirPlugin>("Hadir", {

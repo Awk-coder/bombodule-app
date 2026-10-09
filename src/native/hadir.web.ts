@@ -11,4 +11,11 @@ export class HadirWeb extends WebPlugin implements HadirPlugin {
   async takeAnswers() {
     return { answers: [] };
   }
+  async canInstallApk() {
+    return { value: false };
+  }
+  async openInstallPermissionSettings() {}
+  async downloadAndInstall(options: { url: string }) {
+    window.open(options.url, "_blank");
+  }
 }
