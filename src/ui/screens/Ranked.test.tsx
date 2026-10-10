@@ -50,10 +50,10 @@ it("shows the season rank, Elo and recent changes", () => {
   const root = document.createElement("div");
   act(() => render(<Ranked />, root));
   const season = root.querySelector(".season")!;
-  expect(season.textContent).toContain("906");
+  expect(season.textContent).toContain("903");
   expect(season.textContent).toContain("Gold I");
-  expect(season.textContent).toContain("+6");
-  expect(season.querySelector(".season-elo")!.textContent).toBe("906");
+  expect(season.textContent).toContain("+3");
+  expect(season.querySelector(".season-elo")!.textContent).toBe("903");
   expect(season.querySelector(".badge")!.textContent).toBe("");
   expect(season.querySelector(".elo-bar")).toBeNull();
 });
@@ -84,7 +84,7 @@ it("explains how ranking works with the full ladder", () => {
   const root = mount();
   act(() => button(root, "How ranking works").click());
   const sheet = root.querySelector(".sheet")!.textContent!;
-  for (const t of ["+6", "+35", "-4", "-12", "-30", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
+  for (const t of ["+3", "+18", "-2", "-6", "-15", "Emerald", "1200", "Netherite", "2000", "each semester"]) expect(sheet).toContain(t);
   expect(root.querySelectorAll(".sheet .badge").length).toBe(6);
 });
 

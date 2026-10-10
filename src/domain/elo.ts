@@ -2,7 +2,7 @@ import { eloFromGpa, gpa, labelKey, round2, sortResults } from "./grades";
 import { ymd } from "./time";
 import type { AppState, SemesterResult, Task } from "./types";
 
-export const DELTA = { onTime: 6, finalOnTime: 35, late: -4, missed: -12, finalMissed: -30 };
+export const DELTA = { onTime: 3, finalOnTime: 18, late: -2, missed: -6, finalMissed: -15 };
 const UNRATED = 900;
 export const MAX_TASKS_PER_WEEK = 5;
 
@@ -140,20 +140,22 @@ export function placementElo(prior: SemesterResult[]): number {
 }
 
 /**
- * Task Elo gain with diminishing returns at high tiers:
- * - Below Netherite (<2000): +6 normal, +35 final
- * - Netherite (2000-2199): +4 normal, +12 final
- * - Netherite Elite (2200-2349): +2 normal, +6 final
- * - Peak tier (2350+): +1 normal, +3 final (extreme grind)
+ * Task Elo gain proportional across rank tiers:
+ * - Under Emerald (<1600): +3 normal, +18 final (half of legacy +6/+35)
+ * - Emerald (1600-1799): +3 normal, +15 final
+ * - Diamond (1800-1999): +2 normal, +10 final
+ * - Netherite (2000+): +1 normal, +5 final (peak 2350+: +1 normal, +3 final)
  */
 export function taskGain(currentElo: number, final: boolean, mult = 1.0): number {
   let base: number;
   if (currentElo >= 2350) {
     base = final ? 3 : 1;
-  } else if (currentElo >= 2200) {
-    base = final ? 6 : 2;
   } else if (currentElo >= 2000) {
-    base = final ? 12 : 4;
+    base = final ? 5 : 1;
+  } else if (currentElo >= 1800) {
+    base = final ? 10 : 2;
+  } else if (currentElo >= 1600) {
+    base = final ? 15 : 3;
   } else {
     base = final ? DELTA.finalOnTime : DELTA.onTime;
   }

@@ -30,13 +30,13 @@ describe("seasonElo", () => {
       ],
     });
     const season = seasonElo(s, now);
-    expect(Object.fromEntries(season.changes.map((c) => [c.taskId, c.delta]))).toEqual({ on: 6, fin: 35, late: -4, miss: -12, finmiss: -30, legacy: 6 });
-    expect(season.elo).toBe(900 + 6 + 35 - 4 - 12 - 30 + 6);
+    expect(Object.fromEntries(season.changes.map((c) => [c.taskId, c.delta]))).toEqual({ on: 3, fin: 18, late: -2, miss: -6, finmiss: -15, legacy: 3 });
+    expect(season.elo).toBe(900 + 3 + 18 - 2 - 6 - 15 + 3);
     expect(season.changes[0].taskId).toBe("finmiss"); // newest first
   });
 
   it("never goes below zero", () => {
-    const tasks = Array.from({ length: 40 }, (_, i) => task(`m${i}`, "2026-10-10T23:59+08:00", { final: true }));
+    const tasks = Array.from({ length: 80 }, (_, i) => task(`m${i}`, "2026-10-10T23:59+08:00", { final: true }));
     expect(seasonElo(makeState({ tasks }), now).elo).toBe(0);
   });
 
@@ -79,8 +79,8 @@ describe("seasonElo", () => {
     const season = seasonElo(s, now);
     expect(season.placement).toBe(1883);
     expect(season.comebackActive).toBe(true);
-    // Task delta has 1.35x velocity: round(6 * 1.35) = 8
-    expect(season.changes[0].delta).toBe(8);
+    // In Diamond (1883), base is 2. Task delta has 1.35x velocity: round(2 * 1.35) = 3
+    expect(season.changes[0].delta).toBe(3);
 
     // When student advances to Sem 3 (e.g. 3.67 GPA), they already used their one-time comeback
     const sNext = makeState({
@@ -113,27 +113,33 @@ describe("seasonElo", () => {
       }),
     );
     const season = seasonElo(makeState({ tasks }), now);
-    // 5 tasks get +6, 3 tasks get +0 (weekly cap)
+    // 5 tasks get +3, 3 tasks get +0 (weekly cap)
     const deltas = season.changes.map((c) => c.delta);
-    expect(deltas.filter((d) => d === 6)).toHaveLength(5);
+    expect(deltas.filter((d) => d === 3)).toHaveLength(5);
     expect(deltas.filter((d) => d === 0)).toHaveLength(3);
     expect(season.changes.some((c) => c.title.includes("weekly cap"))).toBe(true);
   });
 
-  it("applies diminishing returns in Netherite (+4 until 2200, +2 until 2350, +1 past 2350)", () => {
-    // Below Netherite (<2000): normal task gives +6, final gives +35
-    expect(taskGain(1500, false)).toBe(6);
-    expect(taskGain(1500, true)).toBe(35);
+  it("applies diminishing returns across rank tiers (+3 under Emerald, +3 in Emerald, +2 in Diamond, +1 in Netherite)", () => {
+    // Under Emerald (<1600): normal task gives +3, final gives +18
+    expect(taskGain(1500, false)).toBe(3);
+    expect(taskGain(1500, true)).toBe(18);
 
-    // In Netherite entry (2000-2199): normal task gives +4, final gives +12
-    expect(taskGain(2050, false)).toBe(4);
-    expect(taskGain(2050, true)).toBe(12);
+    // In Emerald (1600-1799): normal task gives +3, final gives +15
+    expect(taskGain(1700, false)).toBe(3);
+    expect(taskGain(1700, true)).toBe(15);
 
-    // Netherite elite (2200-2349): normal task gives +2, final gives +6
-    expect(taskGain(2250, false)).toBe(2);
-    expect(taskGain(2250, true)).toBe(6);
+    // In Diamond (1800-1999): normal task gives +2, final gives +10
+    expect(taskGain(1850, false)).toBe(2);
+    expect(taskGain(1850, true)).toBe(10);
 
-    // Peak tier (2350+): normal task gives +1, final gives +3 (no min-maxing spam)
+    // In Netherite (2000-2349): normal task gives +1, final gives +5
+    expect(taskGain(2050, false)).toBe(1);
+    expect(taskGain(2050, true)).toBe(5);
+    expect(taskGain(2250, false)).toBe(1);
+    expect(taskGain(2250, true)).toBe(5);
+
+    // Peak tier (2350+): normal task gives +1, final gives +3
     expect(taskGain(2350, false)).toBe(1);
     expect(taskGain(2350, true)).toBe(3);
     expect(taskGain(2500, false)).toBe(1);

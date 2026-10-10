@@ -27,7 +27,7 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
       </div>
       {!task.done && (
         <span class={`task-reward-pill ${task.final ? "final" : ""}`}>
-          {task.final ? "+35 Elo" : "+6 Elo"}
+          {task.final ? "+18 Elo" : "+3 Elo"}
         </span>
       )}
     </div>

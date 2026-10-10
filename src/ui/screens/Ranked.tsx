@@ -28,8 +28,8 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
       <h2>How ranking works</h2>
       <p class="group-hint">Your season Elo starts from last semester's GPA and moves with your tasks. It starts over each semester, from your newest result slip.</p>
       <div class="how-rules">
-        <div><b class="up">+{DELTA.onTime}</b><span>Task done on time (+4 until 2200, +2 until 2350, +1 past 2350)</span></div>
-        <div><b class="up">+{DELTA.finalOnTime}</b><span>Final assignment done on time (diminishing in Netherite)</span></div>
+        <div><b class="up">+{DELTA.onTime}</b><span>Task done on time (+3 in Emerald, +2 in Diamond, +1 in Netherite)</span></div>
+        <div><b class="up">+{DELTA.finalOnTime}</b><span>Final assignment done on time (+15 in Emerald, +10 in Diamond, +5 in Netherite)</span></div>
         <div><b class="down">{DELTA.late}</b><span>Task done late</span></div>
         <div><b class="down">{DELTA.missed}</b><span>Task missed</span></div>
         <div><b class="down">{DELTA.finalMissed}</b><span>Final assignment missed</span></div>
