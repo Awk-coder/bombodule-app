@@ -27,26 +27,53 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
     <Sheet open={open} onClose={onClose}>
       <h2>How ranking works</h2>
       <p class="group-hint">Your season Elo starts from last semester's GPA and moves with your tasks. It starts over each semester, from your newest result slip.</p>
-      <div class="how-rules">
-        <div><b class="up">+{DELTA.onTime}</b><span>Task done on time (+3 in Emerald, +2 in Diamond, +1 in Netherite)</span></div>
-        <div><b class="up">+{DELTA.finalOnTime}</b><span>Final assignment done on time (+15 in Emerald, +10 in Diamond, +5 in Netherite)</span></div>
-        <div><b class="down">{DELTA.late}</b><span>Task done late</span></div>
-        <div><b class="down">{DELTA.missed}</b><span>Task missed</span></div>
-        <div><b class="down">{DELTA.finalMissed}</b><span>Final assignment missed</span></div>
-      </div>
-      <p class="group-hint"><b>Weekly Cap:</b> Max 5 on-time tasks per calendar week give positive Elo.</p>
-      <p class="group-hint"><b>Overload Bonus:</b> Semesters with &gt;18 credits gain +10 Elo for every credit above 18.</p>
-      <p class="group-hint"><b>One-Time Comeback:</b> Students with &le;2.20 GPA in a past semester gain a one-time +100 Elo bonus and 1.35× task velocity buff when jumping &ge;+1.0 GPA (+50 Elo for &ge;+0.5). Once you climb you must stay there.</p>
-      <p class="group-hint"><b>Short Semesters:</b> Sem 3 is capped at Diamond III (max 1999 Elo) without bonuses.</p>
-      <h3 class="how-title">Ranks</h3>
-      {[...ORES].reverse().map((ore) => (
-        <div class="how-rank" key={ore}>
-          <RankBadge kind={ore} size={40} />
-          <b style={{ color: ORE_COLOR[ore] }}>{ORE_NAME[ore]}</b>
-          <span>{range(ore)}</span>
+
+      <div class="how-card">
+        <h3 class="how-sub">Task Scoring</h3>
+        <div class="how-rules">
+          <div><b class="up">+{DELTA.onTime}</b><span>Task done on time (+3 in Emerald, +2 in Diamond, +1 in Netherite)</span></div>
+          <div><b class="up">+{DELTA.finalOnTime}</b><span>Final assignment done on time (+15 in Emerald, +10 in Diamond, +5 in Netherite)</span></div>
+          <div><b class="down">{DELTA.late}</b><span>Task done late</span></div>
+          <div><b class="down">{DELTA.missed}</b><span>Task missed</span></div>
+          <div><b class="down">{DELTA.finalMissed}</b><span>Final assignment missed</span></div>
         </div>
-      ))}
-      <p class="group-hint">Each rank below Netherite has divisions I, II and III. Your degree rank is separate: it comes from your CGPA once every result slip is imported.</p>
+      </div>
+
+      <div class="how-card">
+        <h3 class="how-sub">Season Mechanics</h3>
+        <div class="how-mechanics">
+          <div class="how-mech-row">
+            <span class="how-mech-badge">⚡</span>
+            <div><b>Weekly Cap:</b> Max 5 on-time tasks per calendar week give positive Elo.</div>
+          </div>
+          <div class="how-mech-row">
+            <span class="how-mech-badge">📚</span>
+            <div><b>Overload Bonus:</b> Semesters with &gt;18 credits gain +10 Elo for every credit above 18.</div>
+          </div>
+          <div class="how-mech-row">
+            <span class="how-mech-badge">🔥</span>
+            <div><b>One-Time Comeback:</b> Students with &le;2.20 GPA in a past semester gain a one-time +100 Elo bonus and 1.35× task velocity buff when jumping &ge;+1.0 GPA (+50 Elo for &ge;+0.5). Once you climb you must stay there.</div>
+          </div>
+          <div class="how-mech-row">
+            <span class="how-mech-badge">⏳</span>
+            <div><b>Short Semesters:</b> Sem 3 is capped at Diamond III (max 1999 Elo) without bonuses.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-card">
+        <h3 class="how-sub">Ranks</h3>
+        <div class="how-ladder">
+          {[...ORES].reverse().map((ore) => (
+            <div class="how-rank" key={ore}>
+              <RankBadge kind={ore} size={36} />
+              <b style={{ color: ORE_COLOR[ore] }}>{ORE_NAME[ore]}</b>
+              <span>{range(ore)}</span>
+            </div>
+          ))}
+        </div>
+        <p class="how-foot">Each rank below Netherite has divisions I, II and III. Your degree rank is separate: it comes from your CGPA once every result slip is imported.</p>
+      </div>
     </Sheet>
   );
 }
