@@ -1,18 +1,18 @@
 import type { useUpdater } from "../useUpdater";
 
 export function UpdateBanner({ updater }: { updater: ReturnType<typeof useUpdater> }) {
-  const { info, dismissed, downloading, progress, install, dismiss, permissionNeeded, openSettings } = updater;
+  const { info, downloading, progress, install, permissionNeeded, openSettings } = updater;
 
-  if (!info?.updateAvailable || dismissed) return null;
+  if (!info?.updateAvailable) return null;
 
   return (
     <div class="update-card card">
       <div class="update-header">
         <span class="update-pill">UPDATE AVAILABLE</span>
-        <button class="update-close" aria-label="Dismiss" onClick={dismiss}>✕</button>
+        <span class="update-ver-label">{info.latestVersion}</span>
       </div>
       <div class="update-body">
-        <b>Uni Ranked {info.latestVersion} is out!</b>
+        <b>Uni Ranked {info.latestVersion} is available!</b>
         <small>Update now to get the latest features and fixes without losing your existing data.</small>
       </div>
 
@@ -36,7 +36,6 @@ export function UpdateBanner({ updater }: { updater: ReturnType<typeof useUpdate
       ) : (
         <div class="update-actions">
           <button class="btn primary sm" onClick={() => void install()}>Update Now</button>
-          <button class="btn ghost sm" onClick={dismiss}>Later</button>
         </div>
       )}
     </div>

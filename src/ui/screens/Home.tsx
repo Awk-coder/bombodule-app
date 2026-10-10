@@ -13,6 +13,8 @@ import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
 import { TaskRow } from "../components/TaskRow";
+import { UpdateBanner } from "../components/UpdateBanner";
+import { useUpdater } from "../useUpdater";
 
 type Info = (s: Session) => { course: Course; slot: Slot };
 
@@ -70,6 +72,7 @@ function CaughtUp({ sessions, today }: { sessions: Session[]; today: string }) {
 export function Home() {
   const state = useAppState();
   const now = useNow();
+  const updater = useUpdater();
   const sessions = useMemo(() => generateSessions(state, now), [state, now]);
   const courses = new Map(state.courses.map((c) => [c.id, c]));
   const slots = new Map(state.slots.map((s) => [s.id, s]));
@@ -92,6 +95,8 @@ export function Home() {
         <p>{greeting(now)}</p>
         <h1>{state.account?.name ? shortName(state.account.name) : "Student"}</h1>
       </header>
+
+      <UpdateBanner updater={updater} />
 
       {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} upcoming={upcoming} info={info} now={now} />}
 

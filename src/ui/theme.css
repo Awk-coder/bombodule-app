@@ -329,13 +329,21 @@ svg { vertical-align: -2px; }
 .adv-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 30; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
 
-.update-card { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--accent) 40%, var(--border)); margin-bottom: 16px; padding: 14px 16px; animation: toast-in 0.3s ease-out; }
+.update-card {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 18px;
+  margin-bottom: 16px;
+  padding: 16px;
+  animation: up 0.25s ease-out;
+}
 .update-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .update-pill { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, transparent); padding: 3px 8px; border-radius: 999px; }
+.update-ver-label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
 .update-close { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 0 4px; }
-.update-body b { display: block; font-size: 15px; margin-bottom: 2px; }
-.update-body small { color: var(--text-muted); font-size: 12px; line-height: 1.4; display: block; }
-.update-actions { display: flex; gap: 8px; margin-top: 12px; }
+.update-body b { display: block; font-size: 15px; margin-bottom: 3px; color: var(--text); }
+.update-body small { color: var(--text-muted); font-size: 12px; line-height: 1.45; display: block; }
+.update-actions { display: flex; gap: 8px; margin-top: 14px; }
 .update-perm { background: rgba(255, 152, 0, 0.12); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 10px; padding: 8px 10px; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
 .update-perm small { color: var(--warn); font-size: 11px; }
 .update-progress-box { margin-top: 12px; }

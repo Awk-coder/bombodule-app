@@ -1,24 +1,35 @@
 import { useEffect, useState } from "preact/hooks";
 import { Hadir } from "../native/hadir";
-import { APP_VERSION, checkGitHubUpdate, type UpdateInfo } from "../domain/updater";
+import { APP_VERSION, checkGitHubUpdate, isNewerVersion, type UpdateInfo } from "../domain/updater";
 
 const LAST_CHECK_KEY = "uni-ranked-last-update-check";
+const CACHED_INFO_KEY = "uni-ranked-cached-update-info";
 const CHECK_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function useUpdater() {
-  const [info, setInfo] = useState<UpdateInfo | null>(null);
+  const [info, setInfo] = useState<UpdateInfo | null>(() => {
+    try {
+      const raw = localStorage.getItem(CACHED_INFO_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.updateAvailable && isNewerVersion(parsed.latestVersion, APP_VERSION)) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return null;
+  });
   const [checking, setChecking] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [dismissed, setDismissed] = useState(false);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
 
   async function check(force = false) {
     if (checking) return;
     const now = Date.now();
     const last = parseInt(localStorage.getItem(LAST_CHECK_KEY) || "0", 10);
-    if (!force && now - last < CHECK_INTERVAL_MS) return;
+    if (!force && now - last < CHECK_INTERVAL_MS && info?.updateAvailable) return;
 
     setChecking(true);
     setError(null);
@@ -27,8 +38,14 @@ export function useUpdater() {
       localStorage.setItem(LAST_CHECK_KEY, String(now));
       if (res?.updateAvailable) {
         setInfo(res);
+        try {
+          localStorage.setItem(CACHED_INFO_KEY, JSON.stringify(res));
+        } catch {}
       } else {
         setInfo(res);
+        try {
+          localStorage.removeItem(CACHED_INFO_KEY);
+        } catch {}
       }
     } catch (e) {
       setError((e as Error).message);
@@ -88,11 +105,9 @@ export function useUpdater() {
     downloading,
     progress,
     error,
-    dismissed,
     permissionNeeded,
     check: () => check(true),
     install,
-    dismiss: () => setDismissed(true),
     openSettings: () => Hadir.openInstallPermissionSettings(),
   };
 }
