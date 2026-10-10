@@ -327,7 +327,7 @@ svg { vertical-align: -2px; }
 .adv small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 .adv-progress { height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; margin-top: 12px; }
 .adv-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-.adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 30; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
+.adv-toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 1000; min-width: 240px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); border-radius: 16px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4); padding: 10px 16px; animation: toast-in 0.35s ease-out; }
 
 .update-card {
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
