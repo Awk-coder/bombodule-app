@@ -16,18 +16,30 @@ export function Tasks() {
   const now = useNow();
   const [editing, setEditing] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
+  const [filterCourse, setFilterCourse] = useState<string | "all">("all");
   const courses = new Map(state.courses.map((c) => [c.id, c]));
   const finalsVisible = isFinalExamTaskVisible(state.semester, now);
   const upcoming = state.tasks
     .filter((t) => !t.done && (!t.final || finalsVisible))
     .sort((a, b) => a.due.localeCompare(b.due));
   const past = state.tasks.filter((t) => t.done).sort((a, b) => b.due.localeCompare(a.due));
+
+  const courseIdsWithTasks = [...new Set(state.tasks.map((t) => t.courseId).filter((id): id is string => Boolean(id) && courses.has(id as string)))];
+  const visibleUpcoming = filterCourse === "all" ? upcoming : upcoming.filter((t) => t.courseId === filterCourse);
+  const visiblePast = filterCourse === "all" ? past : past.filter((t) => t.courseId === filterCourse);
+
   const edit = (t: Task | null) => {
     setEditing(t);
     setOpen(true);
   };
   const sem = state.semester;
   const today = ymd(now);
+  const in7Days = addDays(today, 7);
+
+  const dueToday = visibleUpcoming.filter((t) => t.due.slice(0, 10) <= today);
+  const dueThisWeek = visibleUpcoming.filter((t) => t.due.slice(0, 10) > today && t.due.slice(0, 10) <= in7Days);
+  const dueLater = visibleUpcoming.filter((t) => t.due.slice(0, 10) > in7Days);
+
   const examWindow = !!sem && today > sem.end && today <= addDays(sem.end, 35);
   const examsOn = examWindow && !state.examsDone.includes(sem.label);
   // Tapped "Finished my last paper" but that semester's slip isn't in yet: not ticked until it is.
@@ -59,10 +71,58 @@ export function Tasks() {
           <span>{season.weeklyTaskCount >= 5 ? "⚡ Weekly task cap reached (5/5)" : `⚡ Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
         </div>
       )}
-      <h2 class="section-title">Upcoming <span class="count">{upcoming.length}</span></h2>
-      {upcoming.length ? upcoming.map(row) : <button class="card muted add-card" onClick={() => edit(null)}>Nothing due. Tap to add a task.</button>}
-      <h2 class="section-title muted">Past <span class="count">{past.length}</span></h2>
-      {past.map(row)}
+
+      {courseIdsWithTasks.length > 1 && (
+        <div class="filter-chips-bar">
+          <button class={`filter-chip ${filterCourse === "all" ? "active" : ""}`} onClick={() => setFilterCourse("all")}>
+            All ({upcoming.length})
+          </button>
+          {courseIdsWithTasks.map((cid) => {
+            const c = courses.get(cid)!;
+            const count = upcoming.filter((t) => t.courseId === cid).length;
+            return (
+              <button key={cid} class={`filter-chip ${filterCourse === cid ? "active" : ""}`} onClick={() => setFilterCourse(cid)}>
+                {c.code} {count > 0 ? `(${count})` : ""}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {!visibleUpcoming.length ? (
+        <>
+          <h2 class="section-title">Upcoming <span class="count">0</span></h2>
+          <button class="card muted add-card" onClick={() => edit(null)}>Nothing due. Tap to add a task.</button>
+        </>
+      ) : (
+        <>
+          {dueToday.length > 0 && (
+            <>
+              <h2 class="section-title urgent">Due Today <span class="count">{dueToday.length}</span></h2>
+              {dueToday.map(row)}
+            </>
+          )}
+          {dueThisWeek.length > 0 && (
+            <>
+              <h2 class="section-title">This Week <span class="count">{dueThisWeek.length}</span></h2>
+              {dueThisWeek.map(row)}
+            </>
+          )}
+          {dueLater.length > 0 && (
+            <>
+              <h2 class="section-title muted">Later <span class="count">{dueLater.length}</span></h2>
+              {dueLater.map(row)}
+            </>
+          )}
+        </>
+      )}
+
+      {visiblePast.length > 0 && (
+        <>
+          <h2 class="section-title muted">Past <span class="count">{visiblePast.length}</span></h2>
+          {visiblePast.map(row)}
+        </>
+      )}
       <button class="fab" aria-label="Add task" onClick={() => edit(null)}><IconPlus size={28} /></button>
       <TaskSheet open={open} task={editing} onClose={() => setOpen(false)} />
     </>

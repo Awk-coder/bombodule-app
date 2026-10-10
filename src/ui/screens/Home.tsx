@@ -2,13 +2,13 @@ import { useMemo } from "preact/hooks";
 import { markSession } from "../../domain/actions";
 import { courseStats, daySummary } from "../../domain/attendance";
 import { generateSessions } from "../../domain/sessions";
-import { hhmm, ymd } from "../../domain/time";
-import type { Course, Session, Slot } from "../../domain/types";
+import { addDays, hhmm, ymd } from "../../domain/time";
+import type { Course, Session, Slot, Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { dayName, fmtDate, fmtTime, greeting, minutesLeft, relDue, shortName, titleCase } from "../format";
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
-import { IconCheck, IconClock, IconPin, IconSettings } from "../components/icons";
+import { IconCheck, IconClock, IconCoffee, IconPin, IconSettings } from "../components/icons";
 import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
@@ -33,7 +33,34 @@ function NowCard({ current, upcoming, info, now }: { current?: Session; upcoming
         </div>
         <p class="hero-time"><IconClock size={14} /> {fmtTime(slot.start)} - {fmtTime(slot.end)} · {dayName(main.start.getDay())}</p>
         <p class="hero-name">{titleCase(course.name)}</p>
-        <p class="hero-venue"><IconPin size={14} /> {slot.venue}</p>
+        <p class="hero-venue"><IconPin size={14} /> {slot.venue}{slot.lecturer ? ` · ${slot.lecturer}` : ""}</p>
+        {current && current.status === "unmarked" && (
+          <div class="hero-actions">
+            <button
+              class="hero-btn ok"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch((st) => markSession(st, current.id, "attended", now));
+              }}
+            >
+              <IconCheck size={15} /> Mark Present
+            </button>
+            <button
+              class="hero-btn bad"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch((st) => markSession(st, current.id, "missed", now));
+              }}
+            >
+              Mark Absent
+            </button>
+          </div>
+        )}
+        {current && current.status === "attended" && (
+          <div class="hero-status-pill ok">
+            <IconCheck size={14} /> Attended today
+          </div>
+        )}
       </div>
       {after && n && (
         <>
@@ -44,6 +71,115 @@ function NowCard({ current, upcoming, info, now }: { current?: Session; upcoming
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function TodayRail({ sessions, info, now }: { sessions: Session[]; info: Info; now: Date }) {
+  if (!sessions.length) return null;
+  const items: Array<{ type: "session"; s: Session } | { type: "break"; label: string }> = [];
+  for (let i = 0; i < sessions.length; i++) {
+    const s = sessions[i];
+    items.push({ type: "session", s });
+    if (i < sessions.length - 1) {
+      const next = sessions[i + 1];
+      const gapMins = Math.round((next.start.getTime() - s.end.getTime()) / (60 * 1000));
+      if (gapMins >= 30) {
+        const hrs = Math.floor(gapMins / 60);
+        const mins = gapMins % 60;
+        const label = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m Break` : `${hrs}h Break`) : `${mins}m Break`;
+        items.push({ type: "break", label });
+      }
+    }
+  }
+
+  return (
+    <div class="today-rail-section">
+      <div class="today-rail-head">
+        <h2 class="section-title">Today's Schedule <span class="count">{sessions.length}</span></h2>
+        <a class="rail-more-link" href="#/schedule">Full timetable ›</a>
+      </div>
+      <div class="today-rail-scroll">
+        {items.map((it, idx) => {
+          if (it.type === "break") {
+            return (
+              <div key={`break-${idx}`} class="rail-break-card">
+                <IconCoffee size={14} />
+                <span>{it.label}</span>
+              </div>
+            );
+          }
+          const { s } = it;
+          const { course, slot } = info(s);
+          const isLive = s.start <= now && now < s.end;
+          const isOver = s.end <= now;
+          return (
+            <a
+              key={s.id}
+              class={`rail-class-card ${isLive ? "live" : ""} ${s.status === "attended" ? "attended" : s.status === "missed" ? "missed" : ""}`}
+              href={courseHref(s.courseId)}
+            >
+              <div class="rail-card-top">
+                <span class="chip">{course.code}</span>
+                {isLive && <span class="rail-live-badge"><span class="live-dot" /> LIVE</span>}
+                {!isLive && s.status === "attended" && <span class="rail-status-pill ok"><IconCheck size={10} /> Attended</span>}
+                {!isLive && s.status === "missed" && <span class="rail-status-pill bad">Missed</span>}
+                {!isLive && s.status === "unmarked" && isOver && <span class="rail-status-pill warn">Unmarked</span>}
+              </div>
+              <p class="rail-class-name">{titleCase(course.name)}</p>
+              <div class="rail-card-meta">
+                <span><IconClock size={12} /> {fmtTime(hhmm(s.start))} - {fmtTime(hhmm(s.end))}</span>
+                <span><IconPin size={12} /> {slot.venue}</span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DailyPulse({
+  sessions,
+  tasks,
+  courses,
+  now,
+}: {
+  sessions: Session[];
+  tasks: Task[];
+  courses: Course[];
+  now: Date;
+}) {
+  const today = ymd(now);
+  const todaySessions = sessions.filter((s) => s.date === today);
+  const attendedCount = todaySessions.filter((s) => s.status === "attended").length;
+  const totalTodayClasses = todaySessions.length;
+
+  const dueSoonTasks = tasks.filter((t) => !t.done && t.due.slice(0, 10) <= addDays(today, 2)).length;
+
+  let maxStreak = 0;
+  for (const c of courses) {
+    if (!c.active) continue;
+    const st = courseStats(c, sessions);
+    if (st.currentStreak > maxStreak) maxStreak = st.currentStreak;
+  }
+
+  return (
+    <div class="daily-pulse-card">
+      <div class="daily-pulse-item">
+        <span class="daily-pulse-val">{totalTodayClasses > 0 ? `${attendedCount}/${totalTodayClasses}` : "—"}</span>
+        <span class="daily-pulse-lbl">Classes Today</span>
+      </div>
+      <div class="daily-pulse-sep" />
+      <div class="daily-pulse-item">
+        <span class="daily-pulse-val">{dueSoonTasks}</span>
+        <span class="daily-pulse-lbl">Due Soon</span>
+      </div>
+      <div class="daily-pulse-sep" />
+      <div class="daily-pulse-item">
+        <span class="daily-pulse-val">{maxStreak > 0 ? `🔥 ${maxStreak}` : "0"}</span>
+        <span class="daily-pulse-lbl">Best Streak</span>
+      </div>
     </div>
   );
 }
@@ -77,6 +213,7 @@ export function Home() {
 
   const current = sessions.find((s) => s.start <= now && now < s.end);
   const upcoming = sessions.filter((s) => s.start > now).slice(0, 2);
+  const todaySessions = sessions.filter((s) => s.date === ymd(now)).sort((a, b) => a.start.getTime() - b.start.getTime());
   const unmarked = sessions.filter((s) => s.status === "unmarked").reverse();
   const warnings = state.courses
     .filter((c) => c.active)
@@ -96,6 +233,10 @@ export function Home() {
       {state.courses.length === 0 ? <LinkCard /> : <NowCard current={current} upcoming={upcoming} info={info} now={now} />}
 
       <div class="home-scroll">
+      {state.courses.length > 0 && <DailyPulse sessions={sessions} tasks={state.tasks} courses={state.courses} now={now} />}
+
+      {todaySessions.length > 0 && <TodayRail sessions={todaySessions} info={info} now={now} />}
+
       {unmarked.length === 0 && state.courses.length > 0 && <CaughtUp sessions={sessions} today={ymd(now)} />}
 
       {unmarked.length > 0 && (

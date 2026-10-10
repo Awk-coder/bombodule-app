@@ -423,3 +423,444 @@ svg { vertical-align: -2px; }
 .title-list .row.on { border-color: var(--accent); }
 .row.danger b { color: var(--danger); }
 .btn.primary.danger { background: var(--danger); border-color: var(--danger); }
+
+/* --- Home: Live Radar, Actions & Today Rail --- */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse-dot 1.8s infinite ease-in-out;
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.6; }
+}
+
+.hero-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.hero-btn.ok {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.hero-btn.bad {
+  background: color-mix(in srgb, var(--missed) 20%, var(--surface));
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.hero-status-pill.ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.daily-pulse-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 10px;
+  margin-bottom: 16px;
+}
+.daily-pulse-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+.daily-pulse-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+.daily-pulse-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-weight: 600;
+}
+.daily-pulse-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.today-rail-section {
+  margin-bottom: 18px;
+}
+.today-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.today-rail-head .section-title {
+  margin-bottom: 0;
+}
+.rail-more-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}
+.today-rail-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: none;
+}
+.today-rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+.rail-class-card {
+  min-width: 175px;
+  max-width: 200px;
+  flex: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+.rail-class-card.live {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.rail-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rail-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.rail-status-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.rail-status-pill.ok {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.rail-status-pill.bad {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+.rail-status-pill.warn {
+  background: color-mix(in srgb, var(--warn) 15%, transparent);
+  color: var(--warn);
+}
+.rail-class-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.rail-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rail-break-card {
+  min-width: 125px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+/* --- Tasks: Quest Board Styling & Filter Chips --- */
+.task-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.task-cat-tag {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.task-reward-slot {
+  flex: none;
+}
+.task-reward-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.task-reward-pill.final {
+  background: color-mix(in srgb, #ffaa00 22%, var(--surface));
+  color: #ffaa00;
+  border-color: color-mix(in srgb, #ffaa00 45%, transparent);
+}
+.task-reward-pill.done {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border);
+  opacity: 0.65;
+}
+
+.filter-chips-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 14px;
+  scrollbar-width: none;
+}
+.filter-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+.filter-chip {
+  flex: none;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.section-title.urgent {
+  color: var(--warn);
+}
+
+/* --- Schedule 2.0: Day / Week Switcher & Calendar Export --- */
+.sched-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sched-top-bar .page-title {
+  margin: 0;
+  font-size: 22px;
+}
+.sched-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.seg-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+}
+.seg-toggle button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.seg-toggle button.on {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.sched-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+}
+.sched-export-btn:active {
+  background: var(--border);
+}
+
+.day-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+.day-pills-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.day-pill-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+}
+.day-pill-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.day-pill-btn.is-today .today-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.day-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.day-slot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s;
+}
+.day-slot-card:active {
+  transform: scale(0.99);
+}
+.day-slot-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.day-slot-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.day-slot-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.day-slot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  align-items: center;
+}
+.day-slot-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sched-day-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 4px 0;
+}
