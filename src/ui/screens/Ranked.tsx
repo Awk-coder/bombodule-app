@@ -11,40 +11,9 @@ import { useResultImport } from "../useResultImport";
 import { AchievementGrid } from "../components/AchievementGrid";
 import { Leaderboard } from "../components/Leaderboard";
 import { ResultPicker, ResultSheet } from "../components/ResultSlip";
-import { ORE_COLOR, ORE_NAME, RankBadge, divLabel, leakOf } from "../components/RankBadge";
+import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
-
-const PROMO_KEY = "uni-ranked-last-rank-key";
-export const RANK_ORDER = [
-  "coal-1", "coal-2", "coal-3",
-  "iron-1", "iron-2", "iron-3",
-  "gold-1", "gold-2", "gold-3",
-  "emerald-1", "emerald-2", "emerald-3",
-  "diamond-1", "diamond-2", "diamond-3",
-  "netherite",
-];
-
-export function rankKey(rank: ReturnType<typeof rankOf> | null): string | null {
-  if (!rank) return null;
-  return rank.ore === "netherite" ? "netherite" : `${rank.ore}-${rank.div ?? 1}`;
-}
-
-/** "up" or "down" once when the rank division changed since the screen was last shown. */
-function useRankChange(rank: ReturnType<typeof rankOf> | null): "up" | "down" | null {
-  const [change] = useState((): "up" | "down" | null => {
-    if (!rank) return null;
-    const key = rankKey(rank);
-    if (!key) return null;
-    let last: string | null = null;
-    try {
-      last = localStorage.getItem(PROMO_KEY);
-      localStorage.setItem(PROMO_KEY, key);
-    } catch {}
-    if (last === null || last === key || !RANK_ORDER.includes(last) || !RANK_ORDER.includes(key)) return null;
-    return RANK_ORDER.indexOf(key) > RANK_ORDER.indexOf(last) ? "up" : "down";
-  });
-  return change;
-}
+import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 
 const ORES: Ore[] = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
 const range = (ore: Ore) => {
@@ -85,13 +54,12 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
 export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonElo>; rank: ReturnType<typeof rankOf> }) {
   const state = useAppState();
   const kind = season.rated ? rank.ore : "unrated";
-  const change = useRankChange(season.rated ? rank : null);
   const [how, setHow] = useState(false);
   const [all, setAll] = useState(false);
   const title = state.title ? titleText(state, state.title) : null;
   const pb = season.placementBreakdown;
   return (
-    <section class={`season ${change === "up" ? "promoted" : ""}`}>
+    <section class="season">
       <RankBadge kind={kind} div={season.rated ? rank.div : null} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
@@ -99,7 +67,6 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
       {season.comebackActive && (
         <span class="buff-pill">🔥 1.35× Comeback Velocity Active</span>
       )}
-      {change && <p class={`rank-change ${change}`}>{change === "up" ? "Promoted to" : "Dropped to"} {ORE_NAME[rank.ore]} {divLabel(rank.div)}</p>}
       <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
       {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
       {season.rated && pb && (pb.loadBonus > 0 || pb.comebackBonus > 0) && (
@@ -144,11 +111,10 @@ export function Ranked() {
   const season = seasonElo(state, now);
   const rank = rankOf(season.elo);
   const lastPaperDone = !state.semester || state.examsDone.includes(state.semester.label);
-  const leak = season.rated ? leakOf(rank.ore, rank.progress) : 0;
 
   return (
-    <div class="ranked" style={leak ? { "--leak-color": ORE_COLOR[rank.ore], "--leak": `${Math.round(leak * 100)}%` } : undefined}>
-      {leak > 0 && <div class="rank-leak" aria-hidden />}
+    <div class="ranked">
+      <ShaderGradientBackground ore={season.rated ? rank.ore : "coal"} />
       <h1 class="page-title">Ranked</h1>
       <SeasonCard season={season} rank={rank} />
 

@@ -1,6 +1,17 @@
 import type { AppState, PauseInterval, Session } from "./types";
 import { addDays, atTime, parseYmd, ymd } from "./time";
 
+export const ATTENDANCE_LOCK_HOURS = 36; // 1.5 days grace period
+
+/**
+ * A session's attendance locks 36 hours (1.5 days) after the class ends.
+ * Once locked, missed/unmarked classes cannot be changed to attended.
+ */
+export function isSessionLocked(sessionEnd: Date, now: Date): boolean {
+  const graceMs = ATTENDANCE_LOCK_HOURS * 60 * 60 * 1000;
+  return now.getTime() - sessionEnd.getTime() > graceMs;
+}
+
 export function isPausedOn(pauses: PauseInterval[], date: string): boolean {
   return pauses.some((p) => date >= p.from && (p.to === null || date <= p.to));
 }

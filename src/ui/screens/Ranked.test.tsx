@@ -111,14 +111,6 @@ it("lets you undo graduating", () => {
   expect(getState().graduated).toBeUndefined();
 });
 
-it("says when you ranked up or down", () => {
-  act(() => dispatch((s) => ({ ...s, results: [result("Sem 2, 2025/2026", [["X 1", "B"]])] })));
-  localStorage.setItem("uni-ranked-last-rank-key", "gold-1");
-  expect(mount().textContent).toContain("Promoted to Emerald I");
-  localStorage.setItem("uni-ranked-last-rank-key", "diamond-1");
-  expect(mount().textContent).toContain("Dropped to Emerald I");
-});
-
 it("shows four Elo changes until you ask for all", () => {
   const due = new Date(Date.now() - 86_400_000).toISOString();
   const tasks = [1, 2, 3, 4, 5, 6].map((i) => ({ id: `t${i}`, courseId: null, title: `Task ${i}`, due, note: "", done: true }));

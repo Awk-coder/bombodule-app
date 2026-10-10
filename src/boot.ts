@@ -23,7 +23,7 @@ async function warnIfNeeded(prev: AppState, next: AppState): Promise<void> {
 export async function boot(): Promise<void> {
   await loadState();
 
-  if (import.meta.env.DEV && new URLSearchParams(location.search).has("seed")) {
+  if (import.meta.env.DEV && (!getState().onboarded || new URLSearchParams(location.search).has("seed"))) {
     const { seedState } = await import("./dev/seed");
     dispatch(() => seedState(new Date()));
   }

@@ -28,5 +28,15 @@ export default defineConfig({
       workbox: { globPatterns: ["**/*.{js,mjs,css,html,png,svg,woff,woff2}"], maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 },
     }),
   ],
+  server: {
+    host: true,
+    port: 5173,
+    watch: {
+      ignored: ["**/android/**", "**/ios/**", "**/dist/**", "**/.git/**"],
+    },
+  },
+  optimizeDeps: {
+    exclude: ["@napi-rs/canvas"],
+  },
   test: { include: ["src/**/*.test.ts", "src/**/*.test.tsx", "server/src/**/*.test.ts"] },
 });

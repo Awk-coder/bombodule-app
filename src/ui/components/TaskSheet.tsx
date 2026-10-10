@@ -1,8 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import { deleteTask, upsertTask } from "../../domain/actions";
+import { isFinalExamTaskVisible } from "../../domain/calendar";
 import { addDays, atTime, hhmm, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
+import { useNow } from "../useNow";
 import { Chips } from "./Chips";
 import { Sheet } from "./Sheet";
 import { Toggle } from "./Toggle";
@@ -16,12 +18,14 @@ interface Props {
 
 export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props) {
   const state = useAppState();
+  const now = useNow();
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState<string | null>(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("23:59");
   const [note, setNote] = useState("");
   const [final, setFinal] = useState(false);
+  const allowFinal = isFinalExamTaskVisible(state.semester, now) || (task?.final ?? false);
 
   useEffect(() => {
     if (!open) return;
@@ -70,10 +74,12 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
         <label class="field"><span>Due date</span><input type="date" value={date} onInput={(e) => setDate(e.currentTarget.value)} /></label>
         <label class="field"><span>Time</span><input type="time" value={time} onInput={(e) => setTime(e.currentTarget.value)} /></label>
       </div>
-      <div class="row final-row">
-        <div class="grow"><b>Final assignment</b><small>Worth more on your Ranked season</small></div>
-        <Toggle on={final} onChange={setFinal} />
-      </div>
+      {allowFinal && (
+        <div class="row final-row">
+          <div class="grow"><b>Final assignment</b><small>Worth more on your Ranked season</small></div>
+          <Toggle on={final} onChange={setFinal} />
+        </div>
+      )}
       <label class="field"><span>Note</span><textarea rows={3} value={note} onInput={(e) => setNote(e.currentTarget.value)} /></label>
       <button class="btn primary" disabled={!title.trim() || !date || !time} onClick={save}>Save</button>
       {task && <button class="btn ghost" onClick={remove}>Delete task</button>}

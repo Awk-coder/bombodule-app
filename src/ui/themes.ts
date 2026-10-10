@@ -35,29 +35,27 @@ export const THEMES: Theme[] = [
     },
   },
   {
-    id: "sand", name: "Sand", swatch: ["#f9f5ef", "#f6be55", "#a1453c", "#ababab"], light: true,
+    id: "sand", name: "Sand", swatch: ["#120f0d", "#241c16", "#e07a5f", "#f7f3ee"], light: false,
     vars: {
-      "--bg": "#f9f5ef", "--surface": "#fffdf9", "--border": "#e9e0d2", "--accent": "#a1453c", "--accent-dim": "#fbe7c0",
-      "--hero": "#fdf0d4", "--hero-outer": "#fffdf9", "--hero-line": "#f0d39a", "--track": "#efe4d2",
-      "--text": "#2c2622", "--text-muted": "#8c8681", "--on-accent": "#ffffff", "--missed": "#d9a19b", "--warn": "#d18a0f",
+      "--bg": "#120f0d", "--surface": "#1b1613", "--border": "#2b231e", "--accent": "#e07a5f", "--accent-dim": "#331e17",
+      "--hero": "#241c16", "--hero-outer": "#15110e", "--hero-line": "#3d2d23", "--track": "#28201a",
+      "--text": "#f7f3ee", "--text-muted": "#9c9287", "--on-accent": "#1f0e08", "--missed": "#4a2420", "--warn": "#f59e0b",
     },
   },
   {
-    id: "peach", name: "Peach", swatch: ["#fdd0be", "#e8857f", "#e0605e", "#4a2e12"], light: true,
+    id: "peach", name: "Peach", swatch: ["#140e11", "#261620", "#ff7b72", "#fdf2f4"], light: false,
     vars: {
-      "--bg": "#fde6dc", "--surface": "#fff4ef", "--border": "#f5c9b8", "--accent": "#c94a48", "--accent-dim": "#f9c9bf",
-      "--hero": "#fdd0be", "--hero-outer": "#fff4ef", "--hero-line": "#e8857f", "--track": "#f6b8a6",
-      "--text": "#4a2e12", "--text-muted": "#9a6f5c", "--on-accent": "#ffffff", "--missed": "#8a5a3c", "--warn": "#b86e00",
-      "--danger": "#4a2e12", "--danger-bg": "#f5d9c6",
+      "--bg": "#140e11", "--surface": "#1d1419", "--border": "#2d1e27", "--accent": "#ff7b72", "--accent-dim": "#381b22",
+      "--hero": "#261620", "--hero-outer": "#160e13", "--hero-line": "#422336", "--track": "#2a1b24",
+      "--text": "#fdf2f4", "--text-muted": "#9e7e8b", "--on-accent": "#240910", "--missed": "#4d202e", "--warn": "#f59e0b",
     },
   },
   {
-    id: "crimson", name: "Crimson", swatch: ["#ede8db", "#850000", "#6a0000", "#1b1919"], light: true,
+    id: "crimson", name: "Crimson", swatch: ["#110809", "#240f13", "#f43f5e", "#fbf1f2"], light: false,
     vars: {
-      "--bg": "#ede8db", "--surface": "#f6f2e8", "--border": "#dcd4c3", "--accent": "#850000", "--accent-dim": "#e6d3c8",
-      "--hero": "#f3e6dc", "--hero-outer": "#f6f2e8", "--hero-line": "#c99a8f", "--track": "#e2d6c9",
-      "--text": "#1b1919", "--text-muted": "#7a746a", "--on-accent": "#ffffff", "--missed": "#1b1919", "--warn": "#b86e00",
-      "--danger": "#6a0000", "--danger-bg": "#f0d6d0",
+      "--bg": "#110809", "--surface": "#1a0d0f", "--border": "#2b1417", "--accent": "#f43f5e", "--accent-dim": "#381217",
+      "--hero": "#240f13", "--hero-outer": "#13090b", "--hero-line": "#3f181e", "--track": "#261115",
+      "--text": "#fbf1f2", "--text-muted": "#9c787e", "--on-accent": "#200408", "--missed": "#481219", "--warn": "#f59e0b",
     },
   },
 ];

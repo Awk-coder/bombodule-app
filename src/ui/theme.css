@@ -55,8 +55,8 @@ svg { vertical-align: -2px; }
 .caught-up b { display: block; color: var(--accent); }
 .caught-up small { display: block; color: var(--text-muted); font-size: 13px; margin-top: 2px; }
 .caught-up-icon { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--accent-dim); color: var(--accent); display: grid; place-items: center; }
-.card.glow-warn { border-color: var(--warn); box-shadow: 0 0 14px color-mix(in srgb, var(--warn) 25%, transparent); }
-.card.glow-danger { border-color: var(--danger); box-shadow: 0 0 14px color-mix(in srgb, var(--danger) 25%, transparent); }
+.card.glow-warn { border-color: var(--warn); }
+.card.glow-danger { border-color: var(--danger); }
 .course-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
 .course-name { margin: 10px 0 0; font-weight: 600; }
 
@@ -114,8 +114,24 @@ svg { vertical-align: -2px; }
 .tab.active { color: var(--accent); font-weight: 700; }
 .tab.active svg { fill: var(--accent-dim); }
 
-.sheet-backdrop { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; background: rgba(0, 0, 0, 0.6); animation: fade 0.15s; }
-.sheet { width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 10px var(--gutter) calc(24px + env(safe-area-inset-bottom)); animation: up 0.2s ease-out; }
+.sheet-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background: rgba(0, 0, 0, 0.65); animation: fade 0.15s; }
+.sheet { position: relative; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; overflow-x: hidden; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 10px var(--gutter) calc(24px + env(safe-area-inset-bottom)); animation: up 0.2s ease-out; }
+.sheet > *:not(.sheet-shader) { position: relative; z-index: 1; }
+.sheet-shader {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  width: 100% !important;
+  height: 264px !important;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  border-radius: 22px 22px 0 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, rgba(0, 0, 0, 0.8) 70%, transparent 95%);
+  mask-image: linear-gradient(to bottom, #000 45%, rgba(0, 0, 0, 0.8) 70%, transparent 95%);
+}
 .sheet-handle { width: 40px; height: 4px; border-radius: 999px; background: var(--border); margin: 0 auto 16px; }
 .sheet h2 { font-family: var(--serif); color: var(--accent); margin: 0 0 16px; font-size: 20px; }
 .field { display: block; margin-bottom: 14px; }
@@ -172,6 +188,26 @@ svg { vertical-align: -2px; }
 .seg button { padding: 7px 12px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
 .seg button.on.ok { background: var(--accent); color: var(--on-accent); }
 .seg button.on.bad { background: var(--missed); color: var(--text); }
+.mark-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  user-select: none;
+}
+.mark-pill.ok {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.mark-pill.bad {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+}
 
 .profile { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 16px; }
 .avatar { width: 64px; height: 64px; flex: none; border-radius: 50%; background: var(--accent-dim); color: var(--accent); display: grid; place-items: center; font-family: var(--serif); font-size: 24px; }
@@ -210,13 +246,31 @@ svg { vertical-align: -2px; }
 .final-tag { color: var(--warn); font-size: 11px; font-weight: 800; letter-spacing: 0.06em; margin-right: 6px; }
 
 /* Ranked: app styling; only the badge carries the rank's shape and colour. */
-.rank-leak { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(120% 55% at 50% 0%, color-mix(in srgb, var(--leak-color) var(--leak), transparent), transparent 72%), radial-gradient(90% 40% at 50% 100%, color-mix(in srgb, var(--leak-color) calc(var(--leak) / 2), transparent), transparent 70%); animation: leak-breathe 6s ease-in-out infinite; }
-@keyframes leak-breathe { 50% { opacity: 0.75; } }
+.rank-leak { display: none; }
 
 .badge { flex: none; display: block; }
 .badge svg { display: block; }
 
-@media (prefers-reduced-motion: reduce) { .rank-leak { animation: none !important; } }
+.shader-gradient-wrapper {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+}
+.shader-gradient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.ranked { position: relative; display: flow-root; }
+.ranked .page-title,
+.ranked .season {
+  position: relative;
+  z-index: 1;
+}
 
 .season { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
 .season-elo { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin-top: 14px; line-height: 1; }
@@ -345,6 +399,18 @@ svg { vertical-align: -2px; }
 .lb-more { display: block; margin: 10px 0 0; }
 .lb-search { display: block; width: 100%; margin-bottom: 12px; }
 .lb-elo { font-weight: 700; font-variant-numeric: tabular-nums; }
+.lb-skeleton-row { pointer-events: none; }
+.skeleton-box {
+  background: linear-gradient(90deg, var(--border), color-mix(in srgb, var(--surface) 65%, var(--border)), var(--border));
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+  display: block;
+}
+.skeleton-pos { width: 14px; height: 14px; border-radius: 4px; margin-left: auto; }
+.skeleton-badge { width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.skeleton-name { height: 14px; margin-bottom: 5px; border-radius: 4px; }
+.skeleton-title { height: 10px; border-radius: 3px; }
+.skeleton-elo { width: 38px; height: 16px; border-radius: 4px; margin-left: auto; }
 .player { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .player h2 { margin: 10px 0 0; }
 .player-title { color: var(--text-muted); font-style: italic; margin: 2px 0 0; }

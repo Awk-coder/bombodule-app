@@ -2,13 +2,29 @@ import { DEFAULT_LIMIT, DEFAULT_SETTINGS, PALETTE_SIZE, SEMESTER_DAYS, emptyStat
 import type { AppState, Course, Mark, Settings, Slot, Task } from "./types";
 import { IIUM_CALENDAR } from "./calendar";
 import { countedPoint } from "./grades";
-import { addDays } from "./time";
+import { isSessionLocked } from "./sessions";
+import { addDays, atTime } from "./time";
 import type { ParsedSchedule } from "../iium/parser";
 import type { ParsedResult } from "../iium/results";
 
 export const courseKey = (code: string, section: string) => `${code}-${section}`;
 
-export function markSession(state: AppState, sessionId: string, mark: Mark): AppState {
+export function markSession(state: AppState, sessionId: string, mark: Mark, now?: Date): AppState {
+  if (now) {
+    const atIdx = sessionId.indexOf("@");
+    if (atIdx !== -1) {
+      const slotId = sessionId.slice(0, atIdx);
+      const date = sessionId.slice(atIdx + 1);
+      const slot = state.slots.find((s) => s.id === slotId);
+      const endTime = slot ? atTime(date, slot.end) : atTime(date, "23:59");
+      if (isSessionLocked(endTime, now)) {
+        const currentMark = state.marks[sessionId];
+        if (mark === "attended" && currentMark !== "attended") {
+          return state; // Locked: cannot change missed or unmarked to attended after 1.5 days
+        }
+      }
+    }
+  }
   return { ...state, marks: { ...state.marks, [sessionId]: mark } };
 }
 

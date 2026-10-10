@@ -105,8 +105,8 @@ export function Home() {
           {unmarked.map((s) => (
             <SwipeRow
               key={s.id}
-              onRight={() => dispatch((st) => markSession(st, s.id, "attended"))}
-              onLeft={() => dispatch((st) => markSession(st, s.id, "missed"))}
+              onRight={() => dispatch((st) => markSession(st, s.id, "attended", now))}
+              onLeft={() => dispatch((st) => markSession(st, s.id, "missed", now))}
             >
               <div class="grow"><b>{info(s).course.code}</b><small>{fmtDate(s.date)} · {fmtTime(hhmm(s.start))}</small></div>
               <span class="swipe-arrows">‹ ›</span>

@@ -28,6 +28,21 @@ describe("markSession", () => {
   it("stores the mark", () => {
     expect(markSession(makeState(), BICS_MON_1, "missed").marks[BICS_MON_1]).toBe("missed");
   });
+
+  it("allows changing to attended within 36 hours (1.5 days)", () => {
+    // BICS_MON_1: Mon 2026-10-05 11:30-12:50
+    const state = markSession(makeState(), BICS_MON_1, "missed");
+    const within36h = new Date("2026-10-06T15:00:00+08:00");
+    const updated = markSession(state, BICS_MON_1, "attended", within36h);
+    expect(updated.marks[BICS_MON_1]).toBe("attended");
+  });
+
+  it("blocks changing missed to attended after 36 hours (1.5 days)", () => {
+    const state = markSession(makeState(), BICS_MON_1, "missed");
+    const past36h = new Date("2026-10-07T08:00:00+08:00"); // 43 hours later
+    const updated = markSession(state, BICS_MON_1, "attended", past36h);
+    expect(updated.marks[BICS_MON_1]).toBe("missed"); // blocked!
+  });
 });
 
 describe("setPaused", () => {

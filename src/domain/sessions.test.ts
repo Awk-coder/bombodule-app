@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateSessions, isPausedOn } from "./sessions";
+import { generateSessions, isPausedOn, isSessionLocked } from "./sessions";
 import { BICS_MON_1, makeState } from "./testState";
 
 const at = (d: number, h: number, m = 0) => new Date(2026, 9, d, h, m);
@@ -87,5 +87,23 @@ describe("isPausedOn", () => {
     expect(isPausedOn(p, "2026-10-05")).toBe(true);
     expect(isPausedOn(p, "2026-10-06")).toBe(true);
     expect(isPausedOn(p, "2026-10-07")).toBe(false);
+  });
+});
+
+describe("isSessionLocked", () => {
+  it("is not locked within 36 hours (1.5 days) after class ends", () => {
+    const classEnd = new Date("2026-10-05T12:50:00+08:00");
+    // 12 hours later -> not locked
+    expect(isSessionLocked(classEnd, new Date("2026-10-06T00:50:00+08:00"))).toBe(false);
+    // 35 hours later -> not locked
+    expect(isSessionLocked(classEnd, new Date("2026-10-06T23:50:00+08:00"))).toBe(false);
+  });
+
+  it("locks after 36 hours (1.5 days)", () => {
+    const classEnd = new Date("2026-10-05T12:50:00+08:00");
+    // 37 hours later -> locked
+    expect(isSessionLocked(classEnd, new Date("2026-10-07T02:00:00+08:00"))).toBe(true);
+    // 3 days later -> locked
+    expect(isSessionLocked(classEnd, new Date("2026-10-08T12:00:00+08:00"))).toBe(true);
   });
 });

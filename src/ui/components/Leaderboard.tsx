@@ -7,6 +7,7 @@ import { Chips } from "./Chips";
 import { IconBack } from "./icons";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "./RankBadge";
 import { Sheet } from "./Sheet";
+import { ShaderGradientBackground } from "./ShaderGradientBackground";
 
 type Scope = "group" | "world";
 type Load = { players: PublicPlayer[] } | { error: string } | null;
@@ -16,11 +17,13 @@ const seasonRank = (p: PublicPlayer) => (p.rated && p.ore ? `${ORE_NAME[p.ore]} 
 function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose: () => void }) {
   if (!player) return null;
   const kind = player.rated && player.ore ? player.ore : "unrated";
+  const ore = kind === "unrated" ? "coal" : kind;
   return (
-    <Sheet open onClose={onClose}>
+    <Sheet open onClose={onClose} className="sheet-player">
+      <ShaderGradientBackground ore={ore} opacity={0.9} className="sheet-shader" />
       <div class="player">
         <RankBadge kind={kind} div={player.rated ? player.div : null} size={96} />
-        <h2>{player.name}</h2>
+        <h2 style={{ color: ORE_COLOR[kind] }}>{player.name}</h2>
         {player.title && <p class="player-title">{player.title}</p>}
         <div class="player-stats">
           <div>
@@ -80,6 +83,24 @@ function useBoard(q = "") {
   return { online, profile, scope, setScope, noGroup, load, retry: () => setAttempt((n) => n + 1) };
 }
 
+export function LeaderboardSkeleton({ count = 5 }: { count?: number }) {
+  return (
+    <div class="card lb-list lb-skeleton" aria-label="Loading leaderboard">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} class="lb-row lb-skeleton-row">
+          <span class="lb-pos"><span class="skeleton-box skeleton-pos" /></span>
+          <div class="skeleton-box skeleton-badge" />
+          <span class="lb-name">
+            <span class="skeleton-box skeleton-name" style={{ width: `${55 + ((i * 19) % 35)}%` }} />
+            <span class="skeleton-box skeleton-title" style={{ width: `${35 + ((i * 13) % 25)}%` }} />
+          </span>
+          <span class="lb-elo"><span class="skeleton-box skeleton-elo" /></span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function BoardBody({ board, limit, empty }: { board: ReturnType<typeof useBoard>; limit?: number; empty: string }) {
   const [open, setOpen] = useState<PublicPlayer | null>(null);
   const { load, profile } = board;
@@ -90,7 +111,7 @@ function BoardBody({ board, limit, empty }: { board: ReturnType<typeof useBoard>
       {board.noGroup ? (
         <p class="group-hint lb-hint">Create or join a group in <a href="#/settings">Settings</a> to race your friends.</p>
       ) : load === null ? (
-        <p class="group-hint lb-hint">Loading…</p>
+        <LeaderboardSkeleton count={limit ?? 5} />
       ) : "error" in load ? (
         <div class="card lb-error">
           <p class="error">{load.error}</p>

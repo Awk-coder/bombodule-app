@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { finishExams, unfinishExams } from "../../domain/actions";
+import { isFinalExamTaskVisible } from "../../domain/calendar";
 import { seasonElo } from "../../domain/elo";
 import { ImportSlip } from "../components/ResultSlip";
 import { addDays, ymd } from "../../domain/time";
@@ -16,7 +17,10 @@ export function Tasks() {
   const [editing, setEditing] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const courses = new Map(state.courses.map((c) => [c.id, c]));
-  const upcoming = state.tasks.filter((t) => !t.done).sort((a, b) => a.due.localeCompare(b.due));
+  const finalsVisible = isFinalExamTaskVisible(state.semester, now);
+  const upcoming = state.tasks
+    .filter((t) => !t.done && (!t.final || finalsVisible))
+    .sort((a, b) => a.due.localeCompare(b.due));
   const past = state.tasks.filter((t) => t.done).sort((a, b) => b.due.localeCompare(a.due));
   const edit = (t: Task | null) => {
     setEditing(t);
