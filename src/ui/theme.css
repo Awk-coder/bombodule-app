@@ -98,6 +98,9 @@ svg { vertical-align: -2px; }
 .btn.bad { color: var(--danger); border-color: var(--danger); }
 .btn.primary { display: block; width: 100%; background: var(--accent); color: var(--on-accent); border-color: var(--accent); padding: 14px; font-size: 15px; border-radius: 14px; margin-top: 8px; }
 .btn.ghost { display: block; width: 100%; padding: 14px; color: var(--text-muted); border: 0; }
+.btn.sm { display: inline-flex; align-items: center; justify-content: center; width: auto !important; padding: 7px 16px; font-size: 13px; border-radius: 999px; margin: 0 !important; flex: none; }
+.btn.ghost.sm { border: 1px solid var(--border); color: var(--text); background: transparent; }
+.btn.primary.sm { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 
 .meter { display: flex; gap: 4px; margin-top: 10px; }
 .meter span { flex: 1; height: 6px; border-radius: 999px; background: var(--accent-dim); }
@@ -551,6 +554,58 @@ svg { vertical-align: -2px; }
 }
 .sched-export-btn:active {
   background: var(--border);
+}
+
+/* --- Settings: Dedicated Updates Card --- */
+.update-settings-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.update-settings-info {
+  flex: 1;
+  min-width: 0;
+}
+.update-settings-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.update-version-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--border) 60%, transparent);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+.update-new-pill {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.update-settings-status {
+  display: block;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+.update-btn {
+  flex: none;
+  white-space: nowrap;
 }
 
 /* --- Tasks: Filter Chips & Elo Reward Pill --- */

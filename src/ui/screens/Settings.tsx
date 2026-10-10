@@ -158,10 +158,14 @@ export function Settings() {
       {importError && <p class="error">{importError}</p>}
 
       <p class="group-title">Updates</p>
-      <div class="row">
-        <div class="grow">
-          <b>Uni Ranked v{updater.currentVersion}</b>
-          <small>
+      <div class="card update-settings-card">
+        <div class="update-settings-info">
+          <div class="update-settings-title-row">
+            <b>Uni Ranked</b>
+            <span class="update-version-tag">v{updater.currentVersion}</span>
+            {updater.info?.updateAvailable && <span class="update-new-pill">UPDATE</span>}
+          </div>
+          <small class="update-settings-status">
             {updater.checking
               ? "Checking GitHub for updates…"
               : updater.info?.updateAvailable
@@ -170,11 +174,11 @@ export function Settings() {
           </small>
         </div>
         {updater.info?.updateAvailable ? (
-          <button class="btn primary sm" disabled={updater.downloading} onClick={() => void updater.install()}>
+          <button class="btn primary sm update-btn" disabled={updater.downloading} onClick={() => void updater.install()}>
             {updater.downloading ? `${updater.progress}%` : "Update"}
           </button>
         ) : (
-          <button class="btn ghost sm" disabled={updater.checking} onClick={() => void updater.check()}>
+          <button class="btn ghost sm update-btn" disabled={updater.checking} onClick={() => void updater.check()}>
             {updater.checking ? "Checking…" : "Check now"}
           </button>
         )}
