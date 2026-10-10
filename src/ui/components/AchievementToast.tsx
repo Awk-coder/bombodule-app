@@ -5,6 +5,7 @@ import { AchievementArt } from "./AchievementArt";
 
 const SHOW_MS = { normal: 4000, rare: 6000, legendary: 8000 };
 const EXIT_MS = 400; // matches the toast-out animation
+const FAST_EXIT_MS = 160;
 
 const replayers = new Set<(id: string) => void>();
 
@@ -16,11 +17,20 @@ export function AchievementToast() {
   const { achievements } = useAppState();
   const seen = useRef<Set<string> | null>(null);
   const [queue, setQueue] = useState<string[]>([]);
-  const [leaving, setLeaving] = useState<"one" | "all" | null>(null);
+  const [leaving, setLeaving] = useState<"one" | "all" | "fast" | null>(null);
   const [shown, setShown] = useState(0); // bumps per toast, so a repeat slides in afresh
+  const activeRef = useRef<string | null>(null);
+  activeRef.current = queue[0] ?? null;
 
   useEffect(() => {
-    const replay = (id: string) => setQueue((q) => [...q, id]);
+    const replay = (id: string) => {
+      if (activeRef.current) {
+        setLeaving("fast");
+        setQueue([activeRef.current, id]);
+      } else {
+        setQueue((q) => [...q, id]);
+      }
+    };
     replayers.add(replay);
     return () => void replayers.delete(replay);
   }, []);
@@ -42,16 +52,17 @@ export function AchievementToast() {
     if (!queue.length || leaving) return;
     const t = setTimeout(() => setLeaving("one"), SHOW_MS[a?.tier ?? "normal"]);
     return () => clearTimeout(t);
-  }, [queue, leaving]);
+  }, [queue[0], leaving]);
 
   // Slide out the way it came in, then show the next one.
   useEffect(() => {
     if (!leaving) return;
+    const ms = leaving === "fast" ? FAST_EXIT_MS : EXIT_MS;
     const t = setTimeout(() => {
       setQueue((q) => (leaving === "all" ? [] : q.slice(1)));
       setLeaving(null);
       setShown((n) => n + 1);
-    }, EXIT_MS);
+    }, ms);
     return () => clearTimeout(t);
   }, [leaving]);
 
@@ -59,7 +70,7 @@ export function AchievementToast() {
   const label = a.tier === "legendary" ? "Legendary achievement" : a.tier === "rare" ? "Rare achievement" : a.secret ? "Secret achievement" : "Achievement unlocked";
   const isBum = a.id === "dont-be-a-bum";
   return (
-    <div key={shown} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""} ${isBum ? "bum" : ""} ${leaving ? "leaving" : ""}`} role="status" onClick={() => setLeaving("all")}>
+    <div key={shown} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""} ${isBum ? "bum" : ""} ${leaving ? `leaving ${leaving}` : ""}`} role="status" onClick={() => setLeaving("all")}>
       <AchievementArt a={a} size={a.tier === "legendary" ? 64 : 20} />
       <div>
         <small>{label}</small>

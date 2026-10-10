@@ -383,10 +383,13 @@ svg { vertical-align: -2px; }
 .adv-toast.legendary small { color: #f7c95c; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .adv-toast.legendary b { display: block; color: #fff; font-size: 18px; margin-top: 2px; }
 .adv-toast.legendary .adv-art { animation: art-pop 0.7s 0.2s both; }
-.adv-toast.leaving { animation: toast-out 0.4s ease-in forwards; }
+.adv-toast.leaving { animation: toast-out 0.25s ease-in forwards; }
+.adv-toast.leaving.fast { animation: toast-out-fast 0.15s ease-in forwards; }
 .adv-toast.legendary.leaving { animation: legendary-out 0.4s ease-in forwards; }
+.adv-toast.legendary.leaving.fast { animation: toast-out-fast 0.15s ease-in forwards; }
 .adv-toast.leaving::after { display: none; }
 @keyframes toast-out { to { transform: translate(-50%, -120%); opacity: 0; } }
+@keyframes toast-out-fast { to { transform: translate(-50%, -140%) scale(0.95); opacity: 0; } }
 @keyframes legendary-out { to { transform: translate(-50%, -140%) scale(0.8); opacity: 0; } }
 @keyframes toast-shine { from { background-position: 180% 0; } to { background-position: -80% 0; } }
 @keyframes bum-in { 0% { transform: translate(-50%, -140%) scale(0.85); opacity: 0; } 65% { transform: translate(-50%, 4px) scale(1.04); opacity: 1; } 100% { transform: translate(-50%, 0) scale(1); opacity: 1; } }

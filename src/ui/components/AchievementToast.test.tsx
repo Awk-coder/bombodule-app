@@ -81,3 +81,24 @@ it("replaying the same achievement twice plays it twice", () => {
   render(null, root);
   vi.useRealTimers();
 });
+
+it("immediately interrupts an active toast with fast slide-out when a new replay is triggered", () => {
+  vi.useFakeTimers();
+  act(() => dispatch((s) => ({ ...s, achievements: {} })));
+  const root = document.createElement("div");
+  act(() => render(<AchievementToast />, root));
+  act(() => replayToast("taking-inventory"));
+  expect(root.textContent).toContain("Taking Inventory");
+
+  // While "Taking Inventory" is still playing, replay a different one
+  act(() => replayToast("dont-be-a-bum"));
+  expect(root.querySelector(".adv-toast")!.classList).toContain("leaving");
+  expect(root.querySelector(".adv-toast")!.classList).toContain("fast");
+
+  // Within fast exit time (160ms), it switches to the new toast
+  act(() => { vi.advanceTimersByTime(200); });
+  expect(root.textContent).toContain("Don't be a bum");
+  expect(root.querySelector(".adv-toast")!.classList).not.toContain("leaving");
+  render(null, root);
+  vi.useRealTimers();
+});
