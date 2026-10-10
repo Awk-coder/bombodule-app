@@ -449,12 +449,19 @@ export function ShaderGradientBackground({
       document.removeEventListener("visibilitychange", onVisibilityChange);
       ro.disconnect();
       if (observer) observer.disconnect();
+      // Instantly hide canvas before WebGL teardown to eliminate any 1-frame compositor white flash
+      if (canvas) {
+        canvas.style.opacity = "0";
+        canvas.style.visibility = "hidden";
+      }
       gl.deleteBuffer(buf);
       gl.deleteProgram(prog);
       gl.deleteShader(vs);
       gl.deleteShader(fs);
-      // Immediately free WebGL GPU context so repeated opening of sheets never exhausts context limits
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // Free WebGL context for modal sheets to avoid exhausting context limit on repeated opens
+      if (isSheet) {
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+      }
     };
   }, [ore, pal]);
 
