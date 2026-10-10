@@ -16,6 +16,20 @@ export const RARE_ART: PixelArt = {
   ],
 };
 
+/** The red mark for "Don't be a bum" secret achievement. */
+export const BUM_ART: PixelArt = {
+  palette: ["#ef4444", "#fca5a5"],
+  rows: [
+    "...0...",
+    "...0...",
+    "..010..",
+    "0011100",
+    "..010..",
+    "...0...",
+    "...0...",
+  ],
+};
+
 /** A full piece for each legendary achievement, keyed by id. */
 export const LEGENDARY_ART: Record<string, PixelArt> = {
   "perfect-record": {

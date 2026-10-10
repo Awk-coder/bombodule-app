@@ -1,6 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { deleteTask, upsertTask } from "../../domain/actions";
 import { isFinalExamTaskVisible } from "../../domain/calendar";
+import { verifyTaskDeterministic } from "../../domain/taskVerification";
+import { verifyTaskApi } from "../../online/api";
 import { addDays, atTime, hhmm, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
@@ -39,18 +41,36 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
   }, [open, task, presetCourseId]);
 
   function save() {
+    const trimmedTitle = title.trim();
+    const course = state.courses.find((c) => c.id === courseId);
+    const det = verifyTaskDeterministic(trimmedTitle, course?.code);
+    const isBullshit = !!det.bullshit;
+
     const next: Task = {
       id: task?.id ?? crypto.randomUUID(),
-      title: title.trim(),
+      title: trimmedTitle,
       courseId,
       due: atTime(date, time).toISOString(),
       note: note.trim(),
       done: task?.done ?? false,
+      createdAt: task?.createdAt ?? new Date().toISOString(),
       ...(task?.completedAt && { completedAt: task.completedAt }),
       ...(final && { final: true }),
+      bullshit: isBullshit,
     };
     dispatch((s) => upsertTask(s, next));
     onClose();
+
+    // If online and deterministic didn't already reject, run AI validation on worker
+    if (!isBullshit && course?.code) {
+      verifyTaskApi(trimmedTitle, course.code, course.name)
+        .then((res) => {
+          if (res.bullshit || res.academic === false) {
+            dispatch((s) => upsertTask(s, { ...next, bullshit: true }));
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   function remove() {

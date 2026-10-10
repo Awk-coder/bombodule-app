@@ -26,8 +26,8 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
         <small>{[course?.code, task.done ? fmtDate(ymd(due)) : relDue(due, now)].filter(Boolean).join(" · ")}</small>
       </div>
       {!task.done && (
-        <span class={`task-reward-pill ${task.final ? "final" : ""}`}>
-          {task.final ? "+18 Elo" : "+3 Elo"}
+        <span class={`task-reward-pill ${task.bullshit ? "unranked" : task.final ? "final" : ""}`}>
+          {task.bullshit ? "0 Elo" : task.final ? "+18 Elo" : "+3 Elo"}
         </span>
       )}
     </div>

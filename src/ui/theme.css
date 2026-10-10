@@ -357,15 +357,22 @@ svg { vertical-align: -2px; }
 .adv .adv-art { float: right; margin: 0 0 4px 8px; }
 .adv.rare.on { border-color: color-mix(in srgb, #b07ce8 55%, var(--border)); }
 .adv.rare.on b { color: #c79cff; }
+.adv.bum.on { border-color: color-mix(in srgb, #ef4444 65%, var(--border)) !important; box-shadow: 0 0 12px rgb(239 68 68 / 0.18) !important; }
+.adv.bum.on b { color: #f87171 !important; }
 .adv.legendary.on { border-color: color-mix(in srgb, #f2b43a 70%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, #f2b43a 16%, var(--surface)), var(--surface) 70%); box-shadow: 0 0 14px rgb(242 180 58 / 0.25); }
 .adv.legendary.on b { color: #f7c95c; }
 .adv-unlocked { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .adv-sheet-art { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
 .adv-sheet-art small { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #c79cff; }
+.adv-sheet-art.bum small { color: #f87171 !important; }
 .adv-sheet-art.legendary small { color: #f7c95c; }
 .adv-toast { display: flex; align-items: center; gap: 12px; overflow: hidden; }
 .adv-toast.rare { border-color: color-mix(in srgb, #b07ce8 60%, var(--border)); }
 .adv-toast.rare b { color: #c79cff; }
+.adv-toast.bum { border-color: color-mix(in srgb, #ef4444 75%, var(--border)) !important; box-shadow: 0 8px 24px rgb(0 0 0 / 0.4), 0 0 20px rgb(239 68 68 / 0.35) !important; }
+.adv-toast.bum b { color: #f87171 !important; }
+.adv-toast.bum small { color: color-mix(in srgb, #f87171 85%, #fff) !important; }
+.adv-toast.bum::after { background: linear-gradient(110deg, transparent 35%, rgb(255 180 180 / 0.4) 50%, transparent 65%) !important; }
 .adv-toast.rare::after, .adv-toast.legendary::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgb(255 240 200 / 0.35) 50%, transparent 65%); background-size: 250% 100%; animation: toast-shine 1.1s ease-out 0.3s both; }
 .adv-toast.legendary { min-width: 300px; padding: 16px 20px; border: 2px solid #f2b43a; background: linear-gradient(135deg, color-mix(in srgb, #f2b43a 22%, var(--surface)), var(--surface) 75%); box-shadow: 0 8px 24px rgb(0 0 0 / 0.4), 0 0 28px 4px rgb(242 180 58 / 0.55); animation: legendary-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1); }
 .adv-toast.legendary::after { animation-duration: 1.6s; animation-iteration-count: 2; }
@@ -632,6 +639,11 @@ svg { vertical-align: -2px; }
   background: color-mix(in srgb, #ffaa00 22%, var(--surface));
   color: #ffaa00;
   border-color: color-mix(in srgb, #ffaa00 45%, transparent);
+}
+.task-reward-pill.unranked {
+  background: color-mix(in srgb, var(--text-muted) 15%, var(--surface));
+  color: var(--text-muted);
+  border-color: color-mix(in srgb, var(--text-muted) 30%, transparent);
 }
 
 .filter-chips-bar {

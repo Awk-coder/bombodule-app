@@ -191,3 +191,41 @@ describe("http", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("task verification", () => {
+  it("rejects non-academic tasks via deterministic check", async () => {
+    const res = await call("POST", "/tasks/verify", {
+      body: { title: "clean room", courseCode: "INFO 1101" },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.academic).toBe(false);
+    expect(res.body.bullshit).toBe(true);
+  });
+
+  it("accepts valid coursework tasks", async () => {
+    const res = await call("POST", "/tasks/verify", {
+      body: { title: "Lab 2 Packet Tracer", courseCode: "INFO 1101" },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.academic).toBe(true);
+    expect(res.body.bullshit).toBe(false);
+  });
+
+  it("uses env.AI when provided", async () => {
+    const mockAi = {
+      run: async () => ({
+        response: JSON.stringify({ academic: false, bullshit: true, reason: "Not university coursework" }),
+      }),
+    };
+    const req = new Request("https://api.test/tasks/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Custom questionable task", courseCode: "INFO 1101" }),
+    });
+    const res = await handle(req, { DB: db, AI: mockAi }, clock);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.academic).toBe(false);
+    expect(body.bullshit).toBe(true);
+  });
+});

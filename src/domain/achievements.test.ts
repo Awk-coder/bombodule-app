@@ -79,12 +79,13 @@ const CASES: Case[] = [
   ["master-baker", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "A", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCBS 1010", "B", 0.5]]), R("Sem 2, 2025/2026", [["CCBS 2010", "F", 0.5], ["CCCK 1010", "A", 0.5]])] }, NOW]],
   ["gordons-protege", () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "P", 0.5], ["CCCK 2010", "A-", 0.5]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2025/2026", [["CCCK 1010", "A", 0.5], ["CCBS 2010", "A", 0.5]])] }, NOW]],
   ["from-the-ashes", () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "D"]]), R("Sem 2, 2024/2025", [["X 2", "B"]]), R("Sem 1, 2025/2026", [["X 3", "A"]])] }, NOW], () => [{ ...base(), results: [R("Sem 1, 2024/2025", [["X 1", "A"]]), R("Sem 2, 2024/2025", [["X 2", "D"]])] }, NOW]],
+  ["dont-be-a-bum", () => [{ ...base(), tasks: [{ id: "t1", courseId: null, title: "Clean room", due: iso("2026-10-10"), note: "", done: false, bullshit: true }] }, NOW], () => [base(), NOW]],
 ];
 
 describe("achievements", () => {
-  it("has 50 unique ids, 21 secret, and a case for each", () => {
-    expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(50);
-    expect(ACHIEVEMENTS.filter((a) => a.secret)).toHaveLength(21);
+  it("has 51 unique ids, 22 secret, and a case for each", () => {
+    expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(51);
+    expect(ACHIEVEMENTS.filter((a) => a.secret)).toHaveLength(22);
     expect(CASES.map((c) => c[0]).sort()).toEqual(ACHIEVEMENTS.map((a) => a.id).sort());
   });
 
@@ -97,7 +98,7 @@ describe("achievements", () => {
     const ids = (tier?: string) => ACHIEVEMENTS.filter((a) => a.tier === tier).map((a) => a.id).sort();
     expect(ids("legendary")).toEqual(["balanced-diet", "fasting-scholar", "flawless", "from-the-ashes", "next-generation", "perfect-record", "speedrun"]);
     expect(ids("rare")).toEqual([
-      "back-from-the-brink", "copy-paste", "full-house", "gordons-protege", "how-did-we-get-here", "lock-in", "master-baker", "bare-minimum",
+      "back-from-the-brink", "copy-paste", "dont-be-a-bum", "full-house", "gordons-protege", "how-did-we-get-here", "lock-in", "master-baker", "bare-minimum",
       "monsters-hunted", "not-today", "overpowered", "redemption-arc", "serious-dedication", "top-of-the-class", "voluntary-exile",
     ].sort());
     expect(ids(undefined)).toHaveLength(28);

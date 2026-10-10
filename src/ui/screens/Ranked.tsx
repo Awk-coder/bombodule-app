@@ -47,6 +47,10 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
             <div><b>Weekly Cap:</b> Max 5 on-time tasks per calendar week give positive Elo.</div>
           </div>
           <div class="how-mech-row">
+            <span class="how-mech-badge">🛡️</span>
+            <div><b>Academic Integrity:</b> Tasks must belong to an enrolled course. Completed tasks require a 30-minute minimum incubation to award Elo. Non-academic tasks award 0 Elo.</div>
+          </div>
+          <div class="how-mech-row">
             <span class="how-mech-badge">📚</span>
             <div><b>Overload Bonus:</b> Semesters with &gt;18 credits gain +10 Elo for every credit above 18.</div>
           </div>

@@ -1,4 +1,6 @@
 import type { Ore, Tier } from "../domain/grades";
+import { verifyTaskDeterministic } from "../domain/taskVerification";
+import type { TaskVerificationResult } from "../domain/taskVerification";
 
 /** Base URL of the leaderboard server; empty when this build has none, which hides every online feature. */
 export const apiUrl = () => ((import.meta.env.VITE_API_URL as string | undefined) ?? "").replace(/\/+$/, "");
@@ -45,4 +47,24 @@ export async function call<T = void>(path: string, opts: { method?: string; key?
     throw new ApiError(res.status, msg ?? `Server error (${res.status})`);
   }
   return (res.status === 204 ? undefined : await res.json()) as T;
+}
+
+/** Verifies academic legitimacy using Cloudflare Workers AI with deterministic fallback. */
+export async function verifyTaskApi(
+  title: string,
+  courseCode?: string | null,
+  courseName?: string | null,
+): Promise<TaskVerificationResult> {
+  const server = apiUrl();
+  if (!server) {
+    return verifyTaskDeterministic(title, courseCode);
+  }
+  try {
+    return await call<TaskVerificationResult>("/tasks/verify", {
+      method: "POST",
+      body: { title, courseCode, courseName },
+    });
+  } catch {
+    return verifyTaskDeterministic(title, courseCode);
+  }
 }

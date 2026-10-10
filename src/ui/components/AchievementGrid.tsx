@@ -29,7 +29,7 @@ export function AchievementGrid() {
       <h2 class="section-title">Achievements <span class="count">{got} / {ACHIEVEMENTS.length}</span></h2>
       <div class="adv-grid">
         {sorted.slice(0, all ? undefined : SHOWN).map((a) => (
-          <button key={a.id} class={`adv ${achievements[a.id] ? `on ${a.tier ?? ""}` : ""} ${a.secret ? "secret" : ""}`} onClick={() => setOpen(a)}>
+          <button key={a.id} class={`adv ${achievements[a.id] ? `on ${a.tier ?? ""} ${a.id === "dont-be-a-bum" ? "bum" : ""}` : ""} ${a.secret ? "secret" : ""}`} onClick={() => setOpen(a)}>
             {achievements[a.id] && <AchievementArt a={a} size={a.tier === "legendary" ? 36 : 14} />}
             <b>{hidden(a) ? "???" : a.name}</b>
             <small>{hidden(a) ? a.hint : a.desc}</small>
@@ -41,7 +41,7 @@ export function AchievementGrid() {
         {open && (
           <>
             {achievements[open.id] && open.tier && (
-              <div class={`adv-sheet-art ${open.tier}`}>
+              <div class={`adv-sheet-art ${open.tier} ${open.id === "dont-be-a-bum" ? "bum" : ""}`}>
                 <AchievementArt a={open} size={open.tier === "legendary" ? 96 : 32} />
                 <small>{TIER_NAME[open.tier]}</small>
               </div>

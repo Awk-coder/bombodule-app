@@ -1,5 +1,5 @@
 import type { Achievement } from "../../domain/achievements";
-import { LEGENDARY_ART, RARE_ART } from "./achievementArt";
+import { BUM_ART, LEGENDARY_ART, RARE_ART } from "./achievementArt";
 import type { PixelArt } from "./achievementArt";
 
 /** One path per palette colour, each pixel a 1x1 square, centred on a square grid. */
@@ -20,6 +20,9 @@ function Pixels({ art, size }: { art: PixelArt; size: number }) {
 
 /** The rare mark or the legendary piece; nothing for normal achievements. */
 export function AchievementArt({ a, size }: { a: Achievement; size: number }) {
+  if (a.id === "dont-be-a-bum") {
+    return <Pixels art={BUM_ART} size={size} />;
+  }
   const art = a.tier === "legendary" ? LEGENDARY_ART[a.id] : a.tier === "rare" ? RARE_ART : null;
   return art ? <Pixels art={art} size={size} /> : null;
 }

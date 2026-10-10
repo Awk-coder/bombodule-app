@@ -51,9 +51,10 @@ export function setPaused(state: AppState, paused: boolean, today: string): AppS
   return { ...state, pauses: state.pauses.map((p) => (p.to === null ? { ...p, to: addDays(today, -1) } : p)) };
 }
 
-export function upsertTask(state: AppState, task: Task): AppState {
+export function upsertTask(state: AppState, task: Task, now = new Date()): AppState {
+  const withCreated: Task = task.createdAt ? task : { ...task, createdAt: now.toISOString() };
   const exists = state.tasks.some((t) => t.id === task.id);
-  return { ...state, tasks: exists ? state.tasks.map((t) => (t.id === task.id ? task : t)) : [...state.tasks, task] };
+  return { ...state, tasks: exists ? state.tasks.map((t) => (t.id === task.id ? withCreated : t)) : [...state.tasks, withCreated] };
 }
 
 export function deleteTask(state: AppState, id: string): AppState {

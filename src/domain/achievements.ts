@@ -185,6 +185,23 @@ const DEFS: Def[] = [
     },
   },
   { id: "lock-in", tier: "rare", name: "You Need to Lock In", desc: "COND. PASS four semesters in a row", secret: true, hint: "Conditions apply, again and again", check: (c) => condStreak(c) >= 4 },
+  {
+    id: "dont-be-a-bum",
+    tier: "rare",
+    name: "Don't be a bum",
+    desc: "Try to claim Elo for a non-academic task",
+    secret: true,
+    hint: "Nice try, that's not coursework",
+    check: (c) =>
+      c.s.tasks.some(
+        (t) =>
+          t.bullshit ||
+          (t.done &&
+            t.createdAt &&
+            t.completedAt &&
+            new Date(t.completedAt).getTime() - new Date(t.createdAt).getTime() < 30 * 60 * 1000),
+      ),
+  },
 ];
 
 function TIER_INDEX(g: number): number {

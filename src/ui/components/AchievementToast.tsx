@@ -57,8 +57,9 @@ export function AchievementToast() {
 
   if (!a) return null;
   const label = a.tier === "legendary" ? "Legendary achievement" : a.tier === "rare" ? "Rare achievement" : a.secret ? "Secret achievement" : "Achievement unlocked";
+  const isBum = a.id === "dont-be-a-bum";
   return (
-    <div key={shown} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""} ${leaving ? "leaving" : ""}`} role="status" onClick={() => setLeaving("all")}>
+    <div key={shown} class={`adv-toast ${a.secret ? "secret" : ""} ${a.tier ?? ""} ${isBum ? "bum" : ""} ${leaving ? "leaving" : ""}`} role="status" onClick={() => setLeaving("all")}>
       <AchievementArt a={a} size={a.tier === "legendary" ? 64 : 20} />
       <div>
         <small>{label}</small>

@@ -35,6 +35,8 @@ export interface Task {
   done: boolean;
   completedAt?: string; // ISO, set when ticked done
   final?: boolean; // the course's final assignment
+  createdAt?: string; // ISO, set when created
+  bullshit?: boolean; // flagged as non-academic / exploit task
 }
 
 /** Inclusive YYYY-MM-DD range; `to: null` means still paused. */

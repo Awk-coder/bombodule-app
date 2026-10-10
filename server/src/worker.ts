@@ -1,4 +1,5 @@
 import { TIERS, rankOf } from "../../src/domain/grades";
+import { verifyTaskDeterministic } from "../../src/domain/taskVerification";
 import { TITLE_TEXTS } from "../../src/domain/titles";
 
 /** The slice of Cloudflare's D1 API this worker uses. */
@@ -14,6 +15,9 @@ interface D1Bound {
 }
 export interface Env {
   DB: D1;
+  AI?: {
+    run(model: string, inputs: Record<string, unknown>): Promise<unknown>;
+  };
 }
 
 interface Row {
@@ -267,6 +271,60 @@ async function route(req: Request, env: Env, now: number): Promise<Response> {
         .all<Row & { pos: number }>()
     ).results;
     return json({ players: rows.map((r) => ({ ...publicPlayer(r), pos: r.pos })) });
+  }
+
+  if (m === "POST" && path === "/tasks/verify") {
+    const b = await body(req);
+    const title = typeof b.title === "string" ? b.title.trim() : "";
+    const courseCode = typeof b.courseCode === "string" ? b.courseCode.trim() : null;
+    const courseName = typeof b.courseName === "string" ? b.courseName.trim() : null;
+
+    if (!title) throw new HttpError(400, "Missing title");
+
+    // Deterministic check first:
+    const det = verifyTaskDeterministic(title, courseCode);
+    if (!det.academic || det.bullshit) {
+      return json(det);
+    }
+
+    // If Cloudflare Workers AI is configured on this worker:
+    if (env.AI && typeof env.AI.run === "function") {
+      try {
+        const aiPrompt = `You are a strict academic integrity evaluator for a university grading app.
+Determine whether a given student task represents legitimate academic coursework (study, assignment, lab, quiz, exam, reading, project, problem set, tutorial, paper, or homework) for a university course.
+Personal chores (cleaning, laundry), entertainment (watching movies, anime), video games, fitness/gym, sleep, leisure, social hangouts, or joke/test entries are NOT academic coursework.
+
+Course: ${courseCode ?? ""} ${courseName ?? ""}
+Task: "${title}"
+
+Respond with strict JSON ONLY: {"academic": boolean, "bullshit": boolean, "reason": "brief string"}`;
+
+        const aiRes = await env.AI.run("@cf/meta/llama-3.2-1b-instruct", {
+          messages: [
+            {
+              role: "system",
+              content: "You evaluate whether task titles represent legitimate academic college coursework. Output only valid JSON.",
+            },
+            { role: "user", content: aiPrompt },
+          ],
+          max_tokens: 60,
+          temperature: 0.1,
+        });
+
+        const raw = typeof aiRes === "object" && aiRes && "response" in aiRes ? (aiRes as { response: string }).response : JSON.stringify(aiRes);
+        const mJson = raw.match(/\{[\s\S]*?\}/);
+        if (mJson) {
+          const parsed = JSON.parse(mJson[0]);
+          const academic = Boolean(parsed.academic);
+          const bullshit = parsed.bullshit !== undefined ? Boolean(parsed.bullshit) : !academic;
+          return json({ academic, bullshit, reason: parsed.reason ?? null });
+        }
+      } catch {
+        // AI fallback to deterministic
+      }
+    }
+
+    return json(det);
   }
 
   const one = path.match(/^\/players\/([^/]+)$/);

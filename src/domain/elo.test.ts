@@ -145,4 +145,48 @@ describe("seasonElo", () => {
     expect(taskGain(2500, false)).toBe(1);
     expect(taskGain(2500, true)).toBe(3);
   });
+
+  it("awards 0 Elo for tasks completed under 30 minutes from creation", () => {
+    // Created at 10:00, completed at 10:15 (15 mins -> under 30m)
+    const quickTask = task("quick_1", "2026-10-09T23:59+08:00", {
+      done: true,
+      createdAt: "2026-10-08T10:00:00+08:00",
+      completedAt: "2026-10-08T10:15:00+08:00",
+    });
+    const season = seasonElo(makeState({ tasks: [quickTask] }), now);
+    expect(season.changes).toHaveLength(1);
+    expect(season.changes[0].delta).toBe(0);
+    expect(season.changes[0].title).toContain("<30m · 0 Elo");
+
+    // Created at 10:00, completed at 10:45 (45 mins -> >= 30m)
+    const validTask = task("valid_1", "2026-10-09T23:59+08:00", {
+      done: true,
+      createdAt: "2026-10-08T10:00:00+08:00",
+      completedAt: "2026-10-08T10:45:00+08:00",
+    });
+    const seasonValid = seasonElo(makeState({ tasks: [validTask] }), now);
+    expect(seasonValid.changes[0].delta).toBe(3);
+  });
+
+  it("awards 0 Elo for bullshit tasks and does not penalize if overdue", () => {
+    const bsCompleted = task("bs_done", "2026-10-09T23:59+08:00", {
+      title: "Clean room",
+      done: true,
+      bullshit: true,
+      createdAt: "2026-10-01T10:00:00+08:00",
+      completedAt: "2026-10-05T10:00:00+08:00",
+    });
+    const seasonDone = seasonElo(makeState({ tasks: [bsCompleted] }), now);
+    expect(seasonDone.changes[0].delta).toBe(0);
+    expect(seasonDone.changes[0].title).toContain("non-academic · 0 Elo");
+
+    // Overdue bullshit task should not trigger -6 missed penalty
+    const bsOverdue = task("bs_missed", "2026-10-01T10:00:00+08:00", {
+      title: "Play Valorant",
+      done: false,
+      bullshit: true,
+    });
+    const seasonOverdue = seasonElo(makeState({ tasks: [bsOverdue] }), now);
+    expect(seasonOverdue.changes).toHaveLength(0);
+  });
 });

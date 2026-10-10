@@ -190,8 +190,13 @@ export function seasonElo(state: AppState, now: Date): Season {
     const wKey = weekKey(dueTime);
     let delta = 0;
 
+    const isBullshit = !!t.bullshit;
+    const isUnder30m = !!(t.createdAt && t.completedAt && (new Date(t.completedAt).getTime() - new Date(t.createdAt).getTime() < 30 * 60 * 1000));
+
     if (t.done) {
-      if (onTime(t)) {
+      if (isBullshit || isUnder30m) {
+        delta = 0;
+      } else if (onTime(t)) {
         const count = weeklyPositiveCount[wKey] ?? 0;
         if (count < MAX_TASKS_PER_WEEK) {
           weeklyPositiveCount[wKey] = count + 1;
@@ -202,14 +207,20 @@ export function seasonElo(state: AppState, now: Date): Season {
       } else {
         delta = DELTA.late;
       }
-    } else if (dueTime < now) {
+    } else if (dueTime < now && !isBullshit) {
       delta = t.final ? DELTA.finalMissed : DELTA.missed;
     }
 
-    if (delta !== 0 || (t.done && onTime(t))) {
+    if (delta !== 0 || (t.done && onTime(t)) || (t.done && (isBullshit || isUnder30m))) {
+      let suffix = "";
+      if (t.done) {
+        if (isBullshit) suffix = " (non-academic · 0 Elo)";
+        else if (isUnder30m) suffix = " (<30m · 0 Elo)";
+        else if (onTime(t) && delta === 0) suffix = " (weekly cap)";
+      }
       changes.push({
         taskId: t.id,
-        title: t.title + (t.done && onTime(t) && delta === 0 ? " (weekly cap)" : ""),
+        title: t.title + suffix,
         delta,
         at: (t.done && t.completedAt) || t.due,
       });

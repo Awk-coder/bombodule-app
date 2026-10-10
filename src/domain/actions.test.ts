@@ -175,7 +175,7 @@ describe("applySync", () => {
 });
 
 describe("tasks", () => {
-  const t: Task = { id: "t1", courseId: null, title: "Lab 1", due: "2026-10-07T15:59:00.000Z", note: "", done: false };
+  const t: Task = { id: "t1", courseId: null, title: "Lab 1", due: "2026-10-07T15:59:00.000Z", note: "", done: false, createdAt: "2026-10-01T00:00:00.000Z" };
 
   it("upsert adds then replaces", () => {
     const b = upsertTask(upsertTask(makeState(), t), { ...t, title: "Lab 1 v2" });
