@@ -654,6 +654,19 @@ svg { vertical-align: -2px; }
   border-color: color-mix(in srgb, var(--text-muted) 30%, transparent);
 }
 
+.row.task-bum {
+  border-color: color-mix(in srgb, #ef4444 42%, var(--border));
+  background: color-mix(in srgb, #ef4444 3.5%, var(--surface));
+}
+.row.task-bum b {
+  color: color-mix(in srgb, #f87171 60%, var(--text));
+}
+.row.task-bum .task-reward-pill.unranked {
+  border-color: color-mix(in srgb, #ef4444 45%, transparent);
+  color: #f87171;
+  background: color-mix(in srgb, #ef4444 14%, var(--surface));
+}
+
 .filter-chips-bar {
   display: flex;
   gap: 8px;

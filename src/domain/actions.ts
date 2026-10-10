@@ -61,8 +61,7 @@ export function recordBumAttempt(state: AppState, now = new Date()): AppState {
   const achievements = state.achievements["dont-be-a-bum"]
     ? state.achievements
     : { ...state.achievements, "dont-be-a-bum": now.toISOString() };
-  const tasks = state.tasks.filter((t) => !t.bullshit);
-  return { ...state, achievements, tasks };
+  return { ...state, achievements };
 }
 
 export function deleteTask(state: AppState, id: string): AppState {
@@ -224,7 +223,7 @@ export function parseImport(json: string): AppState {
   return {
     ...emptyState(),
     ...obj,
-    tasks: (Array.isArray(obj.tasks) ? (obj.tasks as Task[]) : []).filter((t) => !t.bullshit),
+    tasks: Array.isArray(obj.tasks) ? (obj.tasks as Task[]) : [],
     pauses: Array.isArray(obj.pauses) ? obj.pauses : [],
     settings: { ...DEFAULT_SETTINGS, ...obj.settings },
     results: Array.isArray(obj.results) ? obj.results : [],

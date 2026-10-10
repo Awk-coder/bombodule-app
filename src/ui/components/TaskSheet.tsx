@@ -47,15 +47,6 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
     const det = verifyTaskDeterministic(trimmedTitle, course?.code);
     const isBullshit = !!det.bullshit;
 
-    if (isBullshit) {
-      // PREVENT the task from being added
-      if (task) dispatch((s) => deleteTask(s, task.id));
-      dispatch((s) => recordBumAttempt(s));
-      replayToast("dont-be-a-bum");
-      onClose();
-      return;
-    }
-
     const next: Task = {
       id: task?.id ?? crypto.randomUUID(),
       title: trimmedTitle,
@@ -66,16 +57,21 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
       createdAt: task?.createdAt ?? new Date().toISOString(),
       ...(task?.completedAt && { completedAt: task.completedAt }),
       ...(final && { final: true }),
+      bullshit: isBullshit,
     };
     dispatch((s) => upsertTask(s, next));
+    if (isBullshit) {
+      dispatch((s) => recordBumAttempt(s));
+      replayToast("dont-be-a-bum");
+    }
     onClose();
 
-    // If online and deterministic didn't already reject, run AI validation on worker
-    if (course?.code) {
+    // If online and deterministic didn't already flag as bullshit, run AI validation on worker
+    if (!isBullshit && course?.code) {
       verifyTaskApi(trimmedTitle, course.code, course.name)
         .then((res) => {
           if (res.bullshit || res.academic === false) {
-            dispatch((s) => deleteTask(s, next.id));
+            dispatch((s) => upsertTask(s, { ...next, bullshit: true }));
             dispatch((s) => recordBumAttempt(s));
             replayToast("dont-be-a-bum");
           }

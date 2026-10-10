@@ -86,7 +86,7 @@ export function Home() {
     .map((c) => ({ c, st: courseStats(c, sessions) }))
     .filter((x) => x.st.risk !== "ok")
     .sort((a, b) => b.st.missed - a.st.missed);
-  const due = state.tasks.filter((t) => !t.done && !t.bullshit).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
+  const due = state.tasks.filter((t) => !t.done).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
 
   return (
     <>

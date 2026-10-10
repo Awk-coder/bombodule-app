@@ -10,7 +10,7 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
   const overdue = !task.done && due < now;
 
   return (
-    <div class={`row ${task.done ? "task-done" : ""} ${overdue ? "overdue" : ""} ${task.final ? "task-final" : ""}`} onClick={onOpen}>
+    <div class={`row ${task.done ? "task-done" : ""} ${overdue ? "overdue" : ""} ${task.final ? "task-final" : ""} ${task.bullshit ? "task-bum" : ""}`} onClick={onOpen}>
       <button
         class={`check ${task.done ? "on" : ""}`}
         aria-label={task.done ? "Mark not done" : "Mark done"}
