@@ -57,6 +57,14 @@ export function upsertTask(state: AppState, task: Task, now = new Date()): AppSt
   return { ...state, tasks: exists ? state.tasks.map((t) => (t.id === task.id ? withCreated : t)) : [...state.tasks, withCreated] };
 }
 
+export function recordBumAttempt(state: AppState, now = new Date()): AppState {
+  const achievements = state.achievements["dont-be-a-bum"]
+    ? state.achievements
+    : { ...state.achievements, "dont-be-a-bum": now.toISOString() };
+  const tasks = state.tasks.filter((t) => !t.bullshit);
+  return { ...state, achievements, tasks };
+}
+
 export function deleteTask(state: AppState, id: string): AppState {
   return { ...state, tasks: state.tasks.filter((t) => t.id !== id) };
 }
@@ -216,6 +224,7 @@ export function parseImport(json: string): AppState {
   return {
     ...emptyState(),
     ...obj,
+    tasks: (Array.isArray(obj.tasks) ? (obj.tasks as Task[]) : []).filter((t) => !t.bullshit),
     pauses: Array.isArray(obj.pauses) ? obj.pauses : [],
     settings: { ...DEFAULT_SETTINGS, ...obj.settings },
     results: Array.isArray(obj.results) ? obj.results : [],

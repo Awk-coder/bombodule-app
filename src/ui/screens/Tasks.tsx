@@ -20,11 +20,11 @@ export function Tasks() {
   const courses = new Map(state.courses.map((c) => [c.id, c]));
   const finalsVisible = isFinalExamTaskVisible(state.semester, now);
   const upcoming = state.tasks
-    .filter((t) => !t.done && (!t.final || finalsVisible))
+    .filter((t) => !t.done && (!t.final || finalsVisible) && !t.bullshit)
     .sort((a, b) => a.due.localeCompare(b.due));
-  const past = state.tasks.filter((t) => t.done).sort((a, b) => b.due.localeCompare(a.due));
+  const past = state.tasks.filter((t) => t.done && !t.bullshit).sort((a, b) => b.due.localeCompare(a.due));
 
-  const courseIdsWithTasks = [...new Set(state.tasks.map((t) => t.courseId).filter((id): id is string => Boolean(id) && courses.has(id as string)))];
+  const courseIdsWithTasks = [...new Set(state.tasks.filter((t) => !t.bullshit).map((t) => t.courseId).filter((id): id is string => Boolean(id) && courses.has(id as string)))];
   const visibleUpcoming = filterCourse === "all" ? upcoming : upcoming.filter((t) => t.courseId === filterCourse);
   const visiblePast = filterCourse === "all" ? past : past.filter((t) => t.courseId === filterCourse);
 

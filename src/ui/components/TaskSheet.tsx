@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { deleteTask, upsertTask } from "../../domain/actions";
+import { deleteTask, recordBumAttempt, upsertTask } from "../../domain/actions";
 import { isFinalExamTaskVisible } from "../../domain/calendar";
 import { verifyTaskDeterministic } from "../../domain/taskVerification";
 import { verifyTaskApi } from "../../online/api";
@@ -7,6 +7,7 @@ import { addDays, atTime, hhmm, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { useNow } from "../useNow";
+import { replayToast } from "./AchievementToast";
 import { Chips } from "./Chips";
 import { Sheet } from "./Sheet";
 import { Toggle } from "./Toggle";
@@ -46,6 +47,15 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
     const det = verifyTaskDeterministic(trimmedTitle, course?.code);
     const isBullshit = !!det.bullshit;
 
+    if (isBullshit) {
+      // PREVENT the task from being added
+      if (task) dispatch((s) => deleteTask(s, task.id));
+      dispatch((s) => recordBumAttempt(s));
+      replayToast("dont-be-a-bum");
+      onClose();
+      return;
+    }
+
     const next: Task = {
       id: task?.id ?? crypto.randomUUID(),
       title: trimmedTitle,
@@ -56,17 +66,18 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
       createdAt: task?.createdAt ?? new Date().toISOString(),
       ...(task?.completedAt && { completedAt: task.completedAt }),
       ...(final && { final: true }),
-      bullshit: isBullshit,
     };
     dispatch((s) => upsertTask(s, next));
     onClose();
 
     // If online and deterministic didn't already reject, run AI validation on worker
-    if (!isBullshit && course?.code) {
+    if (course?.code) {
       verifyTaskApi(trimmedTitle, course.code, course.name)
         .then((res) => {
           if (res.bullshit || res.academic === false) {
-            dispatch((s) => upsertTask(s, { ...next, bullshit: true }));
+            dispatch((s) => deleteTask(s, next.id));
+            dispatch((s) => recordBumAttempt(s));
+            replayToast("dont-be-a-bum");
           }
         })
         .catch(() => {});
