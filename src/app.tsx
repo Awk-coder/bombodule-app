@@ -2,11 +2,14 @@ import { App as CapApp } from "@capacitor/app";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
 import { recordAchievements } from "./domain/achievements";
+import { seasonElo } from "./domain/elo";
+import { rankOf } from "./domain/grades";
 import { recordPeak } from "./domain/titles";
 import { Hadir } from "./native/hadir";
 import { shareFile } from "./native/share";
 import { dispatch, useAppState, useLoadStatus } from "./store/store";
 import { AchievementToast } from "./ui/components/AchievementToast";
+import { ShaderGradientBackground } from "./ui/components/ShaderGradientBackground";
 import { TabBar } from "./ui/components/TabBar";
 import { go, parseHash, useRoute } from "./ui/router";
 import type { Tab } from "./ui/router";
@@ -58,6 +61,10 @@ export function App() {
   }, [theme]);
   const route = useRoute();
   const now = useNow();
+  const season = seasonElo(state, now);
+  const rank = rankOf(season.elo);
+  const ore = season.rated ? rank.ore : "coal";
+
   useEffect(() => {
     if (status.loaded && !status.error && state.onboarded) dispatch((s) => recordPeak(recordAchievements(s, new Date()), new Date()));
   }, [state, now, status.loaded, status.error]);
@@ -69,6 +76,7 @@ export function App() {
   const Screen = SCREENS[route.tab];
   return (
     <>
+      <ShaderGradientBackground ore={ore} />
       <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>
         {route.courseId ? <CourseDetail id={route.courseId} /> : route.board ? <LeaderboardPage /> : <Screen />}
       </main>

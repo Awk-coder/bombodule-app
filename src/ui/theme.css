@@ -35,9 +35,9 @@ input, select, textarea { font: inherit; color: var(--text); background: var(--b
 svg { vertical-align: -2px; }
 
 /* One screen tall, nothing scrolls but the content's own scroller (Schedule). */
-.screen.fill { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }
+.screen.fill { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); position: relative; z-index: 1; }
 .screen.fill > .sched { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.screen { max-width: 560px; margin: 0 auto; padding: max(env(safe-area-inset-top), 12px) var(--gutter) calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom)); }
+.screen { max-width: 560px; margin: 0 auto; padding: max(env(safe-area-inset-top), 12px) var(--gutter) calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom)); position: relative; z-index: 1; }
 .page-title { font-family: var(--serif); color: var(--accent); text-align: center; font-size: 26px; margin: 28px 0 24px; }
 .section-title { font-family: var(--serif); color: var(--accent); font-size: 22px; margin: 28px 0 12px; display: flex; align-items: center; gap: 10px; }
 .section-title.muted { color: var(--text-muted); }

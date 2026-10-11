@@ -67,20 +67,18 @@ export function Tasks() {
           <button class="btn ghost" onClick={() => dispatch((s) => unfinishExams(s, sem!.label))}>Undo</button>
         </div>
       )}
-      {season.rated && (
-        <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`} style={{ marginBottom: "16px" }}>
-          <div class="weekly-cap-content">
-            <PixelIcon art={LIGHTNING_ART} />
-            <span>{season.weeklyTaskCount >= 5 ? "Weekly task cap reached" : "Weekly Ranked Tasks"}</span>
-            <div class="weekly-cap-cells" aria-label={`${season.weeklyTaskCount}/5 tasks`}>
-              {Array.from({ length: 5 }, (_, i) => (
-                <span key={i} class={`cap-cell ${i < season.weeklyTaskCount ? "active" : ""}`} />
-              ))}
-            </div>
-            <span class="weekly-cap-fraction">{season.weeklyTaskCount}/5</span>
+      <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`} style={{ marginBottom: "16px" }}>
+        <div class="weekly-cap-content">
+          <PixelIcon art={LIGHTNING_ART} />
+          <span>{season.weeklyTaskCount >= 5 ? "Weekly task cap reached" : "Weekly Ranked Tasks"}</span>
+          <div class="weekly-cap-cells" aria-label={`${season.weeklyTaskCount}/5 tasks`}>
+            {Array.from({ length: 5 }, (_, i) => (
+              <span key={i} class={`cap-cell ${i < season.weeklyTaskCount ? "active" : ""}`} />
+            ))}
           </div>
+          <span class="weekly-cap-fraction">{season.weeklyTaskCount}/5</span>
         </div>
-      )}
+      </div>
 
       {courseIdsWithTasks.length > 1 && (
         <div class="filter-chips-bar">

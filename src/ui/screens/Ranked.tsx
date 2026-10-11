@@ -13,7 +13,6 @@ import { Leaderboard } from "../components/Leaderboard";
 import { ResultPicker, ResultSheet } from "../components/ResultSlip";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
-import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import {
   PixelIcon,
   LIGHTNING_ART,
@@ -148,7 +147,6 @@ export function Ranked() {
 
   return (
     <div class="ranked">
-      <ShaderGradientBackground ore={season.rated ? rank.ore : "coal"} />
       <h1 class="page-title">Ranked</h1>
       <SeasonCard season={season} rank={rank} />
 
