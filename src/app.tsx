@@ -67,7 +67,7 @@ export function App() {
 
   // Per-screen fluid background settings (Schedule is explicitly 0/off for clean timetable contrast):
   const SCREEN_SHADERS: Record<Tab, { height: number; opacity: number }> = {
-    ranked: { height: 520, opacity: 1.0 },
+    ranked: { height: 660, opacity: 1.0 },
     home: { height: 380, opacity: 0.85 },
     tasks: { height: 300, opacity: 0.8 },
     courses: { height: 280, opacity: 0.75 },

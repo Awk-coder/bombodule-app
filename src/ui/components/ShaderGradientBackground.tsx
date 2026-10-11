@@ -376,7 +376,7 @@ export function ShaderGradientBackground({
     let isPaused = false;
     let startTime = performance.now();
     const isSheet = !!canvas.closest(".sheet");
-    const baseH = pal.height + 120;
+    const baseH = Math.max(actualH, pal.height + 180, 720);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
@@ -463,7 +463,7 @@ export function ShaderGradientBackground({
   }, [ore, pal]);
 
   const isSheetComponent = className?.includes("sheet-shader") || false;
-  const baseH = pal.height + 120;
+  const baseH = Math.max(actualH, pal.height + 180, 720);
 
   return (
     <div
