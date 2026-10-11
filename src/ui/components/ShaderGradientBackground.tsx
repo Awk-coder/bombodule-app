@@ -303,6 +303,8 @@ export function ShaderGradientBackground({
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const actualH = height ?? (pal.height + 120);
+  const targetHRef = useRef(actualH);
+  targetHRef.current = actualH;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -375,11 +377,11 @@ export function ShaderGradientBackground({
     let isIntersecting = true;
     let startTime = performance.now();
     const isSheet = !!canvas.closest(".sheet");
-    const targetH = actualH;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
       if (!canvas || !gl) return;
+      const targetH = targetHRef.current;
       const w = Math.min(canvas.clientWidth || 360, 540);
       const h = Math.min(canvas.clientHeight || 480, targetH);
       if (canvas.width !== w || canvas.height !== h) {
@@ -466,7 +468,7 @@ export function ShaderGradientBackground({
         gl.getExtension("WEBGL_lose_context")?.loseContext();
       }
     };
-  }, [ore, pal, actualH]);
+  }, [ore, pal]);
 
   return (
     <div

@@ -65,6 +65,17 @@ export function App() {
   const rank = rankOf(season.elo);
   const ore = season.rated ? rank.ore : "coal";
 
+  // Per-screen fluid background settings (Schedule is explicitly 0/off for clean timetable contrast):
+  const SCREEN_SHADERS: Record<Tab, { height: number; opacity: number }> = {
+    ranked: { height: 520, opacity: 1.0 },
+    home: { height: 380, opacity: 0.85 },
+    tasks: { height: 300, opacity: 0.8 },
+    courses: { height: 280, opacity: 0.75 },
+    settings: { height: 300, opacity: 0.7 },
+    schedule: { height: 0, opacity: 0 },
+  };
+  const shaderCfg = route.courseId || route.board ? { height: 0, opacity: 0 } : (SCREEN_SHADERS[route.tab] ?? { height: 0, opacity: 0 });
+
   useEffect(() => {
     if (status.loaded && !status.error && state.onboarded) dispatch((s) => recordPeak(recordAchievements(s, new Date()), new Date()));
   }, [state, now, status.loaded, status.error]);
@@ -76,7 +87,7 @@ export function App() {
   const Screen = SCREENS[route.tab];
   return (
     <>
-      <ShaderGradientBackground ore={ore} />
+      <ShaderGradientBackground ore={ore} height={shaderCfg.height} opacity={shaderCfg.opacity} />
       <main class={(route.tab === "schedule" || route.tab === "home") && !route.courseId ? "screen fill" : "screen"}>
         {route.courseId ? <CourseDetail id={route.courseId} /> : route.board ? <LeaderboardPage /> : <Screen />}
       </main>
