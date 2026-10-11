@@ -22,7 +22,7 @@ function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose
     <Sheet open onClose={onClose} className="sheet-player">
       <ShaderGradientBackground ore={ore} opacity={0.9} className="sheet-shader" />
       <div class="player">
-        <RankBadge kind={kind} div={player.rated ? player.div : null} size={96} />
+        <RankBadge kind={kind} div={player.rated ? player.div : null} size={80} />
         <h2 style={{ color: ORE_COLOR[kind] }}>{player.name}</h2>
         {player.title && <p class="player-title">{player.title}</p>}
         <div class="player-stats">

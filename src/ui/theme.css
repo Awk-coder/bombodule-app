@@ -45,10 +45,9 @@ svg { vertical-align: -2px; }
   margin: 0 auto;
   padding: max(env(safe-area-inset-top), 16px) var(--gutter) calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   position: relative;
-  z-index: 1;
 }
 .screen.fill > .sched { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.screen { max-width: 560px; margin: 0 auto; padding: max(env(safe-area-inset-top), 12px) var(--gutter) calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom)); position: relative; z-index: 1; }
+.screen { max-width: 560px; margin: 0 auto; padding: max(env(safe-area-inset-top), 12px) var(--gutter) calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom)); position: relative; }
 .page-title { font-family: var(--serif); color: var(--accent); text-align: center; font-size: 26px; margin: 28px 0 24px; }
 .section-title { font-family: var(--serif); color: var(--accent); font-size: 22px; margin: 28px 0 12px; display: flex; align-items: center; gap: 10px; }
 .section-title.muted { color: var(--text-muted); }
@@ -129,14 +128,15 @@ svg { vertical-align: -2px; }
 .risk-text-danger, .risk-text-barred { color: var(--danger); }
 
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; background: var(--bg); border-top: 1px solid var(--border); padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); }
+body:has(.sheet-backdrop) .tabbar { display: none !important; }
 .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); }
 .tab svg { width: 24px; height: 24px; }
 .tab.active { color: var(--accent); font-weight: 700; position: relative; }
 .tab.active svg { fill: var(--accent-dim); }
 .tab.active::after { content: ""; position: absolute; bottom: -2px; width: 4px; height: 4px; border-radius: 1px; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 
-.sheet-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background: rgba(0, 0, 0, 0.65); animation: fade 0.15s; }
-.sheet { position: relative; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; overflow-x: hidden; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 10px var(--gutter) calc(24px + env(safe-area-inset-bottom)); animation: up 0.2s ease-out; }
+.sheet-backdrop { position: fixed; inset: 0; z-index: 9999 !important; display: flex; align-items: flex-end; background: rgba(0, 0, 0, 0.65); animation: fade 0.15s; }
+.sheet { position: relative; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; overflow-x: hidden; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 10px var(--gutter) calc(36px + env(safe-area-inset-bottom)); animation: up 0.2s ease-out; }
 .sheet > *:not(.sheet-shader) { position: relative; z-index: 1; }
 .sheet-shader {
   position: absolute !important;
@@ -563,11 +563,15 @@ svg { vertical-align: -2px; }
 .player { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .player h2 { margin: 10px 0 0; }
 .player-title { color: var(--text-muted); font-style: italic; margin: 2px 0 0; }
-.player-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 18px 0 8px; }
+.player-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 22px 0 20px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 .player-stats > div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .player-stats small { color: var(--text-muted); font-size: 12px; }
 .player-stats span { color: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .player-degree { display: flex; align-items: center; gap: 4px; }
+.sheet-player { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+.sheet-player .sheet-shader { height: 190px !important; }
+.sheet-player .player h2 { margin: 6px 0 0; }
+.sheet-player .player-stats { margin: 14px 0 6px; padding-bottom: 0; }
 .group-code { letter-spacing: 2px; color: var(--text); }
 .title-list .row.on { border-color: var(--accent); }
 .row.danger b { color: var(--danger); }
