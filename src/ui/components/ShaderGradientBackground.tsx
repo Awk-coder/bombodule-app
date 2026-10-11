@@ -374,16 +374,15 @@ export function ShaderGradientBackground({
 
     let animId: number;
     let isPaused = false;
-    let isIntersecting = true;
     let startTime = performance.now();
     const isSheet = !!canvas.closest(".sheet");
+    const baseH = pal.height + 120;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
       if (!canvas || !gl) return;
-      const targetH = targetHRef.current;
-      const w = Math.min(canvas.clientWidth || 360, 540);
-      const h = Math.min(canvas.clientHeight || 480, targetH);
+      const w = Math.min(window.innerWidth || canvas.clientWidth || 360, 540);
+      const h = isSheet ? (canvas.clientHeight || 264) : baseH;
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
@@ -393,22 +392,11 @@ export function ShaderGradientBackground({
     resize();
     window.addEventListener("resize", resize);
 
-    // ResizeObserver ensures canvas updates its buffer as the modal sheet finishes its 200ms slide-up animation
-    const ro = new ResizeObserver(() => resize());
-    ro.observe(canvas);
-
-    // IntersectionObserver is ONLY for the main scrollable page, NOT for sheets (sheets start at translateY(100%) offscreen which falsely pauses them)
-    let observer: IntersectionObserver | null = null;
-    if (!isSheet) {
-      observer = new IntersectionObserver(([entry]) => {
-        isIntersecting = entry.isIntersecting;
-        if (!isIntersecting) {
-          cancelAnimationFrame(animId);
-        } else if (!isPaused && !reducedMotion) {
-          animId = requestAnimationFrame(render);
-        }
-      });
-      observer.observe(canvas);
+    // ResizeObserver only needed for modal sheets sliding up from offscreen
+    let ro: ResizeObserver | null = null;
+    if (isSheet) {
+      ro = new ResizeObserver(() => resize());
+      ro.observe(canvas);
     }
 
     function onVisibilityChange() {
@@ -418,7 +406,7 @@ export function ShaderGradientBackground({
       } else {
         isPaused = false;
         startTime = performance.now();
-        if ((isSheet || isIntersecting) && !reducedMotion) {
+        if (!reducedMotion) {
           animId = requestAnimationFrame(render);
         }
       }
@@ -427,7 +415,12 @@ export function ShaderGradientBackground({
 
     function render(now: number = performance.now()) {
       if (!gl || !canvas || isPaused) return;
-      if (!isSheet && !isIntersecting) return;
+
+      // When height is 0 (Schedule), skip draw calls to save GPU while keeping loop ready
+      if (!isSheet && targetHRef.current <= 0) {
+        if (!reducedMotion) animId = requestAnimationFrame(render);
+        return;
+      }
 
       const elapsed = (now - startTime) / 1000;
       gl.useProgram(prog);
@@ -442,7 +435,7 @@ export function ShaderGradientBackground({
     }
 
     render();
-    // Safety frame: ensure resize runs right after sheet animation begins
+    // Safety frame: ensure resize runs right after initial layout
     requestAnimationFrame(() => {
       resize();
       render();
@@ -452,8 +445,7 @@ export function ShaderGradientBackground({
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      ro.disconnect();
-      if (observer) observer.disconnect();
+      if (ro) ro.disconnect();
       // Instantly hide canvas before WebGL teardown to eliminate any 1-frame compositor white flash
       if (canvas) {
         canvas.style.opacity = "0";
@@ -470,6 +462,9 @@ export function ShaderGradientBackground({
     };
   }, [ore, pal]);
 
+  const isSheetComponent = className?.includes("sheet-shader") || false;
+  const baseH = pal.height + 120;
+
   return (
     <div
       class={`shader-gradient-wrapper ${className ?? ""}`.trim()}
@@ -480,7 +475,11 @@ export function ShaderGradientBackground({
         ...style,
       }}
     >
-      <canvas ref={canvasRef} class="shader-gradient-canvas" />
+      <canvas
+        ref={canvasRef}
+        class="shader-gradient-canvas"
+        style={!isSheetComponent ? { height: `${baseH}px` } : undefined}
+      />
     </div>
   );
 }
