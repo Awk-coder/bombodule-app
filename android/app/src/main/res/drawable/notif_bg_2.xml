@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Prompt card background for course palette 2 (src/ui/palette.ts): diagonal gradient plus a soft glow top-right. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp" />
+            <gradient android:angle="315" android:startColor="#3F5916" android:centerColor="#192E03" android:endColor="#0C1702" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp" />
+            <gradient android:type="radial" android:centerX="0.95" android:centerY="0" android:gradientRadius="180dp" android:startColor="#40C6F25A" android:endColor="#00C6F25A" />
+        </shape>
+    </item>
+</layer-list>

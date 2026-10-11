@@ -1,0 +1,11 @@
+name = "bombodule-api"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bombodule"
+database_id = "831c53d1-50e0-4cef-a88b-f2db5ab12548"

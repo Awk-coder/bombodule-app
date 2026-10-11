@@ -1,0 +1,11 @@
+node_modules/
+dist/
+tests/fixtures/real-*
+*.log
+.superpowers/
+references/
+.env.local
+server/.wrangler/
+*.traineddata
+.vercel
+.env*

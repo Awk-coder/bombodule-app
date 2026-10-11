@@ -1,0 +1,7 @@
+[tools]
+node = "24"
+java = "temurin-21"
+
+[env]
+ANDROID_HOME = "{{env.HOME}}/Android/Sdk"
+_.path = ["{{env.HOME}}/Android/Sdk/platform-tools", "{{env.HOME}}/Android/Sdk/cmdline-tools/latest/bin"]
