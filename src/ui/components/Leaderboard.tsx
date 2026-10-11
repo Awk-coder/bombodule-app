@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { apiUrl, call } from "../../online/api";
 import type { PublicPlayer } from "../../online/api";
@@ -15,28 +15,31 @@ type Load = { players: PublicPlayer[] } | { error: string } | null;
 const seasonRank = (p: PublicPlayer) => (p.rated && p.ore ? `${ORE_NAME[p.ore]} ${divLabel(p.div)}`.trim() : "Unrated");
 
 function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose: () => void }) {
-  if (!player) return null;
-  const kind = player.rated && player.ore ? player.ore : "unrated";
+  const lastPlayer = useRef(player);
+  if (player) lastPlayer.current = player;
+  const p = player ?? lastPlayer.current;
+  if (!p) return null;
+  const kind = p.rated && p.ore ? p.ore : "unrated";
   const ore = kind === "unrated" ? "coal" : kind;
   return (
-    <Sheet open onClose={onClose} className="sheet-player">
+    <Sheet open={!!player} onClose={onClose} className="sheet-player">
       <ShaderGradientBackground ore={ore} opacity={0.9} className="sheet-shader" />
       <div class="player">
-        <RankBadge kind={kind} div={player.rated ? player.div : null} size={80} />
-        <h2 style={{ color: ORE_COLOR[kind] }}>{player.name}</h2>
-        {player.title && <p class="player-title">{player.title}</p>}
+        <RankBadge kind={kind} div={p.rated ? p.div : null} size={80} />
+        <h2 style={{ color: ORE_COLOR[kind] }}>{p.name}</h2>
+        {p.title && <p class="player-title">{p.title}</p>}
         <div class="player-stats">
           <div>
             <small>Season</small>
-            <b style={{ color: ORE_COLOR[kind] }}>{seasonRank(player)}</b>
-            {player.rated && <span>{player.elo}</span>}
+            <b style={{ color: ORE_COLOR[kind] }}>{seasonRank(p)}</b>
+            {p.rated && <span>{p.elo}</span>}
           </div>
           <div>
             <small>Degree</small>
-            {player.degree ? (
-              <b class="player-degree" style={{ color: ORE_COLOR[player.degree.ore] }}>
-                <RankBadge kind={player.degree.ore} size={28} />
-                {ORE_NAME[player.degree.ore]} · {player.degree.tier}
+            {p.degree ? (
+              <b class="player-degree" style={{ color: ORE_COLOR[p.degree.ore] }}>
+                <RankBadge kind={p.degree.ore} size={28} />
+                {ORE_NAME[p.degree.ore]} · {p.degree.tier}
               </b>
             ) : (
               <b>Unranked</b>
@@ -44,7 +47,7 @@ function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose
           </div>
           <div>
             <small>Achievements</small>
-            <b>{player.achievements} of {ACHIEVEMENTS.length}</b>
+            <b>{p.achievements} of {ACHIEVEMENTS.length}</b>
           </div>
         </div>
       </div>
