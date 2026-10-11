@@ -381,7 +381,7 @@ export function ShaderGradientBackground({
 
     function resize() {
       if (!canvas || !gl) return;
-      const w = Math.min(window.innerWidth || canvas.clientWidth || 360, 540);
+      const w = isSheet ? (canvas.clientWidth || 360) : Math.min(canvas.clientWidth || window.innerWidth || 360, 540);
       const h = isSheet ? (canvas.clientHeight || 264) : baseH;
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
@@ -478,7 +478,11 @@ export function ShaderGradientBackground({
       <canvas
         ref={canvasRef}
         class="shader-gradient-canvas"
-        style={!isSheetComponent ? { height: `${baseH}px` } : undefined}
+        style={
+          isSheetComponent
+            ? { position: "absolute", inset: 0, width: "100%", height: "100%", transform: "none", left: 0, top: 0, maxWidth: "none" }
+            : { height: `${baseH}px` }
+        }
       />
     </div>
   );
