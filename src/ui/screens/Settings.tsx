@@ -63,7 +63,7 @@ export function Settings() {
           <div class="avatar">{initials(acc?.name)}</div>
           {season.rated && (
             <div class="avatar-rank-gem" title={`${ORE_NAME[rank.ore]} Rank`}>
-              <RankBadge kind={rank.ore} size={18} />
+              <RankBadge kind={rank.ore} size={30} />
             </div>
           )}
         </div>

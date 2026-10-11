@@ -24,8 +24,8 @@ export function TaskRow({ task, course, now, onOpen }: { task: Task; course?: Co
       </button>
       <div class="grow">
         <b>
-          {task.bullshit && <span class="task-pixel-icon" title="Non-academic task"><PixelIcon art={BUM_ART} size={11} /></span>}
-          {task.final && !task.bullshit && <span class="task-pixel-icon" title="Final assignment"><PixelIcon art={SWORD_ART} size={11} /></span>}
+          {task.bullshit && <span class="task-pixel-icon" title="Non-academic task"><PixelIcon art={BUM_ART} scale={2} /></span>}
+          {task.final && !task.bullshit && <span class="task-pixel-icon" title="Final assignment"><PixelIcon art={SWORD_ART} scale={2} /></span>}
           {task.final && <span class="final-tag">FINAL</span>}
           {task.title}
         </b>

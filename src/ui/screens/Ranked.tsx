@@ -14,6 +14,14 @@ import { ResultPicker, ResultSheet } from "../components/ResultSlip";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
 import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
+import {
+  PixelIcon,
+  LIGHTNING_ART,
+  FLAME_ART,
+  MINI_SHIELD_ART,
+  BOOK_ART,
+  HOURGLASS_ART,
+} from "../components/pixelIcons";
 
 const ORES: Ore[] = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
 const range = (ore: Ore) => {
@@ -43,23 +51,23 @@ function HowRanking({ open, onClose }: { open: boolean; onClose: () => void }) {
         <h3 class="how-sub">Season Mechanics</h3>
         <div class="how-mechanics">
           <div class="how-mech-row">
-            <span class="how-mech-badge">⚡</span>
+            <span class="how-mech-badge"><PixelIcon art={LIGHTNING_ART} /></span>
             <div><b>Weekly Cap:</b> Max 5 on-time tasks per calendar week give positive Elo.</div>
           </div>
           <div class="how-mech-row">
-            <span class="how-mech-badge">🛡️</span>
+            <span class="how-mech-badge"><PixelIcon art={MINI_SHIELD_ART} /></span>
             <div><b>Academic Integrity:</b> Tasks must belong to an enrolled course. Completed tasks require a 30-minute minimum incubation to award Elo. Non-academic tasks award 0 Elo.</div>
           </div>
           <div class="how-mech-row">
-            <span class="how-mech-badge">📚</span>
+            <span class="how-mech-badge"><PixelIcon art={BOOK_ART} /></span>
             <div><b>Overload Bonus:</b> Semesters with &gt;18 credits gain +10 Elo for every credit above 18.</div>
           </div>
           <div class="how-mech-row">
-            <span class="how-mech-badge">🔥</span>
+            <span class="how-mech-badge"><PixelIcon art={FLAME_ART} /></span>
             <div><b>One-Time Comeback:</b> Students with &le;2.20 GPA in a past semester gain a one-time +100 Elo bonus and 1.35× task velocity buff when jumping &ge;+1.0 GPA (+50 Elo for &ge;+0.5). Once you climb you must stay there.</div>
           </div>
           <div class="how-mech-row">
-            <span class="how-mech-badge">⏳</span>
+            <span class="how-mech-badge"><PixelIcon art={HOURGLASS_ART} /></span>
             <div><b>Short Semesters:</b> Sem 3 is capped at Diamond III (max 1999 Elo) without bonuses.</div>
           </div>
         </div>
@@ -96,7 +104,7 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
       {title && <p class="season-title">{title}</p>}
       {season.comebackActive && (
-        <span class="buff-pill">🔥 1.35× Comeback Velocity Active</span>
+        <span class="buff-pill"><PixelIcon art={FLAME_ART} /> 1.35× Comeback Velocity Active</span>
       )}
       <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
       {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
@@ -110,7 +118,8 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
       {season.rated && (
         <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`}>
-          <span>{season.weeklyTaskCount >= 5 ? "⚡ Weekly task cap reached (5/5)" : `⚡ Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
+          <PixelIcon art={LIGHTNING_ART} />
+          <span>{season.weeklyTaskCount >= 5 ? "Weekly task cap reached (5/5)" : `Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
         </div>
       )}
       {season.changes.length > 0 && (

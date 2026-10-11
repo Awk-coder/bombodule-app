@@ -63,7 +63,7 @@ function CaughtUp({ sessions, today }: { sessions: Session[]; today: string }) {
     : "No classes today";
   return (
     <div class="card caught-up">
-      <span class="caught-up-icon"><PixelIcon art={SHIELD_ART} size={22} /></span>
+      <span class="caught-up-icon"><PixelIcon art={SHIELD_ART} scale={2} /></span>
       <div>
         <div class="caught-up-title-row">
           <b>All classes marked</b>
@@ -102,7 +102,7 @@ export function Home() {
       <header class="greeting">
         <div class="greeting-top">
           <a href="#/ranked" class="greeting-rank-pill" title="View your Ranked season profile">
-            <RankBadge kind={season.rated ? rank.ore : "unrated"} size={16} />
+            <RankBadge kind={season.rated ? rank.ore : "unrated"} size={30} />
             <span style={{ color: season.rated ? ORE_COLOR[rank.ore] : "var(--text-muted)" }}>
               {season.rated ? `${ORE_NAME[rank.ore]} ${divLabel(rank.div)} · ${season.elo}` : "Unrated"}
             </span>

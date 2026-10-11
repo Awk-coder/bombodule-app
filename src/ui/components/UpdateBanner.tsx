@@ -1,4 +1,5 @@
 import type { useUpdater } from "../useUpdater";
+import { PixelIcon, WARN_ART } from "./pixelIcons";
 
 export function UpdateBanner({ updater }: { updater: ReturnType<typeof useUpdater> }) {
   const { info, downloading, progress, install, permissionNeeded, openSettings } = updater;
@@ -18,7 +19,7 @@ export function UpdateBanner({ updater }: { updater: ReturnType<typeof useUpdate
 
       {permissionNeeded && (
         <div class="update-perm">
-          <small>⚠️ Permission required: toggle <b>Allow from this source</b> to install updates.</small>
+          <small><PixelIcon art={WARN_ART} /> Permission required: toggle <b>Allow from this source</b> to install updates.</small>
           <button class="btn ghost sm" onClick={() => void openSettings()}>Grant Permission</button>
         </div>
       )}

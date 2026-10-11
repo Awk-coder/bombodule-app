@@ -1,14 +1,46 @@
 import type { JSX } from "preact";
-import { BUM_ART } from "./achievementArt";
+import { BUM_ART, RARE_ART } from "./achievementArt";
 
-export { BUM_ART };
+export { BUM_ART, RARE_ART };
 
 export interface PixelArtData {
   palette: string[];
   rows: string[];
 }
 
-/** 15x15 Emerald/Gold Guardian Shield for attendance cleared / caught up */
+/** 7x9 Pixel Lightning Bolt (strictly 2px/pixel -> 14x18px) */
+export const LIGHTNING_ART: PixelArtData = {
+  palette: ["#854d0e", "#f59e0b", "#fef08a"],
+  rows: [
+    "...00..",
+    "..010..",
+    ".0110..",
+    "0111000",
+    "0111110",
+    "...0110",
+    "..0110.",
+    ".010...",
+    "010....",
+  ],
+};
+
+/** 7x9 Pixel Flame (strictly 2px/pixel -> 14x18px) */
+export const FLAME_ART: PixelArtData = {
+  palette: ["#7c2d12", "#ea580c", "#fbbf24"],
+  rows: [
+    "...0...",
+    "..010..",
+    ".0120..",
+    ".01210.",
+    "0122210",
+    "0122210",
+    "0112110",
+    ".01110.",
+    "..000..",
+  ],
+};
+
+/** 15x15 Emerald/Gold Guardian Shield (strictly 2px/pixel -> 30x30px) */
 export const SHIELD_ART: PixelArtData = {
   palette: ["#0f2e1a", "#15803d", "#22c55e", "#4ade80", "#bbf7d0"],
   rows: [
@@ -30,25 +62,70 @@ export const SHIELD_ART: PixelArtData = {
   ],
 };
 
-/** 11x11 Academic Quest Scroll for task rows */
-export const SCROLL_ART: PixelArtData = {
-  palette: ["#2d2417", "#785324", "#d97706", "#fef3c7", "#fde68a"],
+/** 7x9 Compact Shield for mechanics row (strictly 2px/pixel -> 14x18px) */
+export const MINI_SHIELD_ART: PixelArtData = {
+  palette: ["#0f2e1a", "#15803d", "#4ade80"],
   rows: [
-    "..00000....",
-    ".03444300..",
-    "0341114300.",
-    "0414441430.",
-    "0414111430.",
-    "0414444430.",
-    "0414111430.",
-    "0414444430.",
-    ".034444300.",
-    "..03443020.",
-    "...000000..",
+    ".00000.",
+    "0112110",
+    "0122210",
+    "0122210",
+    "0122210",
+    ".01210.",
+    ".01210.",
+    "..010..",
+    "...0...",
   ],
 };
 
-/** 11x11 Crossed Swords for final exam tasks */
+/** 8x8 Pixel Book for academic overload (strictly 2px/pixel -> 16x16px) */
+export const BOOK_ART: PixelArtData = {
+  palette: ["#1e1b4b", "#4338ca", "#a5b4fc"],
+  rows: [
+    ".00..00.",
+    "01100110",
+    "01211210",
+    "01211210",
+    "01211210",
+    "01211210",
+    "01100110",
+    ".00..00.",
+  ],
+};
+
+/** 7x9 Pixel Hourglass for short semesters (strictly 2px/pixel -> 14x18px) */
+export const HOURGLASS_ART: PixelArtData = {
+  palette: ["#374151", "#9ca3af", "#f3f4f6"],
+  rows: [
+    "0000000",
+    ".01210.",
+    "..010..",
+    "...0...",
+    "..010..",
+    ".01210.",
+    ".01210.",
+    "0122210",
+    "0000000",
+  ],
+};
+
+/** 9x9 Pixel Warning Triangle (strictly 2px/pixel -> 18x18px) */
+export const WARN_ART: PixelArtData = {
+  palette: ["#78350f", "#f59e0b", "#fef08a"],
+  rows: [
+    "....0....",
+    "...010...",
+    "..01210..",
+    "..01210..",
+    ".0112110.",
+    ".0110110.",
+    "011121110",
+    "011000110",
+    "000000000",
+  ],
+};
+
+/** 11x11 Crossed Swords for final exam tasks (strictly 2px/pixel -> 22x22px) */
 export const SWORD_ART: PixelArtData = {
   palette: ["#1e1b4b", "#4338ca", "#818cf8", "#e0e7ff", "#f59e0b", "#78350f"],
   rows: [
@@ -66,40 +143,34 @@ export const SWORD_ART: PixelArtData = {
   ],
 };
 
-/** 9x9 Pixel Diamond Star for prestige indicators */
-export const STAR_ART: PixelArtData = {
-  palette: ["#3b2505", "#b45309", "#f59e0b", "#fde68a", "#ffffff"],
-  rows: [
-    "....0....",
-    "...010...",
-    "..01310..",
-    ".0134310.",
-    "013444310",
-    ".0134310.",
-    "..01310..",
-    "...010...",
-    "....0....",
-  ],
-};
-
+/**
+ * Uniform PixelArt Component.
+ * Pixel sizes are strictly constrained to 2 sizes for uniformity:
+ * - scale 2: Micro scale (2px per art pixel)
+ * - scale 12: Hero scale (12px per art pixel, matching Ranked Badge and 12px shader)
+ */
 export function PixelIcon({
   art,
-  size = 15,
+  scale = 2,
   className,
   style,
 }: {
   art: PixelArtData;
-  size?: number;
+  scale?: 2 | 12;
   className?: string;
   style?: JSX.CSSProperties;
 }) {
   const h = art.rows.length;
   const w = art.rows[0]?.length ?? 0;
+  const pixelSize = scale;
+  const widthPx = w * pixelSize;
+  const heightPx = h * pixelSize;
+
   return (
     <svg
       viewBox={`0 0 ${w} ${h}`}
-      width={size}
-      height={size}
+      width={widthPx}
+      height={heightPx}
       shape-rendering="crispEdges"
       class={className}
       style={{ display: "inline-block", verticalAlign: "middle", flex: "none", ...style }}

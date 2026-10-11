@@ -8,6 +8,7 @@ import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { useNow } from "../useNow";
 import { IconPlus } from "../components/icons";
+import { PixelIcon, LIGHTNING_ART } from "../components/pixelIcons";
 import { TaskRow } from "../components/TaskRow";
 import { TaskSheet } from "../components/TaskSheet";
 
@@ -69,7 +70,8 @@ export function Tasks() {
       {season.rated && (
         <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`} style={{ marginBottom: "16px" }}>
           <div class="weekly-cap-content">
-            <span>{season.weeklyTaskCount >= 5 ? "⚡ Weekly task cap reached" : "⚡ Weekly Ranked Tasks"}</span>
+            <PixelIcon art={LIGHTNING_ART} />
+            <span>{season.weeklyTaskCount >= 5 ? "Weekly task cap reached" : "Weekly Ranked Tasks"}</span>
             <div class="weekly-cap-cells" aria-label={`${season.weeklyTaskCount}/5 tasks`}>
               {Array.from({ length: 5 }, (_, i) => (
                 <span key={i} class={`cap-cell ${i < season.weeklyTaskCount ? "active" : ""}`} />
