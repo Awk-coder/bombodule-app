@@ -1,17 +1,22 @@
 import { useState } from "preact/hooks";
 import { isPaused, parseImport, serialize, setPaused, setSemesterEnd, updateSettings } from "../../domain/actions";
+import { seasonElo } from "../../domain/elo";
+import { rankOf } from "../../domain/grades";
 import { ymd } from "../../domain/time";
 import { DEFAULT_LIMIT } from "../../domain/types";
 import type { AppState } from "../../domain/types";
 import { shareFile } from "../../native/share";
 import { dispatch, useAppState } from "../../store/store";
 import { fmtDate, initials, shortName } from "../format";
+import { useNow } from "../useNow";
 import { useSync } from "../useSync";
 import { useUpdater } from "../useUpdater";
 import { Chips } from "../components/Chips";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { ProfileSection } from "../components/ProfileSection";
+import { ORE_NAME, RankBadge } from "../components/RankBadge";
+import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import { Sheet } from "../components/Sheet";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
@@ -19,8 +24,12 @@ import { THEMES, themeById } from "../themes";
 
 export function Settings() {
   const state = useAppState();
+  const now = useNow();
   const sync = useSync();
   const updater = useUpdater();
+  const season = seasonElo(state, now);
+  const rank = rankOf(season.elo);
+  const ore = season.rated ? rank.ore : "coal";
   const [pendingImport, setPendingImport] = useState<AppState | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -48,11 +57,19 @@ export function Settings() {
   }
 
   return (
-    <>
+    <div class="settings-screen">
+      <ShaderGradientBackground ore={ore} height={340} />
       <h1 class="page-title">Settings</h1>
 
       <div class="profile">
-        <div class="avatar">{initials(acc?.name)}</div>
+        <div class="avatar-frame">
+          <div class="avatar">{initials(acc?.name)}</div>
+          {season.rated && (
+            <div class="avatar-rank-gem" title={`${ORE_NAME[rank.ore]} Rank`}>
+              <RankBadge kind={rank.ore} size={18} />
+            </div>
+          )}
+        </div>
         <div>
           <b>{acc?.name ? shortName(acc.name) : "No timetable yet"}</b>
           <small>{acc ? `${acc.matric ?? "Matric unknown"} · imported ${fmtDate(acc.lastSync)}` : "Import your confirmation slip to load your timetable"}</small>
@@ -213,6 +230,6 @@ export function Settings() {
         </div>
       </Sheet>
       <SyncPreviewSheet sync={sync} />
-    </>
+    </div>
   );
 }

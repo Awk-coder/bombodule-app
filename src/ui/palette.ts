@@ -9,4 +9,5 @@ const PALETTE = [
   { bg: "#1A2733", fg: "#9CC3E6" },
 ];
 
-export const courseColor = (i: number) => PALETTE[i % PALETTE.length];
+export const courseColor = (i: number | undefined) =>
+  PALETTE[typeof i === "number" && !isNaN(i) ? Math.abs(i) % PALETTE.length : 0];

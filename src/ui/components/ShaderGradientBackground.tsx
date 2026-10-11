@@ -288,11 +288,13 @@ export function ShaderGradientBackground({
   className,
   style,
   opacity = 1,
+  height,
 }: {
   ore: Ore;
   className?: string;
   style?: JSX.CSSProperties;
   opacity?: number;
+  height?: number;
 }) {
   if (import.meta.env.VITEST) return null;
 
@@ -300,6 +302,7 @@ export function ShaderGradientBackground({
   if (!pal) return null; // No effect for Coal
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const actualH = height ?? (pal.height + 120);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -372,7 +375,7 @@ export function ShaderGradientBackground({
     let isIntersecting = true;
     let startTime = performance.now();
     const isSheet = !!canvas.closest(".sheet");
-    const targetH = pal.height + 120;
+    const targetH = actualH;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
@@ -458,19 +461,17 @@ export function ShaderGradientBackground({
       gl.deleteProgram(prog);
       gl.deleteShader(vs);
       gl.deleteShader(fs);
-      // Free WebGL context for modal sheets to avoid exhausting context limit on repeated opens
-      if (isSheet) {
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
-      }
+      // Free WebGL context immediately to prevent exhausting context limits across screen transitions
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [ore, pal]);
+  }, [ore, pal, actualH]);
 
   return (
     <div
       class={`shader-gradient-wrapper ${className ?? ""}`.trim()}
       aria-hidden="true"
       style={{
-        height: `${pal.height + 120}px`,
+        height: `${actualH}px`,
         opacity,
         ...style,
       }}

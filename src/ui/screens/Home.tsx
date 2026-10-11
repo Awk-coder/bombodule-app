@@ -1,6 +1,8 @@
 import { useMemo } from "preact/hooks";
 import { markSession } from "../../domain/actions";
 import { courseStats, daySummary } from "../../domain/attendance";
+import { seasonElo } from "../../domain/elo";
+import { rankOf } from "../../domain/grades";
 import { generateSessions } from "../../domain/sessions";
 import { hhmm, ymd } from "../../domain/time";
 import type { Course, Session, Slot } from "../../domain/types";
@@ -8,7 +10,10 @@ import { dispatch, useAppState } from "../../store/store";
 import { dayName, fmtDate, fmtTime, greeting, minutesLeft, relDue, shortName, titleCase } from "../format";
 import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
-import { IconCheck, IconClock, IconPin, IconSettings } from "../components/icons";
+import { IconClock, IconPin, IconSettings } from "../components/icons";
+import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
+import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
+import { PixelIcon, SHIELD_ART } from "../components/pixelIcons";
 import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
@@ -59,9 +64,12 @@ function CaughtUp({ sessions, today }: { sessions: Session[]; today: string }) {
     : "No classes today";
   return (
     <div class="card caught-up">
-      <span class="caught-up-icon"><IconCheck size={20} /></span>
+      <span class="caught-up-icon"><PixelIcon art={SHIELD_ART} size={22} /></span>
       <div>
-        <b>All classes marked</b>
+        <div class="caught-up-title-row">
+          <b>All classes marked</b>
+          <span class="pixel-status-badge">CLEARED</span>
+        </div>
         <small>{todayLine}</small>
         <small>This semester: {attended} attended · {missed} missed</small>
       </div>
@@ -87,11 +95,23 @@ export function Home() {
     .filter((x) => x.st.risk !== "ok")
     .sort((a, b) => b.st.missed - a.st.missed);
   const due = state.tasks.filter((t) => !t.done).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
+  const season = seasonElo(state, now);
+  const rank = rankOf(season.elo);
+  const ore = season.rated ? rank.ore : "coal";
 
   return (
-    <>
+    <div class="home-screen">
+      <ShaderGradientBackground ore={ore} height={420} />
       <header class="greeting">
-        <a class="gear" href="#/settings" aria-label="Settings"><IconSettings size={22} /></a>
+        <div class="greeting-top">
+          <a href="#/ranked" class="greeting-rank-pill" title="View your Ranked season profile">
+            <RankBadge kind={season.rated ? rank.ore : "unrated"} size={16} />
+            <span style={{ color: season.rated ? ORE_COLOR[rank.ore] : "var(--text-muted)" }}>
+              {season.rated ? `${ORE_NAME[rank.ore]} ${divLabel(rank.div)} · ${season.elo}` : "Unrated"}
+            </span>
+          </a>
+          <a class="gear" href="#/settings" aria-label="Settings"><IconSettings size={22} /></a>
+        </div>
         <p>{greeting(now)}</p>
         <h1>{state.account?.name ? shortName(state.account.name) : "Student"}</h1>
       </header>
@@ -141,6 +161,6 @@ export function Home() {
         </>
       )}
       </div>
-    </>
+    </div>
   );
 }
