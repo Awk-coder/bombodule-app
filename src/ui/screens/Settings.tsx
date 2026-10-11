@@ -16,7 +16,6 @@ import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
 import { ProfileSection } from "../components/ProfileSection";
 import { ORE_NAME, RankBadge } from "../components/RankBadge";
-import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import { Sheet } from "../components/Sheet";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
@@ -29,7 +28,6 @@ export function Settings() {
   const updater = useUpdater();
   const season = seasonElo(state, now);
   const rank = rankOf(season.elo);
-  const ore = season.rated ? rank.ore : "coal";
   const [pendingImport, setPendingImport] = useState<AppState | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -57,8 +55,7 @@ export function Settings() {
   }
 
   return (
-    <div class="settings-screen">
-      <ShaderGradientBackground ore={ore} height={340} />
+    <>
       <h1 class="page-title">Settings</h1>
 
       <div class="profile">
@@ -230,6 +227,6 @@ export function Settings() {
         </div>
       </Sheet>
       <SyncPreviewSheet sync={sync} />
-    </div>
+    </>
   );
 }

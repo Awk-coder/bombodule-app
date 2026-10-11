@@ -2,14 +2,12 @@ import { useState } from "preact/hooks";
 import { finishExams, unfinishExams } from "../../domain/actions";
 import { isFinalExamTaskVisible } from "../../domain/calendar";
 import { seasonElo } from "../../domain/elo";
-import { rankOf } from "../../domain/grades";
 import { ImportSlip } from "../components/ResultSlip";
 import { addDays, ymd } from "../../domain/time";
 import type { Task } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { useNow } from "../useNow";
 import { IconPlus } from "../components/icons";
-import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import { TaskRow } from "../components/TaskRow";
 import { TaskSheet } from "../components/TaskSheet";
 
@@ -47,15 +45,12 @@ export function Tasks() {
   // Tapped "Finished my last paper" but that semester's slip isn't in yet: not ticked until it is.
   const examsPending = !!sem && state.examsDone.includes(sem.label) && !state.results.some((r) => r.label === sem.label);
   const season = seasonElo(state, now);
-  const rank = rankOf(season.elo);
-  const ore = season.rated ? rank.ore : "coal";
   const row = (t: Task) => (
     <TaskRow key={t.id} task={t} course={t.courseId ? courses.get(t.courseId) : undefined} now={now} onOpen={() => edit(t)} />
   );
 
   return (
-    <div class="tasks-screen">
-      <ShaderGradientBackground ore={ore} height={360} />
+    <>
       <h1 class="page-title">Tasks</h1>
       {examsOn && (
         <button class="card exams-card" onClick={() => dispatch((s) => finishExams(s, sem!.label))}>
@@ -133,11 +128,13 @@ export function Tasks() {
       {visiblePast.length > 0 && (
         <>
           <h2 class="section-title muted">Past <span class="count">{visiblePast.length}</span></h2>
-          {visiblePast.map(row)}
+          <div style={{ paddingBottom: "70px" }}>
+            {visiblePast.map(row)}
+          </div>
         </>
       )}
       <button class="fab" aria-label="Add task" onClick={() => edit(null)}><IconPlus size={28} /></button>
       <TaskSheet open={open} task={editing} onClose={() => setOpen(false)} />
-    </div>
+    </>
   );
 }

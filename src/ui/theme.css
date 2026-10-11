@@ -169,7 +169,7 @@ svg { vertical-align: -2px; }
 @keyframes up { from { transform: translateY(100%); } }
 @keyframes fade { from { opacity: 0; } }
 
-.fab { position: fixed; right: var(--gutter); bottom: calc(var(--tabbar-h) + 20px + env(safe-area-inset-bottom)); z-index: 5; width: 56px; height: 56px; border-radius: 18px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 30%, transparent); }
+.fab { position: fixed !important; right: var(--gutter); bottom: calc(var(--tabbar-h) + 20px + env(safe-area-inset-bottom)); z-index: 20; width: 56px; height: 56px; border-radius: 18px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 30%, transparent); }
 .check { width: 22px; height: 22px; flex: none; border-radius: 5px; border: 1.5px solid var(--text-muted); display: grid; place-items: center; transition: all 0.12s ease-out; }
 .check.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 35%, transparent); }
 .task-pixel-icon { display: inline-flex; align-items: center; margin-right: 5px; vertical-align: -1px; }
@@ -291,29 +291,12 @@ svg { vertical-align: -2px; }
 }
 .shader-gradient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: transparent; }
 
-.ranked,
-.home-screen,
-.tasks-screen,
-.sched-screen,
-.courses-screen,
-.settings-screen {
+.ranked {
   position: relative;
   display: flow-root;
 }
-.screen.fill > .home-screen,
-.screen.fill > .sched-screen {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
 .ranked .page-title,
-.ranked .season,
-.home-screen > *:not(.shader-gradient-wrapper),
-.tasks-screen > *:not(.shader-gradient-wrapper),
-.sched-screen > *:not(.shader-gradient-wrapper),
-.courses-screen > *:not(.shader-gradient-wrapper),
-.settings-screen > *:not(.shader-gradient-wrapper) {
+.ranked .season {
   position: relative;
   z-index: 1;
 }

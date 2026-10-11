@@ -2,8 +2,6 @@ import { useRef, useState } from "preact/hooks";
 import { setCourseStart } from "../../domain/actions";
 import { courseStats } from "../../domain/attendance";
 import { generateTimetableIcs } from "../../domain/calendarExport";
-import { seasonElo } from "../../domain/elo";
-import { rankOf } from "../../domain/grades";
 import { generateSessions } from "../../domain/sessions";
 import { hhmm } from "../../domain/time";
 import type { AppState, Day, Slot } from "../../domain/types";
@@ -17,7 +15,6 @@ import { Chips } from "../components/Chips";
 import { IconCalendar } from "../components/icons";
 import { LinkCard } from "../components/LinkCard";
 import { Meter, riskLabel } from "../components/Meter";
-import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import { Sheet } from "../components/Sheet";
 
 const PX_PER_MIN = 1.5;
@@ -113,13 +110,8 @@ export function Schedule() {
     await shareFile(filename, ics, "text/calendar");
   };
 
-  const season = seasonElo(state, now);
-  const rank = rankOf(season.elo);
-  const ore = season.rated ? rank.ore : "coal";
-
   return (
-    <div class="sched-screen">
-      <ShaderGradientBackground ore={ore} height={340} />
+    <>
       <div class="sched-top-bar">
         {title}
         <div class="sched-actions">
@@ -224,6 +216,6 @@ export function Schedule() {
           </>
         )}
       </Sheet>
-    </div>
+    </>
   );
 }

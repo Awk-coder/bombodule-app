@@ -461,8 +461,10 @@ export function ShaderGradientBackground({
       gl.deleteProgram(prog);
       gl.deleteShader(vs);
       gl.deleteShader(fs);
-      // Free WebGL context immediately to prevent exhausting context limits across screen transitions
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // Free WebGL context for modal sheets to avoid exhausting context limit on repeated opens
+      if (isSheet) {
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+      }
     };
   }, [ore, pal, actualH]);
 

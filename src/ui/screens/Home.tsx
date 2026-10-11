@@ -12,7 +12,6 @@ import { courseHref, go } from "../router";
 import { useNow } from "../useNow";
 import { IconClock, IconPin, IconSettings } from "../components/icons";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "../components/RankBadge";
-import { ShaderGradientBackground } from "../components/ShaderGradientBackground";
 import { PixelIcon, SHIELD_ART } from "../components/pixelIcons";
 import { SwipeRow } from "../components/SwipeRow";
 import { LinkCard } from "../components/LinkCard";
@@ -97,11 +96,9 @@ export function Home() {
   const due = state.tasks.filter((t) => !t.done).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 3);
   const season = seasonElo(state, now);
   const rank = rankOf(season.elo);
-  const ore = season.rated ? rank.ore : "coal";
 
   return (
-    <div class="home-screen">
-      <ShaderGradientBackground ore={ore} height={420} />
+    <>
       <header class="greeting">
         <div class="greeting-top">
           <a href="#/ranked" class="greeting-rank-pill" title="View your Ranked season profile">
@@ -161,6 +158,6 @@ export function Home() {
         </>
       )}
       </div>
-    </div>
+    </>
   );
 }
