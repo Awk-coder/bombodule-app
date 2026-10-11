@@ -8,18 +8,18 @@ export interface PixelArtData {
   rows: string[];
 }
 
-/** 7x9 Pixel Lightning Bolt (strictly 2px/pixel -> 14x18px) */
+/** 7x9 Pixel Lightning Bolt: 2px fill, 1px outline, 180° rotationally symmetric */
 export const LIGHTNING_ART: PixelArtData = {
-  palette: ["#854d0e", "#f59e0b", "#fef08a"],
+  palette: ["#854d0e", "#f59e0b"],
   rows: [
     "....00.",
-    "...020.",
-    "..0210.",
-    ".021000",
-    "0211110",
-    "...0210",
-    "..0210.",
-    ".020...",
+    "...0110",
+    "..0110.",
+    ".011000",
+    "0111110",
+    "000110.",
+    ".0110..",
+    "0110...",
     ".00....",
   ],
 };

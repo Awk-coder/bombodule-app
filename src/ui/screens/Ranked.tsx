@@ -116,12 +116,6 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
         </small>
       )}
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
-      {season.rated && (
-        <div class={`weekly-cap-indicator ${season.weeklyTaskCount >= 5 ? "capped" : ""}`}>
-          <PixelIcon art={LIGHTNING_ART} />
-          <span>{season.weeklyTaskCount >= 5 ? "Weekly task cap reached (5/5)" : `Weekly Ranked Tasks: ${season.weeklyTaskCount}/5`}</span>
-        </div>
-      )}
       {season.changes.length > 0 && (
         <div class="card elo-changes">
           {season.changes.slice(0, all ? undefined : 4).map((c) => (
