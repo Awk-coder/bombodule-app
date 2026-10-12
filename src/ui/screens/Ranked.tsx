@@ -95,7 +95,6 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
   const [how, setHow] = useState(false);
   const [all, setAll] = useState(false);
   const title = state.title ? titleText(state, state.title) : null;
-  const pb = season.placementBreakdown;
   return (
     <section class="season">
       <RankBadge kind={kind} div={season.rated ? rank.div : null} size={180} />
@@ -107,12 +106,8 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
       )}
       <p class="season-sub">{state.semester?.label ?? "This semester"}</p>
       {!season.rated && <p class="season-sub">Import last semester's slip to get placed</p>}
-      {season.rated && pb && (pb.loadBonus > 0 || pb.comebackBonus > 0) && (
-        <small class="placement-breakdown">
-          Placed {season.placement} Elo (Base {pb.base}
-          {pb.loadBonus > 0 ? ` + ${pb.loadBonus} Overload` : ""}
-          {pb.comebackBonus > 0 ? ` + ${pb.comebackBonus} Comeback` : ""})
-        </small>
+      {season.rated && season.placement !== null && (
+        <small class="placement-breakdown">Placed {season.placement} Elo</small>
       )}
       <small class="elo-next">{rank.next === null ? "Top rank" : `${rank.next - season.elo} to next division`}</small>
       {season.changes.length > 0 && (
