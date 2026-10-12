@@ -20,7 +20,7 @@ describe("tiers and elo", () => {
     expect(tierOf(4.0, "Sem 3, 2025/2026")).toMatchObject({ tier: "A", ore: "diamond" });
     expect(tierOf(4.0, "Sem 1, 2025/2026")).toMatchObject({ tier: "S", ore: "netherite" });
   });
-  it.each([[1.95, 585], [2.54, 924], [2, 600], [3.8, 2000], [4, 2300], [0, 0]] as const)("gpa %s → elo %s", (g, e) => expect(eloFromGpa(g)).toBe(e));
+  it.each([[1.95, 585], [2.54, 924], [2, 600], [3.8, 2000], [4, 2100], [0, 0]] as const)("gpa %s → elo %s", (g, e) => expect(eloFromGpa(g)).toBe(e));
   it("ranks", () => {
     expect(rankOf(585)).toMatchObject({ ore: "coal", div: 3, min: 500, next: 600 });
     expect(rankOf(924)).toMatchObject({ ore: "gold", div: 1, next: 1000 });

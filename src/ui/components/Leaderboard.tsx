@@ -5,6 +5,7 @@ import type { PublicPlayer } from "../../online/api";
 import { useAppState } from "../../store/store";
 import { Chips } from "./Chips";
 import { IconBack } from "./icons";
+import { titleClass } from "../../domain/titles";
 import { ORE_COLOR, ORE_NAME, RankBadge, divLabel } from "./RankBadge";
 import { Sheet } from "./Sheet";
 import { ShaderGradientBackground } from "./ShaderGradientBackground";
@@ -27,7 +28,7 @@ function PlayerSheet({ player, onClose }: { player: PublicPlayer | null; onClose
       <div class="player">
         <RankBadge kind={kind} div={p.rated ? p.div : null} size={80} />
         <h2 style={{ color: ORE_COLOR[kind] }}>{p.name}</h2>
-        {p.title && <p class="player-title">{p.title}</p>}
+        {p.title && <p class={`player-title ${titleClass(p.title)}`.trim()}>{p.title}</p>}
         <div class="player-stats">
           <div>
             <small>Season</small>
@@ -130,7 +131,7 @@ function BoardBody({ board, limit, empty }: { board: ReturnType<typeof useBoard>
               <RankBadge kind={p.rated && p.ore ? p.ore : "unrated"} div={p.rated ? p.div : null} size={32} />
               <span class="lb-name">
                 <b>{p.name}</b>
-                {p.title && <small>{p.title}</small>}
+                {p.title && <small class={titleClass(p.title)}>{p.title}</small>}
               </span>
               <span class="lb-elo">{p.rated ? p.elo : "Unrated"}</span>
             </button>

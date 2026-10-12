@@ -3,7 +3,7 @@ import { clearGraduated, graduationConfirmed, removeResult, setGraduated } from 
 import { DELTA, seasonElo } from "../../domain/elo";
 import { DIVISIONS, degree, gpa, rankOf, sortResults, tierOf } from "../../domain/grades";
 import type { Ore } from "../../domain/grades";
-import { titleText } from "../../domain/titles";
+import { titleClass, titleText } from "../../domain/titles";
 import type { SemesterResult } from "../../domain/types";
 import { dispatch, useAppState } from "../../store/store";
 import { useNow } from "../useNow";
@@ -101,7 +101,7 @@ export function SeasonCard({ season, rank }: { season: ReturnType<typeof seasonE
       <RankBadge kind={kind} div={season.rated ? rank.div : null} size={180} />
       <b class="season-elo">{season.elo}</b>
       <h2 class="season-rank" style={{ color: ORE_COLOR[rank.ore] }}>{ORE_NAME[rank.ore]} {divLabel(rank.div)}</h2>
-      {title && <p class="season-title">{title}</p>}
+      {title && <p class={`season-title ${titleClass(title)}`.trim()}>{title}</p>}
       {season.comebackActive && (
         <span class="buff-pill"><PixelIcon art={FLAME_ART} /> 1.35× Comeback Velocity Active</span>
       )}

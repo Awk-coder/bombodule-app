@@ -201,7 +201,27 @@ body:has(.sheet-backdrop) .tabbar { display: none !important; }
 .overdue small { color: var(--danger); }
 
 .sched { --label-w: 52px; --col: calc((100% - var(--label-w)) / var(--cols)); }
-.sched-head { display: grid; grid-template-columns: repeat(var(--cols), 1fr) var(--label-w); gap: 6px; margin-bottom: 12px; }
+.sched-head { display: grid; grid-template-columns: repeat(var(--cols), 1fr) var(--label-w); gap: 6px; margin-bottom: 8px; }
+.sched-day-bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: color-mix(in srgb, var(--surface) 80%, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+}
+.sched-day-bulk-bar small {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sched-day-bulk-bar .btn-group {
+  display: flex;
+  gap: 6px;
+}
 .day-pill { text-align: center; padding: 9px 0; border-radius: 6px; border: 1px solid var(--accent-dim); color: var(--accent); font-weight: 600; background: transparent; cursor: pointer; }
 .day-pill.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .sched-body { position: relative; }
@@ -574,6 +594,15 @@ body:has(.sheet-backdrop) .tabbar { display: none !important; }
 .sheet-player .sheet-shader { height: 190px !important; }
 .sheet-player .player h2 { margin: 6px 0 0; }
 .sheet-player .player-stats { margin: 14px 0 6px; padding-bottom: 0; }
+.title-biggest-bird {
+  color: #eb5757 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 5px rgba(235, 87, 87, 0.25);
+}
+.title-hot-chicks {
+  color: #a83838 !important;
+  font-weight: 600 !important;
+}
 .group-code { letter-spacing: 2px; color: var(--text); }
 .title-list .row.on { border-color: var(--accent); }
 .row.danger b { color: var(--danger); }

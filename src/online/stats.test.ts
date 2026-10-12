@@ -9,7 +9,7 @@ describe("profileStats", () => {
     const s = makeState({ results: [result("Sem 2, 2025/2026", [["X 1", "A"]])], achievements: { flawless: "x", "roll-call": "x" }, title: "flawless" });
     expect(profileStats(s, now)).toEqual({
       title: "Mr Perfect",
-      stats: { season: "Sem 1, 2026/2027", rated: true, elo: 2300, degreeOre: "netherite", degreeTier: "S", achievements: 2 },
+      stats: { season: "Sem 1, 2026/2027", rated: true, elo: 2100, degreeOre: "netherite", degreeTier: "S", achievements: 2 },
     });
   });
 

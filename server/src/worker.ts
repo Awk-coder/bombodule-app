@@ -149,7 +149,10 @@ async function patchMe(req: Request, env: Env, now: number) {
   const name = b.name === undefined ? undefined : checkName(b.name);
   if (b.title !== undefined && b.title !== null && !(typeof b.title === "string" && TITLE_TEXTS.includes(b.title))) throw new HttpError(400, "Unknown title");
   const stats = b.stats === undefined ? undefined : checkStats(b.stats);
-  if (stats && now - player.updated_at < STATS_EVERY_MS) throw new HttpError(429, "Too soon");
+
+  if (stats && now - player.updated_at < STATS_EVERY_MS && b.title === undefined && name === undefined) {
+    throw new HttpError(429, "Too soon");
+  }
 
   if (name !== undefined) {
     try {
@@ -159,11 +162,13 @@ async function patchMe(req: Request, env: Env, now: number) {
       throw e;
     }
   }
-  if (b.title !== undefined) await env.DB.prepare("UPDATE players SET title = ? WHERE id = ?").bind(b.title as string | null, player.id).run();
+  if (b.title !== undefined) {
+    await env.DB.prepare("UPDATE players SET title = ? WHERE id = ?").bind(b.title as string | null, player.id).run();
+  }
   if (typeof b.matricHash === "string" && /^[a-f0-9]{64}$/i.test(b.matricHash.trim()) && !player.matric_hash) {
     await env.DB.prepare("UPDATE players SET matric_hash = ? WHERE id = ?").bind(b.matricHash.trim().toLowerCase(), player.id).run();
   }
-  if (stats) {
+  if (stats && now - player.updated_at >= STATS_EVERY_MS) {
     await env.DB.prepare("UPDATE players SET season = ?, rated = ?, elo = ?, degree_ore = ?, degree_tier = ?, achievements = ?, updated_at = ? WHERE id = ?")
       .bind(stats.season, stats.rated ? 1 : 0, stats.elo, stats.degreeOre, stats.degreeTier, stats.achievements, now, player.id)
       .run();

@@ -146,7 +146,7 @@ export function semesterMismatch(r: SemesterResult): string | null {
 }
 
 const GPA_PTS = [0, 2, 2.5, 3, 3.5, 3.8, 4];
-const ELO_PTS = [0, 600, 900, 1200, 1500, 2000, 2300];
+const ELO_PTS = [0, 600, 900, 1200, 1500, 2000, 2100];
 
 export function eloFromGpa(g: number): number {
   const x = Math.min(4, Math.max(0, round2(g)));

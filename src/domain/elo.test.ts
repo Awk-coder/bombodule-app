@@ -50,18 +50,18 @@ describe("seasonElo", () => {
     // 15 credits (<= 18) gets +0 overload bonus
     const courses5 = Array.from({ length: 5 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
     const s5 = makeState({ results: [result("Sem 2, 2025/2026", courses5)] });
-    // A is 4.00 (base 2300) + 0 overload bonus = 2300
-    expect(seasonElo(s5, now).placement).toBe(2300);
+    // A is 4.00 (base 2100) + 0 overload bonus = 2100
+    expect(seasonElo(s5, now).placement).toBe(2100);
 
     // 18 credits (<= 18) gets +0 overload bonus
     const courses6 = Array.from({ length: 6 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
     const s6 = makeState({ results: [result("Sem 2, 2025/2026", courses6)] });
-    expect(seasonElo(s6, now).placement).toBe(2300);
+    expect(seasonElo(s6, now).placement).toBe(2100);
 
     // 21 credits (7 courses x 3 credits, 3 cr > 18) gets +30 overload bonus (10 * 3)
     const courses7 = Array.from({ length: 7 }, (_, i): [string, string, number] => [`X ${i}`, "A", 3]);
     const s7 = makeState({ results: [result("Sem 2, 2025/2026", courses7)] });
-    expect(seasonElo(s7, now).placement).toBe(2330);
+    expect(seasonElo(s7, now).placement).toBe(2130);
   });
 
   it("awards underdog comeback bonus only when leaping from <= 2.20 GPA, and strictly once", () => {

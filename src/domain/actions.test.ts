@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applySync, clearGraduated, examsConfirmed, graduationConfirmed, deleteTask, finishExams, importResult, removeResult, unfinishExams, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
+  applySync, bulkMarkDay, clearGraduated, examsConfirmed, graduationConfirmed, deleteTask, finishExams, importResult, removeResult, unfinishExams, setCourseStart, semesterLabelDiffers, setGraduated, isPaused, markSession, parseImport, serialize, setPaused, toggleTask, upsertTask,
 } from "./actions";
 import { generateSessions } from "./sessions";
 import { BICS_MON_1, makeState, result } from "./testState";
@@ -22,6 +22,16 @@ const parsed = (over: Partial<ParsedSchedule> = {}): ParsedSchedule => ({
     { code: "BIIT 2301", section: "1", day: 2, start: "08:30", end: "09:50", venue: "HCI LAB", lecturer: "DR. Y" },
   ],
   ...over,
+});
+
+describe("bulkMarkDay", () => {
+  it("bulk marks all classes on a date as attended or missed", () => {
+    const st = makeState();
+    const date = "2026-10-05";
+    const updated = bulkMarkDay(st, date, "attended", new Date("2026-10-05T20:00:00+08:00"));
+    const sessions = generateSessions(updated, new Date("2026-10-05T20:00:00+08:00")).filter((s) => s.date === date);
+    expect(sessions.every((s) => s.status === "attended")).toBe(true);
+  });
 });
 
 describe("markSession", () => {

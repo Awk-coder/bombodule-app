@@ -37,8 +37,34 @@ const RANK_TITLES: (Title & { ore: Ore })[] = [
 const ORDER: Ore[] = ["coal", "iron", "gold", "emerald", "diamond", "netherite"];
 const atLeast = (ore: Ore | undefined, min: Ore) => !!ore && ORDER.indexOf(ore) >= ORDER.indexOf(min);
 
+const DEV_ACCOUNT = "gmsawk";
+const EARLY_ADOPTERS = new Set(["huzaifa", "luthfi", "shaq", "templeten"]);
+
+export function isDevName(name: string | null | undefined): boolean {
+  if (!name) return false;
+  return name.trim().toLowerCase() === DEV_ACCOUNT;
+}
+
+export function isEarlyAdopterName(name: string | null | undefined): boolean {
+  if (!name) return false;
+  return EARLY_ADOPTERS.has(name.trim().toLowerCase());
+}
+
+export function titleClass(text: string | null | undefined): string {
+  if (!text) return "";
+  if (text === "The Biggest Bird") return "title-biggest-bird";
+  if (text === "Hot Chick" || text === "Hot Chicks") return "title-hot-chicks";
+  return "";
+}
+
 /** Every title text a player may show, for the server to check against. */
-export const TITLE_TEXTS: string[] = [...ACHIEVEMENT_TITLES.map((t) => t.text), ...RANK_TITLES.flatMap((t) => [t.text, `Fallen ${t.text}`])];
+export const TITLE_TEXTS: string[] = [
+  "The Biggest Bird",
+  "Hot Chick",
+  "Hot Chicks",
+  ...ACHIEVEMENT_TITLES.map((t) => t.text),
+  ...RANK_TITLES.flatMap((t) => [t.text, `Fallen ${t.text}`]),
+];
 
 /** Notes the highest season rank reached this semester; same object when nothing changed. */
 export function recordPeak(state: AppState, now: Date): AppState {
@@ -53,7 +79,12 @@ export function recordPeak(state: AppState, now: Date): AppState {
 
 export function unlockedTitles(state: AppState): Title[] {
   const peaks = Object.values(state.rankPeaks);
+  const name = state.profile?.name ?? state.account?.name;
+  const isDev = isDevName(name);
+  const isEarly = isEarlyAdopterName(name);
   return [
+    ...(isDev ? [{ id: "the-biggest-bird", text: "The Biggest Bird" }] : []),
+    ...(isDev || isEarly ? [{ id: "hot-chick", text: "Hot Chick" }] : []),
     ...ACHIEVEMENT_TITLES.filter((t) => state.achievements[t.id]),
     ...RANK_TITLES.filter((t) => peaks.some((p) => atLeast(p, t.ore))).map(({ id, text }) => ({ id, text })),
   ];

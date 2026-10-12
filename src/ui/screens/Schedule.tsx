@@ -1,9 +1,9 @@
 import { useRef, useState } from "preact/hooks";
-import { setCourseStart } from "../../domain/actions";
+import { bulkMarkDay, setCourseStart } from "../../domain/actions";
 import { courseStats } from "../../domain/attendance";
 import { generateTimetableIcs } from "../../domain/calendarExport";
 import { generateSessions } from "../../domain/sessions";
-import { hhmm } from "../../domain/time";
+import { hhmm, ymd } from "../../domain/time";
 import type { AppState, Day, Slot } from "../../domain/types";
 import { shareFile } from "../../native/share";
 import { dispatch, useAppState } from "../../store/store";
@@ -25,6 +25,14 @@ const toMin = (t: string) => {
 const mondayFirst = (d: number) => (d + 6) % 7;
 const HOLD_MS = 5000; // hold a class this long to set its actual start date
 const MOVE_PX = 10; // a drag past this is a scroll, not a hold
+
+function activeDayDate(day: Day, now: Date): string {
+  const dt = new Date(now);
+  const currentDow = dt.getDay();
+  const diff = (day === 0 ? 0 : day) - (currentDow === 0 ? 7 : currentDow);
+  dt.setDate(dt.getDate() + diff);
+  return ymd(dt);
+}
 
 /** Every date the course is scheduled to meet this semester, ignoring any late start already set. */
 function scheduledDates(state: AppState, courseId: string, now: Date): string[] {
@@ -142,6 +150,17 @@ export function Schedule() {
             </button>
           ))}
           <span />
+        </div>
+        <div class="sched-day-bulk-bar">
+          <small>Mark {dayName(activeDay)} ({fmtDate(activeDayDate(activeDay, now))}):</small>
+          <div class="btn-group">
+            <button class="btn ghost sm" onClick={() => dispatch((st) => bulkMarkDay(st, activeDayDate(activeDay, now), "attended", now))}>
+              All Attended
+            </button>
+            <button class="btn ghost sm danger" onClick={() => dispatch((st) => bulkMarkDay(st, activeDayDate(activeDay, now), "missed", now))}>
+              All Missed
+            </button>
+          </div>
         </div>
         <div class="sched-scroll">
           <div class="sched-body" style={`height:${y(endMin) + 12}px`}>

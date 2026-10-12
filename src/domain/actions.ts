@@ -2,7 +2,7 @@ import { DEFAULT_LIMIT, DEFAULT_SETTINGS, PALETTE_SIZE, SEMESTER_DAYS, emptyStat
 import type { AppState, Course, Mark, Settings, Slot, Task } from "./types";
 import { IIUM_CALENDAR } from "./calendar";
 import { countedPoint } from "./grades";
-import { isSessionLocked } from "./sessions";
+import { generateSessions, isSessionLocked } from "./sessions";
 import { addDays, atTime } from "./time";
 import type { ParsedSchedule } from "../iium/parser";
 import type { ParsedResult } from "../iium/results";
@@ -26,6 +26,23 @@ export function markSession(state: AppState, sessionId: string, mark: Mark, now?
     }
   }
   return { ...state, marks: { ...state.marks, [sessionId]: mark } };
+}
+
+/** Bulk marks a list of session IDs as 'attended' or 'missed'. */
+export function bulkMarkSessions(state: AppState, sessionIds: string[], mark: Mark): AppState {
+  if (!sessionIds.length) return state;
+  const newMarks = { ...state.marks };
+  for (const id of sessionIds) {
+    newMarks[id] = mark;
+  }
+  return { ...state, marks: newMarks };
+}
+
+/** Bulk marks all classes on a specific date YYYY-MM-DD for all subjects as 'attended' or 'missed'. */
+export function bulkMarkDay(state: AppState, date: string, mark: Mark, now = new Date()): AppState {
+  const sessions = generateSessions(state, now).filter((s) => s.date === date);
+  if (!sessions.length) return state;
+  return bulkMarkSessions(state, sessions.map((s) => s.id), mark);
 }
 
 /** The section's classes actually began on `date`; null goes back to the scheduled start. */

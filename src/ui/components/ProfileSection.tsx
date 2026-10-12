@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { titleText, unlockedTitles } from "../../domain/titles";
+import { titleClass, titleText, unlockedTitles } from "../../domain/titles";
 import type { Profile } from "../../domain/types";
 import { ApiError, apiUrl, call, hashMatric } from "../../online/api";
 import { dispatch, useAppState } from "../../store/store";
@@ -87,7 +87,10 @@ export function ProfileSection() {
     <>
       <p class="group-title">Profile</p>
       <button class="row" onClick={() => show("title")}>
-        <div class="grow"><b>Title</b><small>{title ?? "None"}</small></div>
+        <div class="grow">
+          <b>Title</b>
+          <small class={titleClass(title)}>{title ?? "None"}</small>
+        </div>
         <IconChevron />
       </button>
 
@@ -143,11 +146,14 @@ export function ProfileSection() {
             <h2>Title</h2>
             {unlockedTitles(state).length === 0 && <p class="group-hint">Unlock titles with achievements, or by reaching Diamond or Netherite in a season.</p>}
             <div class="title-list">
-              {unlockedTitles(state).map((t) => (
-                <button key={t.id} class={`row ${state.title === t.id ? "on" : ""}`} onClick={() => { dispatch((s) => ({ ...s, title: t.id })); setOpen(null); }}>
-                  <b>{titleText(state, t.id)}</b>
-                </button>
-              ))}
+              {unlockedTitles(state).map((t) => {
+                const txt = titleText(state, t.id);
+                return (
+                  <button key={t.id} class={`row ${state.title === t.id ? "on" : ""}`} onClick={() => { dispatch((s) => ({ ...s, title: t.id })); setOpen(null); }}>
+                    <b class={titleClass(txt)}>{txt}</b>
+                  </button>
+                );
+              })}
               <button class="btn ghost" onClick={() => { dispatch((s) => ({ ...s, title: undefined })); setOpen(null); }}>No title</button>
             </div>
           </>
