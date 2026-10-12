@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { isPaused, parseImport, serialize, setPaused, setSemesterEnd, updateSettings } from "../../domain/actions";
 import { seasonElo } from "../../domain/elo";
 import { rankOf } from "../../domain/grades";
@@ -20,6 +20,53 @@ import { Sheet } from "../components/Sheet";
 import { SlipPicker, SyncErrorCard, SyncPreviewSheet } from "../components/SyncParts";
 import { Toggle } from "../components/Toggle";
 import { THEMES, themeById } from "../themes";
+
+function ExemptedCreditsInput({
+  value,
+  onChange,
+}: {
+  value: number | undefined;
+  onChange: (val: number) => void;
+}) {
+  const [text, setText] = useState<string>(value ? String(value) : "");
+
+  useEffect(() => {
+    const parsed = text === "" ? 0 : parseFloat(text) || 0;
+    const currentVal = value ?? 0;
+    if (parsed !== currentVal && !text.endsWith(".")) {
+      setText(currentVal ? String(currentVal) : "");
+    }
+  }, [value]);
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      placeholder="0"
+      value={text}
+      onInput={(e) => {
+        const raw = e.currentTarget.value;
+        if (raw !== "" && !/^\d*\.?\d*$/.test(raw)) return;
+        setText(raw);
+        if (raw === "" || raw === ".") {
+          onChange(0);
+          return;
+        }
+        const parsed = parseFloat(raw);
+        if (!isNaN(parsed)) {
+          const clamped = Math.min(3, Math.max(0, parsed));
+          onChange(clamped);
+        }
+      }}
+      onBlur={() => {
+        const parsed = text === "" ? 0 : parseFloat(text) || 0;
+        const clamped = Math.min(3, Math.max(0, parsed));
+        setText(clamped ? String(clamped) : "");
+        onChange(clamped);
+      }}
+    />
+  );
+}
 
 export function Settings() {
   const state = useAppState();
@@ -110,19 +157,9 @@ export function Settings() {
       <p class="group-title">Degree rank</p>
       <label class="field">
         <span>Exempted credit hours (max 3)</span>
-        <input
-          type="number"
-          min="0"
-          max="3"
-          step="0.5"
-          value={state.settings.exemptedCredits || ""}
-          placeholder="0"
-          onInput={(e) => {
-            const raw = e.currentTarget.value.trim();
-            const val = raw === "" ? 0 : parseFloat(raw) || 0;
-            const clamped = Math.min(3, Math.max(0, val));
-            dispatch((s) => updateSettings(s, { exemptedCredits: clamped }));
-          }}
+        <ExemptedCreditsInput
+          value={state.settings.exemptedCredits}
+          onChange={(clamped) => dispatch((s) => updateSettings(s, { exemptedCredits: clamped }))}
         />
       </label>
       <p class="group-hint">If any courses were exempted, counts up to 3 credit hours so your degree rank unlocks.</p>
