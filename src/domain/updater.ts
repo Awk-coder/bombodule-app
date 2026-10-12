@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.8";
+export const APP_VERSION = "1.2.7";
 export const GITHUB_REPO = "Awk-coder/bombodule-app";
 export const GITHUB_RELEASES_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
