@@ -213,25 +213,29 @@ export function Settings() {
         <div class="update-settings-info">
           <div class="update-settings-title-row">
             <b>Uni Ranked</b>
-            <span class="update-version-tag">v{updater.currentVersion}</span>
-            {updater.info?.updateAvailable && <span class="update-new-pill">UPDATE</span>}
+            <span class="update-version-tag">v{updater.currentVersion}{!updater.isNative ? " (Web)" : ""}</span>
+            {updater.isNative && updater.info?.updateAvailable && <span class="update-new-pill">UPDATE</span>}
           </div>
           <small class="update-settings-status">
-            {updater.checking
+            {!updater.isNative
+              ? "Web version automatically stays up to date"
+              : updater.checking
               ? "Checking GitHub for updates…"
               : updater.info?.updateAvailable
               ? `New version ${updater.info.latestVersion} available!`
               : "App is up to date"}
           </small>
         </div>
-        {updater.info?.updateAvailable ? (
-          <button class="btn primary sm update-btn" disabled={updater.downloading} onClick={() => void updater.install()}>
-            {updater.downloading ? `${updater.progress}%` : "Update"}
-          </button>
-        ) : (
-          <button class="btn ghost sm update-btn" disabled={updater.checking} onClick={() => void updater.check()}>
-            {updater.checking ? "Checking…" : "Check now"}
-          </button>
+        {updater.isNative && (
+          updater.info?.updateAvailable ? (
+            <button class="btn primary sm update-btn" disabled={updater.downloading} onClick={() => void updater.install()}>
+              {updater.downloading ? `${updater.progress}%` : "Update"}
+            </button>
+          ) : (
+            <button class="btn ghost sm update-btn" disabled={updater.checking} onClick={() => void updater.check()}>
+              {updater.checking ? "Checking…" : "Check now"}
+            </button>
+          )
         )}
       </div>
 

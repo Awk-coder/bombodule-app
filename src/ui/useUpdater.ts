@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { useEffect, useState } from "preact/hooks";
 import { Hadir } from "../native/hadir";
 import { APP_VERSION, checkGitHubUpdate, isNewerVersion, type UpdateInfo } from "../domain/updater";
@@ -7,7 +8,10 @@ const CACHED_INFO_KEY = "uni-ranked-cached-update-info";
 const CHECK_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function useUpdater() {
+  const isNative = Capacitor.isNativePlatform();
+
   const [info, setInfo] = useState<UpdateInfo | null>(() => {
+    if (!isNative) return null;
     try {
       const raw = localStorage.getItem(CACHED_INFO_KEY);
       if (raw) {
@@ -26,7 +30,7 @@ export function useUpdater() {
   const [permissionNeeded, setPermissionNeeded] = useState(false);
 
   async function check(force = false) {
-    if (checking) return;
+    if (!isNative || checking) return;
     const now = Date.now();
     const last = parseInt(localStorage.getItem(LAST_CHECK_KEY) || "0", 10);
     if (!force && now - last < CHECK_INTERVAL_MS && info?.updateAvailable) return;
@@ -55,6 +59,7 @@ export function useUpdater() {
   }
 
   async function install() {
+    if (!isNative) return;
     if (!info?.apkUrl) {
       if (info?.htmlUrl) window.open(info.htmlUrl, "_blank");
       return;
@@ -94,20 +99,26 @@ export function useUpdater() {
   }
 
   useEffect(() => {
-    // Automatically check on mount
-    void check(false);
-  }, []);
+    if (isNative) {
+      void check(false);
+    }
+  }, [isNative]);
 
   return {
+    isNative,
     currentVersion: APP_VERSION,
-    info,
-    checking,
+    info: isNative ? info : null,
+    checking: isNative ? checking : false,
     downloading,
     progress,
     error,
     permissionNeeded,
-    check: () => check(true),
+    check: () => {
+      if (isNative) void check(true);
+    },
     install,
-    openSettings: () => Hadir.openInstallPermissionSettings(),
+    openSettings: () => {
+      if (isNative) void Hadir.openInstallPermissionSettings();
+    },
   };
 }

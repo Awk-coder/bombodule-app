@@ -1,10 +1,11 @@
+import { Capacitor } from "@capacitor/core";
 import type { useUpdater } from "../useUpdater";
 import { PixelIcon, WARN_ART } from "./pixelIcons";
 
 export function UpdateBanner({ updater }: { updater: ReturnType<typeof useUpdater> }) {
   const { info, downloading, progress, install, permissionNeeded, openSettings } = updater;
 
-  if (!info?.updateAvailable) return null;
+  if (!Capacitor.isNativePlatform() || !info?.updateAvailable) return null;
 
   return (
     <div class="update-card card">
