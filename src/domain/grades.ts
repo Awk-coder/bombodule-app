@@ -89,7 +89,7 @@ export interface Degree {
 }
 
 /** The app's own CGPA; `ok` only when it reproduces the latest slip, i.e. every past slip is imported. */
-export function degree(results: SemesterResult[], exemptedCredits = 0): Degree | null {
+export function degree(results: SemesterResult[], exemptedCredits = 0, currentSemLabel?: string): Degree | null {
   if (!results.length) return null;
   const latest = sortResults(results).at(-1)!;
   const c = cgpa(results);
@@ -98,29 +98,44 @@ export function degree(results: SemesterResult[], exemptedCredits = 0): Degree |
   const effectiveCredits = round2(c.credits + exempt);
   let reason: string | null = null;
   if (unknown.length) reason = `Unknown grade codes: ${unknown.join(", ")}`;
-  else if (effectiveCredits !== latest.printed.cumCredits) {
-    const missing = missingSemesters(results);
+  else {
+    const missing = missingSemesters(results, currentSemLabel);
     const first = sortResults(results)[0].label;
-    reason = missing.length
-      ? `Missing ${missing.join(", ")}. Import ${missing.length > 1 ? "those slips" : "that slip"} to get ranked.`
-      : `Found ${effectiveCredits} of ${latest.printed.cumCredits} credit hours. Import the slips before ${first}.`;
+    if (missing.length) {
+      reason = `Missing ${missing.join(", ")}. Import ${missing.length > 1 ? "those slips" : "that slip"} to get ranked.`;
+    } else if (effectiveCredits !== latest.printed.cumCredits) {
+      reason = `Found ${effectiveCredits} of ${latest.printed.cumCredits} credit hours. Import the slips before ${first}.`;
+    } else if (c.cgpa !== latest.printed.cgpa) {
+      reason = `Calculated CGPA ${c.cgpa.toFixed(2)}, slip says ${latest.printed.cgpa.toFixed(2)}.`;
+    }
   }
-  else if (c.cgpa !== latest.printed.cgpa) reason = `Calculated CGPA ${c.cgpa.toFixed(2)}, slip says ${latest.printed.cgpa.toFixed(2)}.`;
   return { cgpa: c.cgpa, credits: effectiveCredits, ok: !reason, reason };
 }
 
-/** Regular semesters (Sem 1 and 2) between the first and last imported slip that have no slip. */
-export function missingSemesters(results: SemesterResult[]): string[] {
+/** Regular semesters (Sem 1 and 2) before `currentSemLabel` (or between first and last imported slip) that have no slip. */
+export function missingSemesters(results: SemesterResult[], currentSemLabel?: string): string[] {
   const have = new Set(results.map((r) => r.label));
-  const regular = sortResults(results).map((r) => r.label.match(/^Sem ([12]), (\d{4})\/\d{4}$/)).filter((m) => m !== null);
-  if (regular.length < 2) return [];
+  const sorted = sortResults(results);
+  if (!sorted.length) return [];
+  const firstLabel = sorted[0].label;
+  const lastLabel = currentSemLabel || sorted.at(-1)!.label;
+
+  const mFirst = firstLabel.match(/^Sem ([12]), (\d{4})\/\d{4}$/);
+  const mLast = lastLabel.match(/^Sem ([12]), (\d{4})\/\d{4}$/);
+  if (!mFirst || !mLast) return [];
+
   const label = (sem: number, y: number) => `Sem ${sem}, ${y}/${y + 1}`;
   const out: string[] = [];
-  let [sem, y] = [Number(regular[0][1]), Number(regular[0][2])];
-  const end = label(Number(regular.at(-1)![1]), Number(regular.at(-1)![2]));
-  while (label(sem, y) !== end) {
-    [sem, y] = sem === 1 ? [2, y] : [1, y + 1];
-    if (!have.has(label(sem, y))) out.push(label(sem, y));
+  let [sem, y] = [Number(mFirst[1]), Number(mFirst[2])];
+  const end = label(Number(mLast[1]), Number(mLast[2]));
+
+  while (label(sem, y) !== end && y <= Number(mLast[2]) + 1) {
+    const cur = label(sem, y);
+    if (cur !== lastLabel && !have.has(cur)) {
+      out.push(cur);
+    }
+    if (sem === 1) sem = 2;
+    else { sem = 1; y++; }
   }
   return out;
 }

@@ -86,7 +86,12 @@ export function Schedule() {
   const title = <h1 class="page-title">{state.semester?.label ?? "Schedule"}</h1>;
   if (!slots.length) return <>{title}<LinkCard /></>;
 
-  const days = [...new Set(slots.map((s) => s.day))].sort((a, b) => mondayFirst(a) - mondayFirst(b));
+  const slotDays = new Set(slots.map((s) => s.day));
+  const baseDays: Day[] = [1, 2, 3, 4];
+  if (slotDays.has(5)) baseDays.push(5);
+  if (slotDays.has(6)) baseDays.push(6);
+  if (slotDays.has(0)) baseDays.push(0);
+  const days = baseDays.sort((a, b) => mondayFirst(a) - mondayFirst(b));
   const activeDay: Day = days.includes(selectedDay) ? selectedDay : (days[0] ?? (now.getDay() as Day));
   const visibleDays: Day[] = viewMode === "day" ? [activeDay] : days;
 

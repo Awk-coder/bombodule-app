@@ -102,6 +102,27 @@ describe("parseSlip", () => {
     expect(p.slots.some((s) => s.code === "UNGS 1001")).toBe(false);
   });
 
+  it("parses 8+ courses with fractional credits and single-digit hour times", () => {
+    const p = parseSlip(slip(
+      ["BIIT 3301", "1", "R", "Cloud Computing", "3", "M-W", "3.30", "- 4.50", "PM", "ICT LAB"],
+      ["CCBN 1010", "2", "R", "BADMINTON 1", ".5", "TUE", "5.00", "- 7", "PM", "SPORTS FOYER"],
+      ["SCSH 2163", "44", "R", "USRAH IN ACTION 1", "1", "MON", "5.00", "- 6", "PM"],
+      ["TQTD 2002", "9", "R", "TILAWAH AL-QURAN II", "0.5", "MON", "12.00", "- 12.50", "PM", "ADM 15"],
+    ));
+    expect(p.courses.map((c) => [c.code, c.credits])).toEqual([
+      ["BIIT 3301", 3],
+      ["CCBN 1010", 0.5],
+      ["SCSH 2163", 1],
+      ["TQTD 2002", 0.5],
+    ]);
+    expect(p.slots.find((s) => s.code === "CCBN 1010")).toEqual(
+      expect.objectContaining({ day: 2, start: "17:00", end: "19:00", venue: "SPORTS FOYER" })
+    );
+    expect(p.slots.find((s) => s.code === "SCSH 2163")).toEqual(
+      expect.objectContaining({ day: 1, start: "17:00", end: "18:00" })
+    );
+  });
+
   it("finds nothing in an unrelated document", () => {
     const p = parseSlip([["Hello"], ["Some other PDF"]]);
     expect(p).toEqual({ sessionName: null, studentName: null, matric: null, courses: [], slots: [] });

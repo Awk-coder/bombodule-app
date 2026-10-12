@@ -81,6 +81,11 @@ describe("missingSemesters", () => {
     expect(missingSemesters(rs)).toEqual(["Sem 2, 2024/2025"]);
   });
 
+  it("detects missing semesters up to the current active semester", () => {
+    const rs = [result("Sem 1, 2024/2025", [["X 1", "A"]]), result("Sem 2, 2024/2025", [["X 2", "A"]])];
+    expect(missingSemesters(rs, "Sem 1, 2026/2027")).toEqual(["Sem 1, 2025/2026", "Sem 2, 2025/2026"]);
+  });
+
   it("is empty when the slips run back to back", () => {
     expect(missingSemesters([result("Sem 2, 2024/2025", [["X 1", "A"]]), result("Sem 1, 2025/2026", [["X 2", "A"]])])).toEqual([]);
   });

@@ -1,4 +1,4 @@
-import { eloFromGpa, gpa, labelKey, round2, sortResults } from "./grades";
+import { eloFromGpa, gpa, labelKey, missingSemesters, round2, sortResults } from "./grades";
 import { ymd } from "./time";
 import type { AppState, SemesterResult, Task } from "./types";
 
@@ -231,10 +231,11 @@ export function seasonElo(state: AppState, now: Date): Season {
 
   changes.sort((a, b) => b.at.localeCompare(a.at));
   const elo = isShortSem ? Math.min(1999, runningElo) : runningElo;
-  const currentWeekCount = weeklyPositiveCount[currentWeekKey] ?? 0;
+  const currentWeekCount = state.tasks.filter((t) => !t.bullshit && weekKey(new Date(t.due)) === currentWeekKey).length;
+  const missing = sem ? missingSemesters(state.results, sem.label) : [];
 
   return {
-    rated: !!last,
+    rated: !!last && missing.length === 0,
     placement,
     placementBreakdown: breakdown,
     comebackActive: comeback.active && comeback.multiplier > 1.0,

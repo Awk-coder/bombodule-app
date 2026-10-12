@@ -31,20 +31,21 @@ const DAY_CODES: Record<string, Day> = {
   T: 2, TUE: 2, TUES: 2,
   W: 3, WED: 3,
   TH: 4, THU: 4, THUR: 4, THURS: 4,
-  F: 5, FRI: 5,
+  F: 5, FR: 5, FRI: 5, FRIDAY: 5,
   SAT: 6,
 };
 
 export function parseDays(text: string): Day[] {
   return text
     .toUpperCase()
+    .replace(/[,/]/g, "-")
     .replace(/\s+/g, "")
     .split("-")
     .map((part) => DAY_CODES[part])
     .filter((d): d is Day => d !== undefined);
 }
 
-const TIME = String.raw`(\d{1,2})[.:](\d{2})\s*-\s*(\d{1,2})[.:](\d{2})\s*(AM|PM)`;
+const TIME = String.raw`(\d{1,2})(?:[.:](\d{2}))?\s*-\s*(\d{1,2})(?:[.:](\d{2}))?\s*(AM|PM)`;
 
 const minutes = (h: number, m: number) => h * 60 + m;
 const hhmm = (t: number) => `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
@@ -57,7 +58,10 @@ const hhmm = (t: number) => `${String(Math.floor(t / 60)).padStart(2, "0")}:${St
 export function parseTimeRange(text: string): [string, string] | null {
   const m = text.toUpperCase().match(new RegExp(`^\\s*${TIME}\\s*$`));
   if (!m) return null;
-  const [sh, sm, eh, em] = m.slice(1, 5).map(Number);
+  const sh = Number(m[1]);
+  const sm = m[2] !== undefined ? Number(m[2]) : 0;
+  const eh = Number(m[3]);
+  const em = m[4] !== undefined ? Number(m[4]) : 0;
   const pm = m[5] === "PM";
   if (sh > 12 || eh > 12 || sm > 59 || em > 59) return null;
   const end = minutes(eh === 12 || !pm ? eh : eh + 12, em);
@@ -73,7 +77,7 @@ export interface TextItem {
 }
 
 /** Turn positioned PDF text into lines of cells, top to bottom, left to right. */
-export function groupRows(items: TextItem[], tolerance = 2): string[][] {
+export function groupRows(items: TextItem[], tolerance = 3.5): string[][] {
   const lines: { y: number; cells: TextItem[] }[] = [];
   for (const it of items) {
     if (!it.str.trim()) continue;
@@ -86,8 +90,8 @@ export function groupRows(items: TextItem[], tolerance = 2): string[][] {
     .map((l) => l.cells.sort((a, b) => a.x - b.x).map((c) => c.str.trim()));
 }
 
-const COURSE_ROW = new RegExp(String.raw`^([A-Z]{3,4} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z]{1,2}\s+(.+?)\s+(\d+)(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`);
-const SLOT_ROW = new RegExp(String.raw`^(?:\d+\s+)?([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*)$`);
+const COURSE_ROW = new RegExp(String.raw`^(?:\d+[.\s]+)?([A-Z]{2,4} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z0-9]{1,2}\s+(.+?)\s+(\d*\.?\d+)(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`, "i");
+const SLOT_ROW = new RegExp(String.raw`^(?:\d+\s+)?([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*)$`, "i");
 
 /** Read the "Course Registration Confirmation Slip" from i-Ma'luum, given its text lines. */
 export function parseSlip(rows: string[][]): ParsedSchedule {

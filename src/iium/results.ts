@@ -15,7 +15,7 @@ export interface ParsedResult {
   warnings?: string[];
 }
 
-const COURSE = /^([A-Za-z0-9]{3,4}\s*[A-Za-z0-9]{4}[A-Za-z]?)\s+(.+?)\s+(\d*\.?\d+)\s+([A-Za-z0-9]{1,2}[+-]?|\*)(?:\s+(\d*\.?\d+))?(?:\s+(\d*\.?\d+))?$/;
+const COURSE = /^(?:\d+[.\s]+)?([A-Za-z0-9]{2,4}\s*[A-Za-z0-9]{4}[A-Za-z]?)\s+(.+?)\s+(\d*\.?\d+)\s+([A-Za-z0-9]{1,2}[+-]?|\*)(?:\s+(\d*\.?\d+))?(?:\s+(\d*\.?\d+))?$/i;
 
 /** Read the i-Ma'luum "Examination Result" slip. Only labelled fields are read, so personal lines are never kept. */
 export function parseResults(rows: string[][]): ParsedResult | null {
