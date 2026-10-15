@@ -95,6 +95,7 @@ export interface Profile {
 export interface AppState {
   version: 1;
   onboarded: boolean;
+  tourCompleted?: boolean;
   account: Account | null;
   semester: Semester | null;
   courses: Course[];

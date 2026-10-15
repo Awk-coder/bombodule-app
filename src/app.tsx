@@ -9,6 +9,7 @@ import { Hadir } from "./native/hadir";
 import { shareFile } from "./native/share";
 import { dispatch, useAppState, useLoadStatus } from "./store/store";
 import { AchievementToast } from "./ui/components/AchievementToast";
+import { OnboardingTour } from "./ui/components/OnboardingTour";
 import { ShaderGradientBackground } from "./ui/components/ShaderGradientBackground";
 import { TabBar } from "./ui/components/TabBar";
 import { go, parseHash, useRoute } from "./ui/router";
@@ -93,6 +94,7 @@ export function App() {
       </main>
       <TabBar current={route.tab} />
       <AchievementToast />
+      <OnboardingTour />
     </>
   );
 }

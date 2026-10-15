@@ -32,6 +32,13 @@ describe("bulkMarkDay", () => {
     const sessions = generateSessions(updated, new Date("2026-10-05T20:00:00+08:00")).filter((s) => s.date === date);
     expect(sessions.every((s) => s.status === "attended")).toBe(true);
   });
+
+  it("respects the 36-hour lock when bulk marking past sessions as attended", () => {
+    const st = markSession(makeState(), BICS_MON_1, "missed");
+    const past36h = new Date("2026-10-07T08:00:00+08:00");
+    const updated = bulkMarkDay(st, "2026-10-05", "attended", past36h);
+    expect(updated.marks[BICS_MON_1]).toBe("missed");
+  });
 });
 
 describe("markSession", () => {

@@ -29,20 +29,36 @@ export function markSession(state: AppState, sessionId: string, mark: Mark, now?
 }
 
 /** Bulk marks a list of session IDs as 'attended' or 'missed'. */
-export function bulkMarkSessions(state: AppState, sessionIds: string[], mark: Mark): AppState {
+export function bulkMarkSessions(state: AppState, sessionIds: string[], mark: Mark, now?: Date): AppState {
   if (!sessionIds.length) return state;
   const newMarks = { ...state.marks };
+  let changed = false;
   for (const id of sessionIds) {
-    newMarks[id] = mark;
+    if (now && mark === "attended" && state.marks[id] !== "attended") {
+      const atIdx = id.indexOf("@");
+      if (atIdx !== -1) {
+        const slotId = id.slice(0, atIdx);
+        const date = id.slice(atIdx + 1);
+        const slot = state.slots.find((s) => s.id === slotId);
+        const endTime = slot ? atTime(date, slot.end) : atTime(date, "23:59");
+        if (isSessionLocked(endTime, now)) {
+          continue;
+        }
+      }
+    }
+    if (newMarks[id] !== mark) {
+      newMarks[id] = mark;
+      changed = true;
+    }
   }
-  return { ...state, marks: newMarks };
+  return changed ? { ...state, marks: newMarks } : state;
 }
 
 /** Bulk marks all classes on a specific date YYYY-MM-DD for all subjects as 'attended' or 'missed'. */
 export function bulkMarkDay(state: AppState, date: string, mark: Mark, now = new Date()): AppState {
   const sessions = generateSessions(state, now).filter((s) => s.date === date);
   if (!sessions.length) return state;
-  return bulkMarkSessions(state, sessions.map((s) => s.id), mark);
+  return bulkMarkSessions(state, sessions.map((s) => s.id), mark, now);
 }
 
 /** The section's classes actually began on `date`; null goes back to the scheduled start. */
@@ -105,6 +121,8 @@ export function setSemesterEnd(state: AppState, end: string): AppState {
 }
 
 export const completeOnboarding = (state: AppState): AppState => ({ ...state, onboarded: true });
+export const completeTour = (state: AppState): AppState => ({ ...state, tourCompleted: true });
+export const resetTour = (state: AppState): AppState => ({ ...state, tourCompleted: false });
 
 /** True when a sync would carry a different semester label while the current semester is still running. */
 export function semesterLabelDiffers(state: AppState, parsed: ParsedSchedule, today: string): boolean {

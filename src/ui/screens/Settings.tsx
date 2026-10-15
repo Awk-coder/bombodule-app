@@ -14,6 +14,7 @@ import { useUpdater } from "../useUpdater";
 import { Chips } from "../components/Chips";
 import { IconChevron } from "../components/icons";
 import { PermissionRows } from "../components/PermissionRows";
+import { triggerAppTour } from "../components/OnboardingTour";
 import { ProfileSection } from "../components/ProfileSection";
 import { ORE_NAME, RankBadge } from "../components/RankBadge";
 import { Sheet } from "../components/Sheet";
@@ -207,6 +208,12 @@ export function Settings() {
         <input type="file" accept="application/json,.json" hidden onChange={(e) => void onImportFile(e)} />
       </label>
       {importError && <p class="error">{importError}</p>}
+
+      <p class="group-title">Help & Tour</p>
+      <button class="row" onClick={() => triggerAppTour()}>
+        <div class="grow"><b>Replay app tour</b><small>Walk through features and screens</small></div>
+        <IconChevron />
+      </button>
 
       <p class="group-title">Updates</p>
       <div class="card update-settings-card">

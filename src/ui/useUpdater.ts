@@ -11,7 +11,13 @@ export function useUpdater() {
   const isNative = Capacitor.isNativePlatform();
 
   const [info, setInfo] = useState<UpdateInfo | null>(() => {
-    if (!isNative) return null;
+    if (!isNative) {
+      try {
+        localStorage.removeItem(CACHED_INFO_KEY);
+        localStorage.removeItem(LAST_CHECK_KEY);
+      } catch {}
+      return null;
+    }
     try {
       const raw = localStorage.getItem(CACHED_INFO_KEY);
       if (raw) {
@@ -101,6 +107,11 @@ export function useUpdater() {
   useEffect(() => {
     if (isNative) {
       void check(false);
+    } else {
+      try {
+        localStorage.removeItem(CACHED_INFO_KEY);
+        localStorage.removeItem(LAST_CHECK_KEY);
+      } catch {}
     }
   }, [isNative]);
 

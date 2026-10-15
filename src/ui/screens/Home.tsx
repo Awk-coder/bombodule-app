@@ -125,7 +125,7 @@ export function Home() {
           <div class="unmarked-title-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
             <h2 class="section-title">Unmarked <span class="count">{unmarked.length}</span></h2>
             <div class="bulk-day-actions">
-              <button class="btn ghost sm" onClick={() => dispatch((st) => bulkMarkSessions(st, unmarked.map((s) => s.id), "attended"))}>
+              <button class="btn ghost sm" onClick={() => dispatch((st) => bulkMarkSessions(st, unmarked.map((s) => s.id), "attended", now))}>
                 Mark All Attended ({unmarked.length})
               </button>
             </div>
