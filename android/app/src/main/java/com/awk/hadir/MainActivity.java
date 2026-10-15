@@ -1,6 +1,7 @@
 package com.awk.hadir;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import com.getcapacitor.BridgeActivity;
@@ -10,6 +11,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         registerPlugin(HadirPlugin.class);
         super.onCreate(savedInstanceState);
         // No stretch/glow at the scroll ends: it drags the fixed tab bar along with the page.
