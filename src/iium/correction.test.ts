@@ -26,6 +26,8 @@ describe("cleanOcrGrade", () => {
     expect(cleanOcrGrade("a-")).toBe("A-");
     expect(cleanOcrGrade("A—")).toBe("A-");
     expect(cleanOcrGrade("P4")).toBe("PA");
+    expect(cleanOcrGrade("E X")).toBe("EX");
+    expect(cleanOcrGrade("E-X")).toBe("EX");
   });
 });
 
@@ -35,6 +37,8 @@ describe("cleanOcrCourseCode", () => {
     expect(cleanOcrCourseCode("BICS 13O1")).toBe("BICS 1301");
     expect(cleanOcrCourseCode("BICS l301")).toBe("BICS 1301");
     expect(cleanOcrCourseCode("BICS1301")).toBe("BICS 1301");
+    expect(cleanOcrCourseCode("TQ1001")).toBe("TQ 1001");
+    expect(cleanOcrCourseCode("SCSJA2154")).toBe("SCSJA 2154");
   });
 });
 

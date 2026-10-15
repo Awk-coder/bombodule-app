@@ -34,4 +34,10 @@ export function startProfileSync(getState: () => AppState, onStateChange: (hook:
 
   onStateChange(() => schedule(DEBOUNCE_MS));
   schedule(DEBOUNCE_MS);
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("online", () => {
+      schedule(500);
+    });
+  }
 }

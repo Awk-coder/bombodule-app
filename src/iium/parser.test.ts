@@ -123,6 +123,27 @@ describe("parseSlip", () => {
     );
   });
 
+  it("reads 8-digit matric numbers", () => {
+    const customSlip = [
+      ["Session : 2026/2027", "Semester : 1"],
+      ["Matric No : 12345678"],
+      ["Name : AHMAD EXAMPLE"],
+    ];
+    const p = parseSlip(customSlip);
+    expect(p.matric).toBe("12345678");
+  });
+
+  it("parses 2-letter and 5-letter course code prefixes", () => {
+    const p = parseSlip(
+      slip(
+        ["1", "TQ 1001", "1", "RG", "TILAWATUL QURAN", "0.5", "M", "5.00 - 6.00 PM", "HS-CR1"],
+        ["2", "SCSJA 2154", "2", "RG", "ADVANCED TOPICS", "3", "W", "2.00 - 3.20 PM", "KICT-CR2"],
+      ),
+    );
+    expect(p.courses.map((c) => c.code)).toEqual(["TQ 1001", "SCSJA 2154"]);
+    expect(p.slots.length).toBe(2);
+  });
+
   it("finds nothing in an unrelated document", () => {
     const p = parseSlip([["Hello"], ["Some other PDF"]]);
     expect(p).toEqual({ sessionName: null, studentName: null, matric: null, courses: [], slots: [] });

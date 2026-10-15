@@ -32,16 +32,38 @@ export async function hashMatric(matric: string | null | undefined): Promise<str
   return Array.from(new Uint8Array(d), (x) => x.toString(16).padStart(2, "0")).join("");
 }
 
-export async function call<T = void>(path: string, opts: { method?: string; key?: string; body?: unknown } = {}): Promise<T> {
+export async function call<T = void>(
+  path: string,
+  opts: { method?: string; key?: string; body?: unknown; timeoutMs?: number } = {},
+): Promise<T> {
   const headers: Record<string, string> = {};
   if (opts.body !== undefined) headers["Content-Type"] = "application/json";
   if (opts.key) headers.Authorization = `Bearer ${opts.key}`;
+
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    throw new ApiError(0, "You are offline. Connect to the internet to sync.");
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), opts.timeoutMs ?? 15_000);
+
   let res: Response;
   try {
-    res = await fetch(apiUrl() + path, { method: opts.method ?? "GET", headers, body: opts.body === undefined ? undefined : JSON.stringify(opts.body) });
-  } catch {
+    res = await fetch(apiUrl() + path, {
+      method: opts.method ?? "GET",
+      headers,
+      body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+      signal: controller.signal,
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new ApiError(0, "Connection timed out. Check your internet connection.");
+    }
     throw new ApiError(0, "Can't reach the server. Check your connection.");
+  } finally {
+    clearTimeout(timeoutId);
   }
+
   if (!res.ok) {
     const msg = await res.json().then((j: { error?: string }) => j.error, () => undefined);
     throw new ApiError(res.status, msg ?? `Server error (${res.status})`);

@@ -90,7 +90,7 @@ export function groupRows(items: TextItem[], tolerance = 3.5): string[][] {
     .map((l) => l.cells.sort((a, b) => a.x - b.x).map((c) => c.str.trim()));
 }
 
-const COURSE_ROW = new RegExp(String.raw`^(?:\d+[.\s]+)?([A-Z]{2,4} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z0-9]{1,2}\s+(.+?)\s+(\d*\.?\d+)(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`, "i");
+const COURSE_ROW = new RegExp(String.raw`^(?:\d+[.\s]+)?([A-Z]{2,5} ?\d{4}[A-Z]?)\s+(\d+)\s+[A-Z0-9]{1,2}\s+(.+?)\s+(\d*\.?\d+)(?:\s+([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*))?$`, "i");
 const SLOT_ROW = new RegExp(String.raw`^(?:\d+\s+)?([A-Z]+(?:\s*-\s*[A-Z]+)*)\s+(${TIME})\s*(.*)$`, "i");
 
 /** Read the "Course Registration Confirmation Slip" from i-Ma'luum, given its text lines. */
@@ -124,7 +124,7 @@ export function parseSlip(rows: string[][]): ParsedSchedule {
     const text = cells.join(" ").replace(/\s+/g, " ").trim();
     session ??= text.match(/Session\s*:\s*(\d{4}\/\d{4})/)?.[1] ?? null;
     semester ??= text.match(/Semester\s*:\s*(\d)/)?.[1] ?? null;
-    if (/^Matric No\b/i.test(text)) matric = text.match(/Matric\s*No\s*[:@©~0O-]?\s*(\d{7})/i)?.[1] ?? after(cells, /^Matric No/i)?.match(/\d{7}/)?.[0] ?? null;
+    if (/^Matric No\b/i.test(text)) matric = text.match(/Matric\s*No\s*[:@©~0O-]?\s*(\d{7,8})/i)?.[1] ?? after(cells, /^Matric No/i)?.match(/\d{7,8}/)?.[0] ?? null;
     if (/^Name\b/i.test(text)) studentName = text.match(/Name\s*[:@©~0O-]?\s*([A-Za-z' ]+?)(?:\s+Matric|\s*$)/i)?.[1]?.trim() ?? after(cells, /^Name/i);
 
     const c = text.match(COURSE_ROW);

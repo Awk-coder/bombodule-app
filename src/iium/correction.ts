@@ -59,13 +59,14 @@ export function cleanOcrGrade(raw: string): string {
   if (g === "8+") return "B+";
   if (g === "8-") return "B-";
   if (g === "P4" || g === "P/A") return "PA";
+  if (g === "E X" || g === "E-X") return "EX";
   return g;
 }
 
-/** Fix common OCR confusions in course code strings: 3-4 letters + 4 digits. */
+/** Fix common OCR confusions in course code strings: 2-5 letters + 4 digits. */
 export function cleanOcrCourseCode(raw: string): string {
   const norm = raw.trim().replace(/\s+/g, "");
-  const m = norm.match(/^([A-Za-z0-9]{3,4})([A-Za-z0-9]{4}[A-Za-z]?)$/);
+  const m = norm.match(/^([A-Za-z0-9]{2,5})([A-Za-z0-9]{4}[A-Za-z]?)$/);
   if (!m) return raw.trim();
   const letters = m[1].toUpperCase().replace(/0/g, "O").replace(/1/g, "I").replace(/5/g, "S");
   const digits = m[2].replace(/[Oo]/g, "0").replace(/[LlI|]/g, "1").replace(/[Ss]/g, "5").replace(/[Bb]/g, "8");

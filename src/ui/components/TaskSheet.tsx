@@ -43,6 +43,10 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
 
   function save() {
     const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
+    const safeTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "23:59";
+    const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ymd(new Date());
+
     const course = state.courses.find((c) => c.id === courseId);
     const det = verifyTaskDeterministic(trimmedTitle, course?.code);
     const isBullshit = !!det.bullshit;
@@ -51,7 +55,7 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
       id: task?.id ?? crypto.randomUUID(),
       title: trimmedTitle,
       courseId,
-      due: atTime(date, time).toISOString(),
+      due: atTime(safeDate, safeTime).toISOString(),
       note: note.trim(),
       done: task?.done ?? false,
       createdAt: task?.createdAt ?? new Date().toISOString(),
@@ -88,7 +92,20 @@ export function TaskSheet({ open, task, presetCourseId = null, onClose }: Props)
   return (
     <Sheet open={open} onClose={onClose}>
       <h2>{task ? "Edit task" : "New task"}</h2>
-      <label class="field"><span>Title</span><input value={title} onInput={(e) => setTitle(e.currentTarget.value)} placeholder="Lab report 2" /></label>
+      <label class="field">
+        <span>Title</span>
+        <input
+          value={title}
+          maxLength={80}
+          placeholder="Lab report 2"
+          onInput={(e) => setTitle(e.currentTarget.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && title.trim() && date) {
+              save();
+            }
+          }}
+        />
+      </label>
       <div class="field">
         <span>Course</span>
         <Chips

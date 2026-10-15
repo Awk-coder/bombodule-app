@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.8";
+export const APP_VERSION = "1.3.0";
 export const GITHUB_REPO = "Awk-coder/bombodule-app";
 export const GITHUB_RELEASES_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
@@ -24,6 +24,7 @@ export interface UpdateInfo {
   title: string;
   notes: string;
   apkUrl: string | null;
+  bundleUrl: string | null;
   htmlUrl: string;
   publishedAt: string;
 }
@@ -61,6 +62,16 @@ export function findApkAsset(assets: GitHubAsset[] = []): string | null {
   return (preferred ?? apkAssets[0]).browser_download_url;
 }
 
+/** Finds the live update web bundle zip from release assets list, preferring web-bundle.zip or dist.zip */
+export function findBundleAsset(assets: GitHubAsset[] = []): string | null {
+  if (!assets.length) return null;
+  const bundle = assets.find((a) => {
+    const n = a.name.toLowerCase();
+    return n.endsWith(".zip") && (n.includes("bundle") || n.includes("dist") || n.includes("live"));
+  });
+  return bundle?.browser_download_url ?? null;
+}
+
 /** Checks GitHub for the latest release. */
 export async function checkGitHubUpdate(
   url = GITHUB_RELEASES_URL,
@@ -78,6 +89,7 @@ export async function checkGitHubUpdate(
     const latestVersion = data.tag_name || "";
     const updateAvailable = isNewerVersion(latestVersion, currentVer);
     const apkUrl = findApkAsset(data.assets);
+    const bundleUrl = findBundleAsset(data.assets);
 
     return {
       updateAvailable,
@@ -86,6 +98,7 @@ export async function checkGitHubUpdate(
       title: data.name || latestVersion,
       notes: data.body || "",
       apkUrl,
+      bundleUrl,
       htmlUrl: data.html_url || `https://github.com/${GITHUB_REPO}/releases`,
       publishedAt: data.published_at || "",
     };

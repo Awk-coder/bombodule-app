@@ -34,6 +34,18 @@ export function useUpdater() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [permissionNeeded, setPermissionNeeded] = useState(false);
+  const [liveUpdated, setLiveUpdated] = useState(false);
+  const [liveVersion, setLiveVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isNative) {
+      void Hadir.getLiveUpdateVersion()
+        .then((res) => {
+          if (res?.version) setLiveVersion(res.version);
+        })
+        .catch(() => {});
+    }
+  }, [isNative]);
 
   async function check(force = false) {
     if (!isNative || checking) return;
@@ -51,6 +63,17 @@ export function useUpdater() {
         try {
           localStorage.setItem(CACHED_INFO_KEY, JSON.stringify(res));
         } catch {}
+
+        // If a silent live web bundle is available, download and prepare OTA update in background
+        if (res.bundleUrl && res.latestVersion !== liveVersion) {
+          void Hadir.downloadLiveUpdate({ url: res.bundleUrl, version: res.latestVersion })
+            .then((r) => {
+              if (r.success) {
+                setLiveUpdated(true);
+              }
+            })
+            .catch(() => {});
+        }
       } else {
         setInfo(res);
         try {
@@ -128,6 +151,11 @@ export function useUpdater() {
       if (isNative) void check(true);
     },
     install,
+    reload: () => {
+      if (isNative) void Hadir.reloadWebview();
+    },
+    liveUpdated,
+    liveVersion,
     openSettings: () => {
       if (isNative) void Hadir.openInstallPermissionSettings();
     },

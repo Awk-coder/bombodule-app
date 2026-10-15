@@ -69,19 +69,29 @@ export function ProfileSection() {
     setProfile(undefined);
   });
 
-  const nameSheet = (heading: string, action: string, onSubmit: () => void, hint?: string) => (
-    <>
-      <h2>{heading}</h2>
-      {hint && <p class="group-hint">{hint}</p>}
-      <label class="field">
-        <span>Name</span>
-        <input maxLength={16} value={text} onInput={(e) => setText(e.currentTarget.value)} />
-      </label>
-      {error && <p class="error">{error}</p>}
-      <button class="btn primary" disabled={busy || !text.trim()} onClick={onSubmit}>{action}</button>
-      <button class="btn ghost" onClick={() => setOpen(null)}>Cancel</button>
-    </>
-  );
+  const isValidName = (n: string) => /^[A-Za-z0-9_ ]{3,16}$/.test(n.trim());
+
+  const nameSheet = (heading: string, action: string, onSubmit: () => void, hint?: string) => {
+    const invalidFormat = text.trim().length > 0 && !isValidName(text);
+    return (
+      <>
+        <h2>{heading}</h2>
+        {hint && <p class="group-hint">{hint}</p>}
+        <label class="field">
+          <span>Name</span>
+          <input maxLength={16} placeholder="3–16 letters, numbers, spaces" value={text} onInput={(e) => setText(e.currentTarget.value)} />
+        </label>
+        {invalidFormat && (
+          <p class="group-hint" style={{ color: "var(--warn)" }}>
+            Names must be 3–16 letters, numbers, spaces, or underscores.
+          </p>
+        )}
+        {error && <p class="error">{error}</p>}
+        <button class="btn primary" disabled={busy || !isValidName(text)} onClick={onSubmit}>{action}</button>
+        <button class="btn ghost" onClick={() => setOpen(null)}>Cancel</button>
+      </>
+    );
+  };
 
   return (
     <>
@@ -163,7 +173,12 @@ export function ProfileSection() {
             <h2>Join group</h2>
             <label class="field">
               <span>Group code</span>
-              <input maxLength={6} autoCapitalize="characters" value={text} onInput={(e) => setText(e.currentTarget.value)} />
+              <input
+                maxLength={6}
+                autoCapitalize="characters"
+                value={text}
+                onInput={(e) => setText(e.currentTarget.value)}
+              />
             </label>
             {error && <p class="error">{error}</p>}
             <button class="btn primary" disabled={busy || !text.trim()} onClick={() => void join()}>Join</button>

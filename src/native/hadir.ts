@@ -37,6 +37,10 @@ export interface HadirPlugin {
   canInstallApk(): Promise<{ value: boolean }>;
   openInstallPermissionSettings(): Promise<void>;
   downloadAndInstall(options: { url: string }): Promise<void>;
+  downloadLiveUpdate(options: { url: string; version: string }): Promise<{ success: boolean; version?: string; path?: string }>;
+  reloadWebview(): Promise<void>;
+  resetLiveUpdate(): Promise<void>;
+  getLiveUpdateVersion(): Promise<{ version: string | null }>;
   addListener(event: "answer", fn: () => void): Promise<PluginListenerHandle>; // a card was answered while the app runs
   addListener(event: "downloadProgress", fn: (data: DownloadProgress) => void): Promise<PluginListenerHandle>;
 }

@@ -226,15 +226,25 @@ export function Settings() {
           <small class="update-settings-status">
             {!updater.isNative
               ? "Web version automatically stays up to date"
+              : updater.liveUpdated
+              ? `Live update ${updater.info?.latestVersion} ready`
               : updater.checking
               ? "Checking GitHub for updates…"
               : updater.info?.updateAvailable
-              ? `New version ${updater.info.latestVersion} available!`
+              ? updater.info.bundleUrl
+                ? `Live update ${updater.info.latestVersion} downloading…`
+                : `New version ${updater.info.latestVersion} available!`
+              : updater.liveVersion
+              ? `App is up to date (Live: v${updater.liveVersion})`
               : "App is up to date"}
           </small>
         </div>
         {updater.isNative && (
-          updater.info?.updateAvailable ? (
+          updater.liveUpdated ? (
+            <button class="btn primary sm update-btn" onClick={() => updater.reload()}>
+              Reload
+            </button>
+          ) : updater.info?.updateAvailable ? (
             <button class="btn primary sm update-btn" disabled={updater.downloading} onClick={() => void updater.install()}>
               {updater.downloading ? `${updater.progress}%` : "Update"}
             </button>

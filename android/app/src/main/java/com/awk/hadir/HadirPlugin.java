@@ -1,7 +1,9 @@
 package com.awk.hadir;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
@@ -15,11 +17,14 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.json.JSONException;
 
 @CapacitorPlugin(name = "Hadir")
@@ -196,5 +201,193 @@ public class HadirPlugin extends Plugin {
                 if (connection != null) connection.disconnect();
             }
         }).start();
+    }
+
+    @PluginMethod
+    public void downloadLiveUpdate(PluginCall call) {
+        String urlString = call.getString("url");
+        String version = call.getString("version");
+        if (urlString == null || urlString.isEmpty() || version == null || version.isEmpty()) {
+            call.reject("Missing update URL or version");
+            return;
+        }
+
+        new Thread(() -> {
+            InputStream input = null;
+            OutputStream output = null;
+            HttpURLConnection connection = null;
+            try {
+                URL currentUrl = new URL(urlString);
+                while (true) {
+                    connection = (HttpURLConnection) currentUrl.openConnection();
+                    connection.setInstanceFollowRedirects(true);
+                    connection.setRequestProperty("User-Agent", "Uni-Ranked-Android");
+                    connection.connect();
+                    int code = connection.getResponseCode();
+                    if (code == HttpURLConnection.HTTP_MOVED_TEMP || code == HttpURLConnection.HTTP_MOVED_PERM || code == 307 || code == 308) {
+                        String newLoc = connection.getHeaderField("Location");
+                        connection.disconnect();
+                        currentUrl = new URL(newLoc);
+                    } else {
+                        break;
+                    }
+                }
+
+                File liveUpdatesDir = new File(getContext().getFilesDir(), "live_updates");
+                if (!liveUpdatesDir.exists()) liveUpdatesDir.mkdirs();
+
+                File zipFile = new File(liveUpdatesDir, "update_" + version + ".zip");
+                if (zipFile.exists()) zipFile.delete();
+
+                input = connection.getInputStream();
+                output = new FileOutputStream(zipFile);
+
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, count);
+                }
+                output.flush();
+                output.close();
+                output = null;
+                input.close();
+                input = null;
+
+                File targetDir = new File(liveUpdatesDir, version);
+                if (targetDir.exists()) deleteRecursive(targetDir);
+                targetDir.mkdirs();
+
+                unzip(zipFile, targetDir);
+                zipFile.delete();
+
+                File indexHtml = findIndexHtml(targetDir);
+                if (indexHtml == null) {
+                    deleteRecursive(targetDir);
+                    call.reject("Invalid live update: index.html missing");
+                    return;
+                }
+
+                File serveDir = indexHtml.getParentFile();
+                if (serveDir == null) serveDir = targetDir;
+
+                SharedPreferences prefs = getContext().getSharedPreferences(
+                    com.getcapacitor.plugin.WebView.WEBVIEW_PREFS_NAME,
+                    Activity.MODE_PRIVATE
+                );
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(com.getcapacitor.plugin.WebView.CAP_SERVER_PATH, serveDir.getAbsolutePath());
+                editor.putString("uni_ranked_live_version", version);
+                editor.apply();
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                ret.put("version", version);
+                ret.put("path", serveDir.getAbsolutePath());
+                call.resolve(ret);
+            } catch (Exception e) {
+                call.reject("Live update download failed: " + e.getMessage(), e);
+            } finally {
+                try {
+                    if (output != null) output.close();
+                    if (input != null) input.close();
+                } catch (Exception ignored) {}
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
+    }
+
+    @PluginMethod
+    public void reloadWebview(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            try {
+                SharedPreferences prefs = getContext().getSharedPreferences(
+                    com.getcapacitor.plugin.WebView.WEBVIEW_PREFS_NAME,
+                    Activity.MODE_PRIVATE
+                );
+                String path = prefs.getString(com.getcapacitor.plugin.WebView.CAP_SERVER_PATH, null);
+                if (path != null && !path.isEmpty() && new File(path).exists()) {
+                    getBridge().setServerBasePath(path);
+                }
+                getBridge().getWebView().reload();
+                call.resolve();
+            } catch (Exception e) {
+                call.reject("Reload failed: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void resetLiveUpdate(PluginCall call) {
+        SharedPreferences prefs = getContext().getSharedPreferences(
+            com.getcapacitor.plugin.WebView.WEBVIEW_PREFS_NAME,
+            Activity.MODE_PRIVATE
+        );
+        prefs.edit().remove(com.getcapacitor.plugin.WebView.CAP_SERVER_PATH).remove("uni_ranked_live_version").apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void getLiveUpdateVersion(PluginCall call) {
+        SharedPreferences prefs = getContext().getSharedPreferences(
+            com.getcapacitor.plugin.WebView.WEBVIEW_PREFS_NAME,
+            Activity.MODE_PRIVATE
+        );
+        String v = prefs.getString("uni_ranked_live_version", null);
+        JSObject ret = new JSObject();
+        ret.put("version", v);
+        call.resolve(ret);
+    }
+
+    private static void unzip(File zipFile, File targetDir) throws Exception {
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+        ZipEntry ze;
+        byte[] buffer = new byte[8192];
+        while ((ze = zis.getNextEntry()) != null) {
+            String name = ze.getName();
+            File destFile = new File(targetDir, name);
+            String canonicalDest = destFile.getCanonicalPath();
+            if (!canonicalDest.startsWith(targetDir.getCanonicalPath() + File.separator)) {
+                throw new SecurityException("Zip entry is outside target: " + name);
+            }
+            if (ze.isDirectory()) {
+                destFile.mkdirs();
+            } else {
+                File parent = destFile.getParentFile();
+                if (parent != null && !parent.exists()) parent.mkdirs();
+                FileOutputStream fos = new FileOutputStream(destFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+            }
+            zis.closeEntry();
+        }
+        zis.close();
+    }
+
+    private static File findIndexHtml(File dir) {
+        File direct = new File(dir, "index.html");
+        if (direct.exists()) return direct;
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    File found = findIndexHtml(f);
+                    if (found != null) return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void deleteRecursive(File f) {
+        if (f.isDirectory()) {
+            File[] files = f.listFiles();
+            if (files != null) {
+                for (File c : files) deleteRecursive(c);
+            }
+        }
+        f.delete();
     }
 }
